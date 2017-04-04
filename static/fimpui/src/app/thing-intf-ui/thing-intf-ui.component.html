@@ -1,0 +1,100 @@
+
+<div style = "width:250px">
+   <div *ngIf= "intf.lastValue">
+      <div [ngSwitch]="intf.msgType">
+        <div *ngSwitchCase="'evt.sensor.report'">{{intf.lastValue.val}} {{intf.lastValue.props.unit}} </div>
+        <div *ngSwitchCase="'evt.binary.report'"> <md-chip-list> 
+          <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
+           </md-chip-list> </div>
+        <div *ngSwitchCase="'evt.config.report'">
+          <div *ngFor="let item of intf.lastValue.val|keys" >
+            {{item.key}}={{item.value}} 
+          </div>   
+        </div>
+        <div *ngSwitchCase="'evt.group.report'">
+          <p>Group :{{ intf.lastValue.val.group }} </p>
+          <p> Members :
+          <span *ngFor="let member of intf.lastValue.val.members" >
+            {{ member }}, 
+          </span>
+          </p>   
+        </div>
+        <div *ngSwitchDefault> {{intf.lastValue.val}}</div>
+      </div>
+    </div>
+  <div [ngSwitch]="intf.msgType">
+      <div *ngSwitchCase="'cmd.binary.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdBinarySet(true)" >On</button>
+            <button md-raised-button (click)="cmdBinarySet(false)" >Off</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.binary.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.config.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #confName mdInput placeholder="name">
+            </md-input-container></td>
+            <td><md-input-container class="example-full-width">
+              <input #confValue mdInput placeholder="value">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdConfigSet(confName.value,confValue.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.config.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><md-input-container class="example-full-width">
+              <input #confName mdInput placeholder="name">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdConfigReportGet(confName.value)" >Get</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.group.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #group mdInput placeholder="group">
+            </md-input-container></td>
+            <td><md-input-container class="example-full-width">
+              <input #member mdInput placeholder="member">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdGroupSet(group.value,member.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+
+      <div *ngSwitchCase="'cmd.group.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><md-input-container class="example-full-width">
+              <input #groupName mdInput placeholder="name">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdGroupReportGet(groupName.value)" >Get</button></td>
+          </tr>
+          </table>
+        </form>
+      </div> 
+
+  </div>   
+</div>

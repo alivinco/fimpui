@@ -1,0 +1,17 @@
+ <div class="app-content">
+  <md-card class="example-card">
+    <md-card-header>
+      <!--<div md-card-avatar class="example-header-image"></div>-->
+      <md-card-title><h3>Things</h3></md-card-title>
+      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
+    </md-card-header>
+    <md-card-content>
+       <md-list>
+         <md-list-item *ngFor="let thing of thingsDb.getThings()">
+          <b>Address:</b> {{thing.address}}
+         </md-list-item>
+       </md-list>
+    </md-card-content>
+  </md-card>
+
+</div>

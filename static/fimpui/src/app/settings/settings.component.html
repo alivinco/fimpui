@@ -1,0 +1,19 @@
+<div class="settings">
+ <md-card class="settings-card">
+    <md-card-header>
+     <md-card-title><h3>Settings</h3></md-card-title>
+    </md-card-header>
+    <md-card-content>
+    <md-input-container>
+        <input #host mdInput placeholder="Hostname" value = "{{mqttHost}}" >
+    </md-input-container>
+    <md-input-container>
+        <input #port mdInput type="number" placeholder="Port" [value] = "mqttPort" >
+    </md-input-container>
+    </md-card-content>
+    <md-card-actions>
+      <button md-raised-button color="accent" (click)="save(host.value,port.value)">Save</button>
+    </md-card-actions>
+    <p>Connection status: {{connStatus}}</p>
+  </md-card>
+</div>

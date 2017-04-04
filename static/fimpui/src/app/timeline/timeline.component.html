@@ -1,0 +1,12 @@
+ <div class="app-content">
+ <md-card class="example-card">
+ <md-card-header>
+    <b> Event stream </b>
+ </md-card-header>
+ <md-card-content>
+    <div *ngFor="let msg of messages.slice().reverse()">
+        <b>Topic:</b> {{ msg.topic }} <b> Service:</b> {{ msg.service }} <b> Interface:</b> {{ msg.mtype }} <b> Value:</b> {{ msg.val }} <b> Props:</b> {{ msg.props }}     
+    </div>
+ </md-card-content>
+ </md-card>
+ </div>

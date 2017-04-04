@@ -1,0 +1,34 @@
+<!--<md-menu #appMenu="mdMenu">
+  <button md-menu-item> Settings </button>
+  <button md-menu-item> Help </button>
+</md-menu>-->
+<md-toolbar color="primary">
+    <span>FIMP control center</span>
+    <span class="spacer"></span>
+    <button md-icon-button [mdMenuTriggerFor]="menu">
+      <md-icon>more_vert</md-icon>
+    </button>
+    <md-menu #menu="mdMenu">
+       <button md-menu-item [routerLink]="['zwave-man']">
+        <md-icon>network_check</md-icon>
+        <span>Z-Wave manager</span>
+      </button>
+      <button md-menu-item [routerLink]="['settings']">
+        <md-icon>build</md-icon>
+        <span>Settings</span>
+      </button>
+      <button md-menu-item disabled>
+        <md-icon>devices_other</md-icon>
+        <span>Things browser</span>
+      </button>
+    </md-menu>
+</md-toolbar>
+<router-outlet></router-outlet>
+<!--<app-zwave-man></app-zwave-man>-->
+<!--<app-things-table></app-things-table>-->
+<timeline></timeline>
+
+
+
+
+
