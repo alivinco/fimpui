@@ -52,6 +52,11 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,null,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+
+  cmdMeterReportGet(unit:string){
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,unit,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
 }
 @Pipe({name: 'keys'})
 export class KeysPipe implements PipeTransform {

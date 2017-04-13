@@ -8,16 +8,20 @@
            </md-chip-list> </div>
         <div *ngSwitchCase="'evt.config.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
-            {{item.key}}={{item.value}} 
+            {{item.key}} = {{item.value}} 
           </div>   
         </div>
-        <div *ngSwitchCase="'evt.group.report'">
+        <div *ngSwitchCase="'evt.group.members_report'">
           <p>Group :{{ intf.lastValue.val.group }} </p>
           <p> Members :
           <span *ngFor="let member of intf.lastValue.val.members" >
             {{ member }}, 
           </span>
           </p>   
+        </div>
+        <div *ngSwitchCase="'evt.alarm.report'">
+          <p>Event  = {{ intf.lastValue.val.event }} </p>
+          <p>Status = {{ intf.lastValue.val.status }} </p>
         </div>
         <div *ngSwitchDefault> {{intf.lastValue.val}}</div>
       </div>
@@ -68,7 +72,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.group.set'"> 
+      <div *ngSwitchCase="'cmd.group.add_members'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -83,18 +87,54 @@
           </table>
         </form>
       </div>
+      <div *ngSwitchCase="'cmd.group.delete_members'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #group mdInput placeholder="group">
+            </md-input-container></td>
+            <td><md-input-container class="example-full-width">
+              <input #member mdInput placeholder="member">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdGroupSet(group.value,member.value)" >Delete</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
 
-      <div *ngSwitchCase="'cmd.group.get_report'"> 
+      <div *ngSwitchCase="'cmd.group.get_members'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td><md-input-container class="example-full-width">
-              <input #groupName mdInput placeholder="name">
+              <input #groupName mdInput placeholder="group">
             </md-input-container></td>
             <td><button md-raised-button (click)="cmdGroupReportGet(groupName.value)" >Get</button></td>
           </tr>
           </table>
         </form>
       </div> 
+
+      <div *ngSwitchCase="'cmd.meter.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><md-input-container class="example-full-width">
+              <input #meterUnit mdInput placeholder="unit">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdMeterReportGet(meterUnit.value)" >Get</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+
+      <div *ngSwitchCase="'cmd.sensor.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><button md-raised-button (click)="cmdGetReportNull()" >Get</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
 
   </div>   
 </div>

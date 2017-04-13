@@ -17,9 +17,15 @@
          </table>
     </md-card-content>
     <md-card-actions>
-      <button md-raised-button color="accent" (click)="addDevice(True)">Add</button>
-      <button md-raised-button color="warn"(click)="removeDevice()" >Remove</button>
-      <button md-raised-button color="accent" (click)="reloadNodes()">Reload list</button>
+      <button md-mini-fab (click)="addDevice(True)"> <md-icon>add_circel_outline</md-icon></button>
+      <button md-mini-fab (click)="removeDevice()" color="warn" ><md-icon>remove_circel_outlinechevron_left</md-icon></button>
+      <button md-mini-fab (click)="reloadNodes()"><md-icon>refresh</md-icon></button>
+      <button md-mini-fab (click)="settings.hidden = !settings.hidden" ><md-icon>settings</md-icon></button>
+      <br/>
+      <div #settings hidden > 
+        <p>Advanced settings </p>
+        <button md-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> 
+      </div>
     </md-card-actions>
   </md-card>
 

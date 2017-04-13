@@ -1,3 +1,5 @@
+  <br/>
+  <button md-raised-button [routerLink]="['/zwave-man']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Network manager </button>
   <h3>Thing:</h3>
  
   <md-grid-list cols="2" rowHeight="250"> 
@@ -52,6 +54,7 @@
           <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
                <p><b>Address: </b>{{row.address}}</p>
                <p><b>Secure : </b>{{row.props.is_secure}} <b>Unsecure : </b>{{row.props.is_unsecure}} </p>
+               <p *ngIf="row.props.sup_units"> <b>Supported units:</b> {{row.props.sup_units}} </p>
                <table>
                  <tr><th>type</th><th>msg</th><th>val. type</th><th ></th> </tr>
                  <tr *ngFor="let intf of value">

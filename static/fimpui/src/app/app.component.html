@@ -23,12 +23,14 @@
       </button>
     </md-menu>
 </md-toolbar>
-<router-outlet></router-outlet>
-<!--<app-zwave-man></app-zwave-man>-->
-<!--<app-things-table></app-things-table>-->
-<timeline></timeline>
-
-
+<md-tab-group>
+<md-tab label="Z-Wave">
+  <router-outlet></router-outlet>
+</md-tab>
+<md-tab label="Message stream">
+  <timeline></timeline>
+</md-tab>
+</md-tab-group>
 
 
 

@@ -3,10 +3,72 @@
  <md-card-header>
     <b> Event stream </b>
  </md-card-header>
- <md-card-content>
-    <div *ngFor="let msg of messages.slice().reverse()">
-        <b>Topic:</b> {{ msg.topic }} <b> Service:</b> {{ msg.service }} <b> Interface:</b> {{ msg.mtype }} <b> Value:</b> {{ msg.val }} <b> Props:</b> {{ msg.props }}     
-    </div>
+ <md-card-content >
+    
+
+<ngx-datatable style="height:500px"
+        #myTable
+        class='material expandable'
+        [columnMode]="'standard'"
+        [headerHeight]="50"
+        [footerHeight]="50"
+        [rowHeight]="30"
+        [scrollbarV]="true"
+        [rows]='messages.slice().reverse()'
+       >
+        <!-- Row Detail Template -->
+        <ngx-datatable-row-detail [rowHeight]="100" #myDetailRow  >
+          <ng-template let-row="row" ngx-datatable-row-detail-template>
+            <div style="padding-left:35px;">
+              <div><strong>Message:</strong></div>
+              <div>{{row.raw}}</div>
+            </div>
+          </ng-template>
+        </ngx-datatable-row-detail>
+        <!-- Column Templates -->
+         <ngx-datatable-column
+          [width]="10"
+          [resizeable]="false"
+          [sortable]="false"
+          [draggable]="false"
+          [canAutoResize]="false">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            <a
+              [class.icon-right]="!row.$$expanded"
+              [class.icon-down]="row.$$expanded"
+              title="Expand/Collapse Row"
+              (click)="toggleExpandRow(row)">
+            </a>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Index" width="30">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{row.$$index}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Topic" width="500" [canAutoResize]="true">
+          <ng-template let-value="value" ngx-datatable-cell-template>
+            <strong>{{value}}</strong>
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Service" width="150">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+             {{value}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Mtype" width="200">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+             {{value}}
+          </ng-template>
+        </ngx-datatable-column>
+        <ngx-datatable-column name="Val" width="100">
+          <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
+             {{value}}
+          </ng-template>
+        </ngx-datatable-column>
+  </ngx-datatable>
+
+
  </md-card-content>
  </md-card>
  </div>

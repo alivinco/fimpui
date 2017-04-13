@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ViewChild } from '@angular/core';
 import { FimpService} from '../fimp.service'
 import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message'; 
 
@@ -10,6 +10,7 @@ import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message';
 })
 export class TimelineComponent implements OnInit {
   private messages:FimpMessage[]=[];
+  @ViewChild('myTable') table: any;
   constructor(private fimp: FimpService) { 
    
    };
@@ -28,9 +29,15 @@ export class TimelineComponent implements OnInit {
       console.log("New message in timeline")
       let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
       fimpMsg.topic = msg.topic;
+      fimpMsg.raw = msg.payload.toString();
       this.messages.push(fimpMsg);
       console.log(this.messages.length);
     });
+  }
+
+  toggleExpandRow(row) {
+    console.log('Toggled Expand Row!', row);
+    this.table.rowDetail.toggleExpandRow(row);
   }
  
 

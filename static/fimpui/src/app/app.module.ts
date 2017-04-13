@@ -41,9 +41,7 @@ if (localStorage.getItem("mqttPort")!= null){
 console.log("Port:"+localStorage.getItem("mqttPort"));
 export const MQTT_SERVICE_OPTIONS = {
   connectOnCreate: true,
-  // hostname: '172.16.118.131',
   hostname:mqttHost,
-  // hostname:"aleks.local",
   port: mqttPort,
   path: '/mqtt'
 };

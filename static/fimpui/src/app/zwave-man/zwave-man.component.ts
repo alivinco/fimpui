@@ -62,7 +62,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
-
+  resetNetwork(){
+    let msg  = new FimpMessage("zwave-ad","cmd.network.reset","null",null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
   addDevice(){
     console.log("Add device")
     let msg  = new FimpMessage("zwave-ad","cmd.thing.inclusion","bool",true,null,null)

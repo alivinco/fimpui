@@ -23,6 +23,8 @@ export class FimpMessage {
     // private field
 
     topic : string;
+    // raw otiginal message 
+    raw : string 
 
     constructor(service:string,messageType:string,valueType:string,value:any,props:Map<string,string>,tags : Array<string>) {
         this.service = service;
