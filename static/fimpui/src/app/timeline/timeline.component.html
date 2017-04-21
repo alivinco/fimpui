@@ -46,6 +46,11 @@
             {{row.$$index}}
           </ng-template>
         </ngx-datatable-column>
+        <ngx-datatable-column name="LocalTs"  width="80">
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{row.localTs | date:'HH:mm:ss'}}
+          </ng-template>
+        </ngx-datatable-column>
         <ngx-datatable-column name="Topic" width="500" [canAutoResize]="true">
           <ng-template let-value="value" ngx-datatable-cell-template>
             <strong>{{value}}</strong>

@@ -13,7 +13,7 @@ import { FimpService} from './fimp.service';
 import { ThingsDbService} from './things-db.service';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { ThingIntfUiComponent , KeysPipe }from './thing-intf-ui/thing-intf-ui.component'
-
+import 'hammerjs';
 import {
   MqttMessage,
   MqttModule,

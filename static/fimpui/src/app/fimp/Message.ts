@@ -25,6 +25,8 @@ export class FimpMessage {
     topic : string;
     // raw otiginal message 
     raw : string 
+    // browser timestamp 
+    localTs: number 
 
     constructor(service:string,messageType:string,valueType:string,value:any,props:Map<string,string>,tags : Array<string>) {
         this.service = service;

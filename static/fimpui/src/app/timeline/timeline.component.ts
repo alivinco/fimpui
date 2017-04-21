@@ -30,6 +30,7 @@ export class TimelineComponent implements OnInit {
       let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
       fimpMsg.topic = msg.topic;
       fimpMsg.raw = msg.payload.toString();
+      fimpMsg.localTs =  Date.now();
       this.messages.push(fimpMsg);
       console.log(this.messages.length);
     });
