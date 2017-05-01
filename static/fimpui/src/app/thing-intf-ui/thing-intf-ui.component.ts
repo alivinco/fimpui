@@ -37,6 +37,20 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,level,props,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+
+
+  cmdLevelStart(direction:string,duration:number){
+    var val = direction;
+    var props = new Map<string,string>() ;
+    props["duration"] = String(duration);
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,props,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  } 
+  cmdLevelStop(direction:string){
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  } 
+
   cmdGroupSet(group:string,member:string){
     let val = {};
     val["group"] = group;

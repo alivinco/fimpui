@@ -27,9 +27,10 @@
 
   <h3>Services:</h3>
   <div>
-      <ngx-datatable class="material"
+      <ngx-datatable class="material expandable"
         [rows]="rows"
         [columns]="columns"
+        [scrollbarH]="true"
         [rowHeight]="'auto'"> 
        <ngx-datatable-column name="Name">
           <ng-template let-column="column" ngx-datatable-header-template>
@@ -55,6 +56,7 @@
                <p><b>Address: </b>{{row.address}}</p>
                <p><b>Secure : </b>{{row.props.is_secure}} <b>Unsecure : </b>{{row.props.is_unsecure}} </p>
                <p *ngIf="row.props.sup_units"> <b>Supported units:</b> {{row.props.sup_units}} </p>
+               <p *ngIf="row.props.sup_events"><b>Supported events:</b> {{row.props.sup_events}} </p>
                <table>
                  <tr><th>type</th><th>msg</th><th>val. type</th><th ></th> </tr>
                  <tr *ngFor="let intf of value">

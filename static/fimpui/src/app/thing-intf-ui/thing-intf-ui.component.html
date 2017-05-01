@@ -23,6 +23,9 @@
           <p>Event  = {{ intf.lastValue.val.event }} </p>
           <p>Status = {{ intf.lastValue.val.status }} </p>
         </div>
+        <div *ngSwitchCase="'evt.meter.report'">
+          {{ intf.lastValue.val }} {{ intf.lastValue.props.unit }}
+        </div>
         <div *ngSwitchCase="'evt.lock.report'">
           <p>Is secured      = <md-icon *ngIf="intf.lastValue.val.is_secured" >lock</md-icon> <md-icon *ngIf="!intf.lastValue.val.is_secured" >lock_open</md-icon>  </p>
           <p>Door is closed  = <md-icon *ngIf="intf.lastValue.val.door_is_closed" >done</md-icon> <md-icon *ngIf="!intf.lastValue.val.door_is_closed" >close</md-icon>   </p>
@@ -54,6 +57,38 @@
               <input #durationValue mdInput placeholder="Duration" type="number" value="0">
             </md-input-container></td>
             <td><button md-raised-button (click)="cmdLvlSet(lvlValue.value,durationValue.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+       <div *ngSwitchCase="'cmd.lvl.start'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdLevelStart('up',durationValue.value)" >Up</button>
+            <td><button md-raised-button (click)="cmdLevelStart('down',durationValue.value)" >Down</button>
+            <td><button md-raised-button (click)="cmdLevelStart('auto',durationValue.value)" >Auto</button>
+            <td><md-input-container class="example-full-width">
+              <input #durationValue mdInput placeholder="Duration" type="number" value="0">
+            </md-input-container></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+       <div *ngSwitchCase="'cmd.lvl.stop'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdLevelStop()" >Stop</button>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.lvl.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
           </tr>
           </table>
         </form>

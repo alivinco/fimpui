@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 
 import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
+import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { TimelineComponent } from './timeline/timeline.component';
 import { FimpService} from './fimp.service';
 import { ThingsDbService} from './things-db.service';
@@ -56,6 +57,7 @@ export function mqttServiceFactory() {
   declarations: [
     AppComponent,
     ZwaveManComponent,
+    IkeaManComponent,
     AddDeviceDialog,
     TimelineComponent,
     ThingViewComponent,

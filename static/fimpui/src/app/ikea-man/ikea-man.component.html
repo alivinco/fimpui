@@ -1,0 +1,26 @@
+<div class="ikea-man">
+  <md-card class="example-card">
+    <md-card-header>
+      <!--<div md-card-avatar class="example-header-image"></div>-->
+      <md-card-title><h3>IKEA network manager</h3></md-card-title>
+      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
+    </md-card-header>
+    <md-card-content>
+          <table>
+          <thead><tr><th style="width: 70px">Node</th><th style="width: 100px">Type</th><th style="width: 100px">Service type</th><th></th></tr> </thead>
+          <tbody>
+         <tr *ngFor="let node of nodes">
+          <td> {{node.id}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> <a [routerLink]="['/thing-view',node.id]"><i class="material-icons">info_outline</i></a></td>
+          </tr>
+          </tbody> 
+         </table>
+    </md-card-content>
+    <md-card-actions>
+      <button md-mini-fab (click)="addDevice(True)"> <md-icon>add_circel_outline</md-icon></button>
+      <button md-mini-fab (click)="removeDevice()" color="warn" ><md-icon>remove_circel_outlinechevron_left</md-icon></button>
+      <button md-mini-fab (click)="reloadIkeaDevices()"><md-icon>refresh</md-icon></button>
+    
+   </md-card-actions>
+  </md-card>
+
+</div>
