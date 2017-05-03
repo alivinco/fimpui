@@ -28,7 +28,9 @@ import { SettingsComponent } from './settings/settings.component';
 const appRoutes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'zwave-man', component: ZwaveManComponent },
-  { path: 'thing-view/:id', component: ThingViewComponent },
+  { path: 'ikea-man', component: IkeaManComponent },
+  { path: 'timeline', component: TimelineComponent },
+  { path: 'thing-view/:ad/:id', component: ThingViewComponent },
   { path: '',redirectTo:'/zwave-man',pathMatch: 'full'}
 ];
 let mqttHost : string = "localhost";

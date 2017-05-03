@@ -1,8 +1,13 @@
-  <br/>
-  <button md-raised-button [routerLink]="['/zwave-man']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Network manager </button>
+   <div class="thing-view">
+ <md-card class="example-card">
+ <md-card-header>
+     <button md-raised-button [routerLink]="['/zwave-man']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Network manager </button>
+ </md-card-header>
+ <md-card-content >
+    
   <h3>Thing:</h3>
  
-  <md-grid-list cols="2" rowHeight="250"> 
+  <md-grid-list cols="2" rowHeight="250" [style.background]="'lightblue'"  > 
     <md-grid-tile>
        <table>
         <tr><td><b>Address:</b></td><td> {{ thing.address }} </td> </tr>
@@ -57,6 +62,7 @@
                <p><b>Secure : </b>{{row.props.is_secure}} <b>Unsecure : </b>{{row.props.is_unsecure}} </p>
                <p *ngIf="row.props.sup_units"> <b>Supported units:</b> {{row.props.sup_units}} </p>
                <p *ngIf="row.props.sup_events"><b>Supported events:</b> {{row.props.sup_events}} </p>
+               <p *ngIf="row.props.sup_setpoints"><b>Supported setpoints:</b> {{row.props.sup_setpoints}} </p>
                <table>
                  <tr><th>type</th><th>msg</th><th>val. type</th><th ></th> </tr>
                  <tr *ngFor="let intf of value">
@@ -70,6 +76,10 @@
         </ngx-datatable-column>
       </ngx-datatable>
 </div>
-     
+
+
+</md-card-content>
+ </md-card>
+ </div>     
      
 

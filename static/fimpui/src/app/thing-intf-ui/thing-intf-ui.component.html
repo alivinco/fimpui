@@ -26,6 +26,9 @@
         <div *ngSwitchCase="'evt.meter.report'">
           {{ intf.lastValue.val }} {{ intf.lastValue.props.unit }}
         </div>
+         <div *ngSwitchCase="'evt.setpoint.report'">
+          {{ intf.lastValue.val.type}} {{ intf.lastValue.val.temp }}
+        </div>
         <div *ngSwitchCase="'evt.lock.report'">
           <p>Is secured      = <md-icon *ngIf="intf.lastValue.val.is_secured" >lock</md-icon> <md-icon *ngIf="!intf.lastValue.val.is_secured" >lock_open</md-icon>  </p>
           <p>Door is closed  = <md-icon *ngIf="intf.lastValue.val.door_is_closed" >done</md-icon> <md-icon *ngIf="!intf.lastValue.val.door_is_closed" >close</md-icon>   </p>
@@ -108,6 +111,32 @@
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.setpoint.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #setpointType mdInput placeholder="type">
+            </md-input-container></td>
+            <td><md-input-container class="example-full-width">
+              <input #tempValue mdInput placeholder="temp">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdSetpointSet(setpointType.value,tempValue.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.setpoint.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><md-input-container class="example-full-width">
+              <input #setpointType mdInput placeholder="setpoint type">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdSetpointReportGet(setpointType.value)" >Get</button></td>
           </tr>
           </table>
         </form>

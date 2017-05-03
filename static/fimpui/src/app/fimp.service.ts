@@ -4,12 +4,14 @@ import {
   MqttMessage,
   MqttModule,
   MqttService
-}  from 'angular2-mqtt';
+} from 'angular2-mqtt';
+import { FimpMessage, NewFimpMessageFromString } from "app/fimp/Message";
 
 
 
 @Injectable()
 export class FimpService{
+  private messages:FimpMessage[]=[];
   public observable: Observable<MqttMessage> = null;
   constructor(public mqtt: MqttService) {
      mqtt.onConnect.subscribe((message: any) => {
@@ -22,6 +24,7 @@ export class FimpService{
     this.observable = this.mqtt.observe(topic);
     this.observable.subscribe((msg) => {
       console.log("New message from topic :"+msg.topic+" message :"+msg.payload)
+      this.saveMessage(msg);
     });
     return this.observable
   }
@@ -39,6 +42,18 @@ export class FimpService{
       console.log(err);
     });
   }
+ private saveMessage(msg:MqttMessage){
+      console.log("Saving new message to log")
+      let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
+      fimpMsg.topic = msg.topic;
+      fimpMsg.raw = msg.payload.toString();
+      fimpMsg.localTs =  Date.now();
+      this.messages.push(fimpMsg);
+ }
+
+ public getMessagLog():FimpMessage[]{
+   return this.messages
+ }
 }
 
 

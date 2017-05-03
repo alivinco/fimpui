@@ -28,12 +28,17 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   }
 
   ngOnInit() {
+    let techAdapterName  = this.route.snapshot.params['ad'];
     let id  = this.route.snapshot.params['id'];
-    this.getReport(id);
+    let serviceName = "zwave-ad";
+    if (techAdapterName == "ikea"){
+      serviceName = "ikea-ad";
+    }
+    this.getReport(techAdapterName,serviceName,id);
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
-      if (fimpMsg.service == "zwave-ad" )
+      if (fimpMsg.service == serviceName )
         {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
         { 
@@ -62,9 +67,9 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   ngOnDestroy() {
     this.globalSub.unsubscribe();
   }
-  getReport(nodeId:string){
-    let msg  = new FimpMessage("zwave-ad","cmd.thing.get_inclusion_report","string",nodeId,null,null)
-    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  getReport(techAdapterName:string,serviceName:string, nodeId:string){
+    let msg  = new FimpMessage(serviceName,"cmd.thing.get_inclusion_report","string",nodeId,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:"+techAdapterName+"/ad:1",msg.toString());
   }
 
 }

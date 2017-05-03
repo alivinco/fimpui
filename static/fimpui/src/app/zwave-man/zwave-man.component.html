@@ -11,7 +11,7 @@
           <thead><tr><th style="width: 70px">Node</th><th style="width: 100px">Status</th><th></th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.id}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view',node.id]"><i class="material-icons">info_outline</i></a></td>
+          <td> {{node.id}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view','zw',node.id]"><i class="material-icons">info_outline</i></a></td>
           </tr>
           </tbody> 
          </table>

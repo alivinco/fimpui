@@ -37,7 +37,17 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,level,props,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
-
+  cmdSetpointSet(setpointType:string,temp:string){
+    let val = {};
+    val["type"] = setpointType;
+    val["temp"] = temp;
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
+  cmdSetpointReportGet(name:string){
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,name,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
 
   cmdLevelStart(direction:string,duration:number){
     var val = direction;
