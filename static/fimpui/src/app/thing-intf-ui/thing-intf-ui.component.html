@@ -130,6 +130,26 @@
           </table>
         </form>
       </div>
+      <div *ngSwitchCase="'cmd.mode.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #thermoMode mdInput placeholder="mode">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdModeSet(thermoMode.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.mode.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0"><tr>
+            <td><button md-raised-button (click)="cmdGetReportNull()" >Get</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
       <div *ngSwitchCase="'cmd.setpoint.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>

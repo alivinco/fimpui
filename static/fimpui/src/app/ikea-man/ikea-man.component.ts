@@ -19,7 +19,18 @@ export class IkeaManComponent implements OnInit {
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
   } 
 
-
+  addDevice(){
+    console.log("Add device")
+    let msg  = new FimpMessage("ikea-ad","cmd.thing.inclusion","bool",true,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
+   
+  }
+  removeDevice(){
+    console.log("Remove device ")
+    let msg  = new FimpMessage("ikea-ad","cmd.thing.exclusion","bool",true,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
+    
+  }
   
 
   ngOnInit() {
@@ -35,7 +46,7 @@ export class IkeaManComponent implements OnInit {
           localStorage.setItem("ikeaNodesList", JSON.stringify(this.nodes));
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
             console.log("Reloading nodes 2");
-            this.reloadIkeaDevices();
+            //this.reloadIkeaDevices();
         }
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
