@@ -28,8 +28,6 @@ func (wu * WsUpgrader) Upgrade(c echo.Context) error {
 		return err
 	}
 
-
-
 	fmt.Println("Upgraded ")
 	session := MqttWsProxySession{wsConn:ws}
 	session.Connect(wu.BrokerAddress)
