@@ -3,6 +3,7 @@ import { MdDialog, MdDialogRef} from '@angular/material';
 import { FimpService} from '../fimp.service';
 import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
+import {Router} from '@angular/router';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
 import {
   MqttMessage,
@@ -20,8 +21,9 @@ import {
 export class ZwaveManComponent implements OnInit ,OnDestroy {
   selectedOption: string; 
   nodes : any[];
+  zwAdState : string;
   globalSub : Subscription;
-  constructor(public dialog: MdDialog,private fimp:FimpService) {
+  constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router) {
   }
 
   ngOnInit() {
@@ -41,6 +43,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
             console.log("Reloading nodes 2");
             this.reloadNodes();
+        }else if (fimpMsg.mtype == "evt.state.report"){
+            this.zwAdState = fimpMsg.val;
         }
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
@@ -64,6 +68,19 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   resetNetwork(){
     let msg  = new FimpMessage("zwave-ad","cmd.network.reset","null",null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+  restartAdapter(){
+    let msg  = new FimpMessage("zwave-ad","cmd.proc.restart","string","zwave-ad",null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+    this.router.navigateByUrl("/timeline");
+  }
+  updateNetwork(){
+    let msg  = new FimpMessage("zwave-ad","cmd.network.update","null",null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+  updateDevice(nodeId :number){
+    let msg  = new FimpMessage("zwave-ad","cmd.network.node_update","int",Number(nodeId),null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
   addDevice(){

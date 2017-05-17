@@ -11,10 +11,13 @@
           <thead><tr><th style="width: 70px">Node</th><th style="width: 100px">Status</th><th></th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.id}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view','zw',node.id]"><i class="material-icons">info_outline</i></a></td>
+          <td> {{node.id}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view','zw',node.id]"><i class="material-icons">info_outline</i></a>
+           <a (click)="updateDevice(node.id)"><i class="material-icons">autorenew</i></a>
+          </td>
           </tr>
           </tbody> 
          </table>
+     <p>Zwave adapter state: {{zwAdState}}</p>    
     </md-card-content>
     <md-card-actions>
       <button md-mini-fab (click)="addDevice(True)"> <md-icon>add_circel_outline</md-icon></button>
@@ -24,7 +27,9 @@
       <br/>
       <div #settings hidden > 
         <p>Advanced settings </p>
-        <button md-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> 
+        <button md-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button> 
+        <button md-raised-button color="accent" (click)="updateNetwork()">Trigger network update </button> 
+       <p> <button md-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> </p>
       </div>
     </md-card-actions>
   </md-card>

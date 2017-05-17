@@ -1,0 +1,14 @@
+[Unit]
+Description=FimpUI
+
+[Service]
+Type=simple
+ExecStart=/opt/fimpui/fimpui
+User=fimp
+WorkingDirectory=/opt/fimpui
+Restart=on-failure
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

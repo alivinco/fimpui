@@ -1,0 +1,7 @@
+Package: fimpui
+Version: 0.0.2
+Replaces: fimpui
+Architecture: armhf
+Maintainer: Aleksandrs Livincovs <aleksandrs.livincovs@gmail.com>
+Description: FimpUI is support GUI for FIMP protocol .
+

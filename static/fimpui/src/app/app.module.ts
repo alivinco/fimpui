@@ -33,14 +33,18 @@ const appRoutes: Routes = [
   { path: 'thing-view/:ad/:id', component: ThingViewComponent },
   { path: '',redirectTo:'/zwave-man',pathMatch: 'full'}
 ];
-let mqttHost : string = "localhost";
-let mqttPort : number = 8083
+let mqttHost : string = window.location.hostname;
+let mqttPort : number = Number(window.location.port);
 if (localStorage.getItem("mqttHost")!= null){
       mqttHost = localStorage.getItem("mqttHost");
+}else {
+  localStorage.setItem("mqttHost",mqttHost);
 }
 if (localStorage.getItem("mqttPort")!= null){
       mqttPort = parseInt(localStorage.getItem("mqttPort"));
-} 
+} else {
+  localStorage.setItem("mqttPort",String(mqttPort));
+}
 console.log("Port:"+localStorage.getItem("mqttPort"));
 export const MQTT_SERVICE_OPTIONS = {
   connectOnCreate: true,
