@@ -35,10 +35,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
         { 
-          this.nodes = [];
-          for(var key in fimpMsg.val){
-            this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
-          }
+          this.nodes = fimpMsg.val;
+          // for(var key in fimpMsg.val){
+          //   this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
+          // }
           localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
             console.log("Reloading nodes 2");

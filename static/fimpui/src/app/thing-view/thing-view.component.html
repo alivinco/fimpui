@@ -64,6 +64,7 @@
                <p *ngIf="row.props.sup_events"><b>Supported events:</b> {{row.props.sup_events}} </p>
                <p *ngIf="row.props.sup_setpoints"><b>Supported setpoints:</b> {{row.props.sup_setpoints}} </p>
                <p *ngIf="row.props.sup_modes"><b>Supported modes:</b> {{row.props.sup_modes}} </p>
+               <p *ngIf="row.props.sup_components"><b>Supported components:</b> {{row.props.sup_components}} </p>
                <table>
                  <tr><th>type</th><th>msg</th><th>val. type</th><th ></th> </tr>
                  <tr *ngFor="let intf of value">

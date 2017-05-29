@@ -8,10 +8,13 @@
     <md-card-content>
           <table>
           <thead><tr><th style="width: 70px">Node</th><th style="width: 100px">Type</th><th style="width: 100px">Service type</th>
-          <th style="width: 200px">Alias</th><th></th></tr> </thead>
+          <th style="width: 250px">Alias</th><th></th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.id}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> {{node.alias}} </td> <td> <a [routerLink]="['/thing-view','ikea',node.id]"><i class="material-icons">info_outline</i></a></td>
+          <td> {{node.id}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> {{node.alias}} </td>
+           <td> <a [routerLink]="['/thing-view','ikea',node.id]"><i class="material-icons">info_outline</i></a>
+           <a (click)="removeNode(node.id)"><i class="material-icons">remove_circle_outline</i></a>
+           </td>
           </tr>
           </tbody> 
          </table>

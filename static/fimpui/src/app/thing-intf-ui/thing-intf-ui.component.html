@@ -49,12 +49,27 @@
           </table>
         </form>
       </div>
+      <div *ngSwitchCase="'cmd.color.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td>
+              <md-slider #colorLvlValue thumbLabel  min="0" max="255" step="1" value="0"></md-slider>
+            </td>
+            <td><md-input-container class="example-full-width">
+              <input #compNameValue mdInput placeholder="componnent" type="text" >
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdColorSet(compNameValue.value,colorLvlValue.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
       <div *ngSwitchCase="'cmd.lvl.set'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td>
-              <md-slider #lvlValue thumbLabel  min="0" max="99" step="1" value="0"></md-slider>
+              <md-slider #lvlValue thumbLabel  min="0" max="100" step="1" value="0"></md-slider>
             </td>
             <td><md-input-container class="example-full-width">
               <input #durationValue mdInput placeholder="Duration" type="number" value="0">

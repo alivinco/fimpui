@@ -8,10 +8,10 @@
     <md-card-content>
           <table>
            
-          <thead><tr><th style="width: 70px">Node</th><th style="width: 100px">Status</th><th></th></tr> </thead>
+          <thead><tr><th style="width: 70px">Node</th><th style="width: 150px">Product</th><th style="width: 100px">Status</th><th></th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.id}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view','zw',node.id]"><i class="material-icons">info_outline</i></a>
+          <td> {{node.id}}</td> <td> {{node.hash}}</td> <td> {{node.status}} </td> <td> <a [routerLink]="['/thing-view','zw',node.id]"><i class="material-icons">info_outline</i></a>
            <a (click)="updateDevice(node.id)"><i class="material-icons">autorenew</i></a>
           </td>
           </tr>
