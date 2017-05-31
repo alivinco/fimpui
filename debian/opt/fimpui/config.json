@@ -1,0 +1,8 @@
+{
+  "report_log_files":[
+    "/var/log/futurehome/zwave-ad/zwave-ad.log",
+    "/tmp/zipgateway.log",
+    "/etc/service/vinculum/log/main/current"
+  ],
+  "report_log_size_limit":500000
+}

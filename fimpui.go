@@ -6,11 +6,15 @@ import (
 	"fmt"
 
 	"github.com/alivinco/fimpui/integr/mqtt"
+	"github.com/alivinco/fimpui/integr/logexport"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"io/ioutil"
 	"github.com/koding/websocketproxy"
 	"net/url"
+	"flag"
+	"github.com/alivinco/fimpui/model"
+	"encoding/json"
 )
 
 
@@ -30,6 +34,21 @@ func startWsCoreProxy(backendUrl string){
 }
 
 func main() {
+	configs := &model.FimpUiConfigs{}
+	var configFile string
+	flag.StringVar(&configFile, "c", "", "Config file")
+	flag.Parse()
+	if configFile == "" {
+		configFile = "/opt/fimpui/config.json"
+	}else {
+		fmt.Println("Loading configs from file ", configFile)
+	}
+	configFileBody , err := ioutil.ReadFile(configFile)
+	err = json.Unmarshal(configFileBody,configs)
+	if err != nil {
+		panic("Can't load config file.")
+	}
+	objectStorage , _ := logexport.NewGcpObjectStorage("fh-cube-log")
 	sysInfo := SystemInfo{}
 	versionFile,err := ioutil.ReadFile("VERSION")
 	if err == nil {
@@ -45,6 +64,21 @@ func main() {
 
 		return c.JSON(http.StatusOK,sysInfo)
 	})
+	e.GET ("/fimp/configs",func(c echo.Context) error {
+		return c.JSON(http.StatusOK,configs)
+	})
+	e.GET("/fimp/fr/upload-log-snapshot", func(c echo.Context) error {
+
+		//logexport.UploadLogToGcp()
+		//files := []string {"/var/log/daily.out"}
+		hostAlias := c.QueryParam("hostAlias")
+		fmt.Println(hostAlias)
+		if hostAlias == "" {
+			hostAlias = "unknown"
+		}
+		uploadStatus := objectStorage.UploadLogSnapshot (configs.ReportLogFiles ,hostAlias,configs.ReportLogSizeLimit)
+		return c.JSON(http.StatusOK,uploadStatus)
+	})
 	index := "static/fimpui/dist/index.html"
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"http://localhost:4200","http:://localhost:8082"},
@@ -57,6 +91,7 @@ func main() {
 	e.File("/fimp/settings", index)
 	e.File("/fimp/timeline", index)
 	e.File("/fimp/ikea-man", index)
+	e.File("/fimp/flight-recorder", index)
 	e.File("/fimp/thing-view/*", index)
 	e.Static("/fimp/static", "static/fimpui/dist/")
 	e.Logger.Debug(e.Start(":8081"))

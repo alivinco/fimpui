@@ -1,0 +1,27 @@
+<div class="flight-recorder">
+  <md-card class="example-card">
+    <md-card-header>
+      <!--<div md-card-avatar class="example-header-image"></div>-->
+      <md-card-title><h3>Report a bug</h3></md-card-title>
+      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
+    </md-card-header>
+    <md-card-content>
+       <md-input-container>
+        <input #hostAliasInput mdInput placeholder="Hub Alias" value = "{{hostAlias}}" >
+      </md-input-container>
+       <p>The filese will be uploaded to google cloud as a singe snapshot:</p>
+       <table>
+       <tbody>
+       <tr *ngFor="let log of reportLogFiles">
+       <td> {{ log }} </td>
+       </tr>
+       </tbody>
+       </table>
+       <p> Log size limit is set to {{ reportLogMaxSize }} bytes .   </p>
+    </md-card-content>
+    <md-card-actions>
+      <button md-raised-button color="accent" (click)="uploadLogSnapshot(hostAliasInput.value)"> Upload system logs </button>
+   </md-card-actions>
+  </md-card>
+
+</div>

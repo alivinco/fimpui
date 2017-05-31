@@ -10,6 +10,8 @@ import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { TimelineComponent } from './timeline/timeline.component';
+import { ReportComponent } from './report/report.component';
+import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
 import { FimpService} from './fimp.service';
 import { ThingsDbService} from './things-db.service';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
@@ -30,6 +32,8 @@ const appRoutes: Routes = [
   { path: 'zwave-man', component: ZwaveManComponent },
   { path: 'ikea-man', component: IkeaManComponent },
   { path: 'timeline', component: TimelineComponent },
+  { path: 'report', component: ReportComponent },
+  { path: 'flight-recorder', component: FlightRecorderComponent },
   { path: 'thing-view/:ad/:id', component: ThingViewComponent },
   { path: '',redirectTo:'/zwave-man',pathMatch: 'full'}
 ];
@@ -69,6 +73,8 @@ export function mqttServiceFactory() {
     ThingViewComponent,
     ThingsTableComponent,
     SettingsComponent,
+    ReportComponent,
+    FlightRecorderComponent,
     ThingIntfUiComponent,
     KeysPipe
   ],

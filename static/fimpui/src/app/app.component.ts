@@ -26,7 +26,7 @@ export class AppComponent {
         let body = res.json();
         console.log(body.Version);
         return body;
-      }).subscribe (function(result){
+      }).subscribe ((result)=>{
          console.log(result.Version);
          this.version = result.Version;
          
