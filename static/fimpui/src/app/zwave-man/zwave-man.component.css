@@ -2,9 +2,15 @@
   padding: 20px;
 }
 .example-card {
-  width: 500px;
+  width: 600px;
 }
 
 .example-header-image {
   background-size: cover;
+}
+.open-chip {
+  color: green
+}
+md-chip {
+  cursor: pointer;
 }
