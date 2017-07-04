@@ -8,13 +8,13 @@
     <md-card-content>
           <table>
            
-          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width: 70px">Status</th><th>Actions</th></tr> </thead>
+          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width: 150px">Alias</th><th style="width: 70px">Status</th><th>Actions</th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.address}}</td> <td> {{node.hash}}</td> <td> {{node.status}} </td> <td>
+          <td> {{node.address}}</td> <td> {{node.hash}}</td> <td> {{node.alias}}</td> <td> {{node.status}} </td> <td>
              
              <md-chip-list>
-             <md-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]"> Open </md-chip>
+             <md-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]">Services</md-chip>
              <md-chip (click)="updateDevice(node.address)">Update</md-chip>
              <md-chip color="warn" (click)="deleteFailedDevice(node.address)">Delete</md-chip>
              <md-chip color="warn" (click)="replaceDevice(node.address)">Replace</md-chip>
@@ -31,6 +31,7 @@
       <button md-raised-button (click)="addDevice(True)" color="primary" > Add device</button>
       <button md-raised-button (click)="removeDevice()" color="warn" >Exclude device</button>
       <button md-raised-button (click)="reloadNodes()">Reload list</button>
+      <button md-raised-button (click)="vinculumSync()">Vinculum sync</button>
       <button md-raised-button (click)="settings.hidden = !settings.hidden" >Advanced</button>
       <br/>
       <div #settings hidden > 

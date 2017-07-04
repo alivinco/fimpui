@@ -5,6 +5,7 @@ import { MapFimpInclusionReportToThing } from '../things-db/integrations';
 import { Thing } from '../things-db/thing-model';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message';
 import { Subscription } from 'rxjs/Subscription';
+import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
 
 @Component({
   selector: 'app-thing-view',
@@ -23,7 +24,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   //   { prop: 'groups' },
   // ];
 
-  constructor(private fimp:FimpService,private route: ActivatedRoute,) {
+  constructor(private fimp:FimpService,private route: ActivatedRoute,private http : Http) {
     this.thing = new Thing();
   }
 
@@ -45,6 +46,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
           console.log("New thing")
           this.thing = MapFimpInclusionReportToThing(fimpMsg);
           this.rows = this.thing.services;
+          this.loadThingFromRegistry(this.thing.commTech,this.thing.address)
         } 
 
       }else {
@@ -70,6 +72,29 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   getReport(techAdapterName:string,serviceName:string, nodeId:string){
     let msg  = new FimpMessage(serviceName,"cmd.thing.get_inclusion_report","string",nodeId,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:"+techAdapterName+"/ad:1",msg.toString());
+  }
+
+  saveThingToRegistry(alias:string){
+    this.thing.alias = alias;
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    console.log(this.thing.alias);
+     this.http
+      .put('/fimp/registry/thing',JSON.stringify(this.thing),  options )
+      .subscribe ((result) => {
+         console.log("Thing was saved");
+      });
+  }
+
+  loadThingFromRegistry(tech:string,address:string) {
+     this.http
+      .get('/fimp/registry/thing/'+tech+"/"+address)
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+          this.thing.alias = result.alias                 
+      });
   }
 
 }

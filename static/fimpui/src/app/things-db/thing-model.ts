@@ -1,4 +1,5 @@
 export class Thing {
+    alias :string
     address :string ;
     commTech :string ;
     productHash : string;

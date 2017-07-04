@@ -5,6 +5,7 @@ import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import {Router} from '@angular/router';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
+import { Http, Response,URLSearchParams }  from '@angular/http';
 import {
   MqttMessage,
   MqttModule,
@@ -25,7 +26,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   errorMsg : string;
   globalSub : Subscription;
   progressBarMode : string ;
-  constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router) {
+  constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router,private http : Http) {
   }
 
   ngOnInit() {
@@ -38,6 +39,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
         { 
           this.nodes = fimpMsg.val;
+          this.loadThingsFromRegistry()
           // for(var key in fimpMsg.val){
           //   this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
           // }
@@ -80,6 +82,35 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       this.progressBarMode = "determinate";
     }
   } 
+
+  loadThingsFromRegistry() {
+     this.http
+      .get('/fimp/registry/things')
+      .map(function(res: Response){
+        let body = res.json();
+        //console.log(body.Version);
+        return body;
+      }).subscribe ((result) => {
+         console.log(result.report_log_files);
+         for(let node of this.nodes) {
+           for (let thing of result) {
+              // change node.id to node.address
+               if (node.address == thing.address) {
+                  node["alias"] = thing.alias
+               }
+           }
+         }
+         localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));         
+      });
+  }
+  vinculumSync(){
+    this.http
+      .get('/fimp/vinculum/import_to_registry')
+      .subscribe ((result) => {
+         console.log("Synced");
+         this.reloadNodes();
+      });
+  }
   reloadNodes(){
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
     this.showProgress(true);
