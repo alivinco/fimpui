@@ -1,0 +1,13 @@
+{
+  "flow":[
+    {"id":"1","type":"trigger","label":"wait for event","address":"some/topic","service":"out_bin_switch","interface":"evt.binary.report",
+      "success_node":2,"timeout_node":null,"error_node":null,"node_config":{"value_filter":"" }},
+    {"id":"4","type":"action" ,"label":"Tun on lights A","address":"some/topic","service":"out_bin_switch","interface":"evt.binary.report",
+      "success_node":null,"timeout_node":null,"error_node":null,"node_config":{"value":true }},
+    {"id":"3","type":"wait"   ,"name":"Wait","success_node":null,"timeout_node":null,"error_node":null,"node_config":{"for":90 }},
+    {"id":"4","type":"action" ,"label":"Tun on lights B","address":"some/topic","service":"out_lvl_switch","interface":"cmd.binary.set",
+      "success_node":null,"timeout_node":null,"error_node":null,"node_config":{"value":50 }},
+    {"id":"5","type":"action" ,"label":"Tun on lights C","address":"some/topic","service":"out_lvl_switch","interface":"cmd.binary.set",
+      "success_node":null,"timeout_node":null,"error_node":null,"node_config":{"value":50 }}
+  ]
+}
