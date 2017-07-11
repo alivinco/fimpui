@@ -1,16 +1,15 @@
 package process
 
 import (
-	"github.com/alivinco/fimpui/registry"
 	"github.com/alivinco/fimpui/integr/fhcore"
+	"github.com/alivinco/fimpui/registry"
 )
 
+func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistryStore, vincClient *fhcore.VinculumClient) error {
 
-func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistryStore, vincClient *fhcore.VinculumClient) error{
+	commTechMap := map[string]string{"zwave-ad": "zw", "ikea": "ikea"}
 
-	commTechMap := map[string]string{"zwave-ad":"zw","ikea":"ikea"}
-
-	msg,err := vincClient.GetMessage([]string{"device"})
+	msg, err := vincClient.GetMessage([]string{"device"})
 	if err != nil {
 		return err
 	}

@@ -2,34 +2,34 @@ package logexport
 
 import (
 	"fmt"
-//	"log"
-// Imports the Google Cloud Storage client package.
+	//	"log"
+	// Imports the Google Cloud Storage client package.
 	"cloud.google.com/go/storage"
 	"golang.org/x/net/context"
 	//"google.golang.org/api/iterator"
 	"time"
 	//"github.com/shirou/gopsutil/host"
 
-	"os"
-	"io/ioutil"
 	"io"
+	"io/ioutil"
+	"os"
 )
 
 type GcpObjectStorage struct {
-	bucket * storage.BucketHandle
+	bucket *storage.BucketHandle
 	hostId string
-	ctx context.Context
+	ctx    context.Context
 	client *storage.Client
 }
 
-func NewGcpObjectStorage(bucketName string) (*GcpObjectStorage ,error) {
+func NewGcpObjectStorage(bucketName string) (*GcpObjectStorage, error) {
 	var err error
 	ost := GcpObjectStorage{}
 	ost.ctx = context.Background()
 	ost.client, err = storage.NewClient(ost.ctx)
 	if err != nil {
 		fmt.Println("Failed to create client: %v", err)
-		return nil , err
+		return nil, err
 	}
 	ost.bucket = ost.client.Bucket(bucketName)
 
@@ -39,63 +39,62 @@ func NewGcpObjectStorage(bucketName string) (*GcpObjectStorage ,error) {
 	//}else {
 	//	ost.hostId = "unknown"
 	//}
-	return &ost , nil
+	return &ost, nil
 }
 
-func (ost *GcpObjectStorage)UploadLogSnapshot(files []string,username string,sizeLimit int64)[]string{
+func (ost *GcpObjectStorage) UploadLogSnapshot(files []string, username string, sizeLimit int64) []string {
 	ts := time.Now().Format("2006-01-02T15:04")
-	snapshotName := username+"/"+ts
+	snapshotName := username + "/" + ts
 	var statusReport []string
 	for i := range files {
-		metadata := map[string]string {
+		metadata := map[string]string{
 			"fimpui-username": username,
 		}
-		err := ost.UploadTextFile(snapshotName,files[i],metadata,sizeLimit)
+		err := ost.UploadTextFile(snapshotName, files[i], metadata, sizeLimit)
 		uploadStatus := "OK"
 		if err != nil {
 			uploadStatus = err.Error()
-			fmt.Println("Error while uploading file :",err)
+			fmt.Println("Error while uploading file :", err)
 		}
 
-		statusReport = append(statusReport,fmt.Sprintf("File: %s , upload status = %s ",files[i],uploadStatus))
+		statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", files[i], uploadStatus))
 	}
 	return statusReport
 }
 
-
-func (ost * GcpObjectStorage)UploadTextFile(objectPrefix string,filePath string , metadata map[string]string,sizeLimit int64) error {
+func (ost *GcpObjectStorage) UploadTextFile(objectPrefix string, filePath string, metadata map[string]string, sizeLimit int64) error {
 
 	var fileBody []byte
 	var err error
 	if sizeLimit > 0 {
 		file, err := os.Open(filePath)
 		if err != nil {
-			fmt.Println("Can't open file .Error:",err)
+			fmt.Println("Can't open file .Error:", err)
 			return err
 		}
 		defer file.Close()
 
-		buf := make([]byte,sizeLimit)
+		buf := make([]byte, sizeLimit)
 		stat, err := os.Stat(filePath)
 		if err != nil {
-			fmt.Println("Can't stat file .Error:",err)
+			fmt.Println("Can't stat file .Error:", err)
 			return err
 		}
 		var start int64
 		start = 0
-		if stat.Size()>sizeLimit {
+		if stat.Size() > sizeLimit {
 			start = stat.Size() - sizeLimit
 		}
 
 		fileSize, err := file.ReadAt(buf, start)
-		fmt.Println("NUmber of bytes were read = ",fileSize)
+		fmt.Println("NUmber of bytes were read = ", fileSize)
 		if err != nil && err != io.EOF {
 			fmt.Println(err)
 			return err
 		}
 		fileBody = buf[:fileSize]
 	} else {
-		fileBody , err = ioutil.ReadFile(filePath)
+		fileBody, err = ioutil.ReadFile(filePath)
 
 	}
 	if err != nil {
@@ -103,7 +102,7 @@ func (ost * GcpObjectStorage)UploadTextFile(objectPrefix string,filePath string 
 	}
 	//fmt.Println(filepath.Dir(filePath))
 	//name := objectPrefix+filepath.Dir(filePath)+"/"+ts+"_"+filepath.Base(filePath)
-	name := objectPrefix+filePath
+	name := objectPrefix + filePath
 	wc := ost.bucket.Object(name).NewWriter(ost.ctx)
 	wc.ContentType = "text/plain"
 	//wc.Metadata = map[string]string{
@@ -164,5 +163,3 @@ func (ost * GcpObjectStorage)UploadTextFile(objectPrefix string,filePath string 
 //
 //	fmt.Printf("Bucket %v created.\n", bucketName)
 //}
-
-

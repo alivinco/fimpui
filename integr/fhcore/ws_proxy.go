@@ -1,8 +1,8 @@
 package fhcore
 
 import (
-	"github.com/labstack/echo"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo"
 	"net/http"
 )
 
@@ -15,12 +15,11 @@ var (
 	}
 )
 
-
 type CoreWsUpgrader struct {
 	CoreWsAddres string
 }
 
-func (wu * CoreWsUpgrader ) Upgrade(c echo.Context) error {
+func (wu *CoreWsUpgrader) Upgrade(c echo.Context) error {
 	//ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	//if err != nil {
 	//	fmt.Println(err)

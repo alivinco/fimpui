@@ -1,9 +1,9 @@
 package mqtt
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"bytes"
 )
 
 //PacketNames maps the constants for each of the MQTT packet types
@@ -24,8 +24,6 @@ var PacketNames = map[uint8]string{
 	13: "PINGRESP",
 	14: "DISCONNECT",
 }
-
-
 
 //FixedHeader is a struct to hold the decoded information from
 //the fixed header of an MQTT ControlPacket

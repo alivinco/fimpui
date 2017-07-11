@@ -5,29 +5,30 @@ import (
 
 	"fmt"
 
-	"github.com/alivinco/fimpui/integr/mqtt"
+	"encoding/json"
+	"flag"
+	"github.com/alivinco/fimpui/integr/fhcore"
 	"github.com/alivinco/fimpui/integr/logexport"
+	"github.com/alivinco/fimpui/integr/mqtt"
+	"github.com/alivinco/fimpui/model"
+	"github.com/alivinco/fimpui/process"
+	"github.com/alivinco/fimpui/registry"
+	"github.com/koding/websocketproxy"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"io/ioutil"
-	"github.com/koding/websocketproxy"
 	"net/url"
-	"flag"
-	"github.com/alivinco/fimpui/model"
-	"encoding/json"
 )
-
 
 type SystemInfo struct {
 	Version string
 }
 
-
-func startWsCoreProxy(backendUrl string){
-	u , _ := url.Parse(backendUrl)
+func startWsCoreProxy(backendUrl string) {
+	u, _ := url.Parse(backendUrl)
 	http.Handle("/", http.FileServer(http.Dir("static/fhcore")))
 	http.Handle("/ws", websocketproxy.ProxyHandler(u))
-	err := http.ListenAndServe(":8082",nil )
+	err := http.ListenAndServe(":8082", nil)
 	if err != nil {
 		fmt.Print(err)
 	}
@@ -40,21 +41,29 @@ func main() {
 	flag.Parse()
 	if configFile == "" {
 		configFile = "/opt/fimpui/config.json"
-	}else {
+	} else {
 		fmt.Println("Loading configs from file ", configFile)
 	}
-	configFileBody , err := ioutil.ReadFile(configFile)
-	err = json.Unmarshal(configFileBody,configs)
+	configFileBody, err := ioutil.ReadFile(configFile)
+	err = json.Unmarshal(configFileBody, configs)
 	if err != nil {
 		panic("Can't load config file.")
 	}
-	objectStorage , _ := logexport.NewGcpObjectStorage("fh-cube-log")
+
+	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
+	err = vinculumClient.Connect()
+	if err != nil {
+		fmt.Println("Vinculum is not connected")
+	}
+	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
+
+	objectStorage, _ := logexport.NewGcpObjectStorage("fh-cube-log")
 	sysInfo := SystemInfo{}
-	versionFile,err := ioutil.ReadFile("VERSION")
+	versionFile, err := ioutil.ReadFile("VERSION")
 	if err == nil {
 		sysInfo.Version = string(versionFile)
 	}
-	coreUrl := "ws://localhost:1989"
+	coreUrl := "ws://" + configs.VinculumAddress
 	go startWsCoreProxy(coreUrl)
 	wsUpgrader := mqtt.WsUpgrader{"localhost:1883"}
 	e := echo.New()
@@ -62,10 +71,10 @@ func main() {
 	e.Use(middleware.Recover())
 	e.GET("/fimp/system-info", func(c echo.Context) error {
 
-		return c.JSON(http.StatusOK,sysInfo)
+		return c.JSON(http.StatusOK, sysInfo)
 	})
-	e.GET ("/fimp/configs",func(c echo.Context) error {
-		return c.JSON(http.StatusOK,configs)
+	e.GET("/fimp/configs", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, configs)
 	})
 	e.GET("/fimp/fr/upload-log-snapshot", func(c echo.Context) error {
 
@@ -76,12 +85,44 @@ func main() {
 		if hostAlias == "" {
 			hostAlias = "unknown"
 		}
-		uploadStatus := objectStorage.UploadLogSnapshot (configs.ReportLogFiles ,hostAlias,configs.ReportLogSizeLimit)
-		return c.JSON(http.StatusOK,uploadStatus)
+		uploadStatus := objectStorage.UploadLogSnapshot(configs.ReportLogFiles, hostAlias, configs.ReportLogSizeLimit)
+		return c.JSON(http.StatusOK, uploadStatus)
 	})
+	e.GET("/fimp/registry/things", func(c echo.Context) error {
+		things := thingRegistryStore.GetAllThings()
+		return c.JSON(http.StatusOK, things)
+	})
+
+	e.GET("/fimp/registry/thing/:tech/:address", func(c echo.Context) error {
+		things, _ := thingRegistryStore.GetThingByAddress(c.Param("tech"), c.Param("address"))
+		return c.JSON(http.StatusOK, things)
+	})
+	e.GET("/fimp/registry/clear_all", func(c echo.Context) error {
+		thingRegistryStore.ClearAll()
+		return c.NoContent(http.StatusOK)
+	})
+
+	e.PUT("/fimp/registry/thing", func(c echo.Context) error {
+		thing := registry.Thing{}
+		err := c.Bind(&thing)
+		fmt.Println(err)
+		thingRegistryStore.UpsertThing(thing)
+		return c.NoContent(http.StatusOK)
+	})
+
+	e.GET("/fimp/vinculum/devices", func(c echo.Context) error {
+		resp, _ := vinculumClient.GetMessage([]string{"device"})
+		return c.JSON(http.StatusOK, resp.Msg.Data.Param.Device)
+	})
+
+	e.GET("/fimp/vinculum/import_to_registry", func(c echo.Context) error {
+		process.LoadVinculumDeviceInfoToStore(thingRegistryStore, vinculumClient)
+		return c.NoContent(http.StatusOK)
+	})
+
 	index := "static/fimpui/dist/index.html"
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:4200","http:://localhost:8082"},
+		AllowOrigins: []string{"http://localhost:4200", "http:://localhost:8082"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 	}))
 	e.GET("/mqtt", wsUpgrader.Upgrade)

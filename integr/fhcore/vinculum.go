@@ -1,28 +1,29 @@
 package fhcore
+
 import (
-	"github.com/gorilla/websocket"
-	"net/url"
 	"fmt"
-	"math/rand"
-	"time"
+	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"math/rand"
+	"net/url"
+	"time"
 )
 
 type VinculumClient struct {
-	host string
-	inboundMsgCh chan []byte
-	client *websocket.Conn
-	isRunning bool
+	host            string
+	inboundMsgCh    chan []byte
+	client          *websocket.Conn
+	isRunning       bool
 	runningRequests map[int]chan VinculumMsg
 }
 
-func NewVinculumClient(host string ) *VinculumClient {
-	vc := VinculumClient{host:host,isRunning:true}
+func NewVinculumClient(host string) *VinculumClient {
+	vc := VinculumClient{host: host, isRunning: true}
 	return &vc
 }
 
-func (vc * VinculumClient) Connect() error{
-	vc.runningRequests = make(map[int] chan VinculumMsg)
+func (vc *VinculumClient) Connect() error {
+	vc.runningRequests = make(map[int]chan VinculumMsg)
 	u := url.URL{Scheme: "ws", Host: vc.host, Path: "/ws"}
 	fmt.Println("Connecting to %s", u.String())
 	var err error
@@ -45,7 +46,7 @@ func (vc * VinculumClient) Connect() error{
 				continue
 			}
 			if vincMsg.Msg.Type == "response" {
-				for k,vchan := range vc.runningRequests {
+				for k, vchan := range vc.runningRequests {
 					if k == vincMsg.Msg.Data.RequestID {
 						fmt.Println("Response match")
 						vchan <- vincMsg
@@ -60,31 +61,30 @@ func (vc * VinculumClient) Connect() error{
 	return nil
 }
 
-func (vc * VinculumClient) GetMessage(components []string ) (VinculumMsg ,error ) {
+func (vc *VinculumClient) GetMessage(components []string) (VinculumMsg, error) {
 	if !vc.isRunning {
 		err := vc.Connect()
 		if err != nil {
-			return VinculumMsg{},errors.New("Vinculum is Not connected ")
+			return VinculumMsg{}, errors.New("Vinculum is Not connected ")
 		}
 	}
 	reqId := rand.Intn(1000)
-	msg := VinculumMsg{Ver: "sevenOfNine",Msg: Msg{Type: "request" , Src: "fimpui" , Dst: "vinculum" , Data : Data{Cmd: "get",RequestID: reqId,Param: Param{Components: components} } } }
+	msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "get", RequestID: reqId, Param: Param{Components: components}}}}
 	vc.client.WriteJSON(msg)
 	vc.runningRequests[reqId] = make(chan VinculumMsg)
 	select {
-		case msg := <- vc.runningRequests[reqId]:
-			delete(vc.runningRequests, reqId)
-			return msg , nil
-		case <-time.After(time.Second * 5):
-			fmt.Println("timeout 5 sec")
+	case msg := <-vc.runningRequests[reqId]:
+		delete(vc.runningRequests, reqId)
+		return msg, nil
+	case <-time.After(time.Second * 5):
+		fmt.Println("timeout 5 sec")
 	}
 	delete(vc.runningRequests, reqId)
 
-	return VinculumMsg{},errors.New("Timeout")
+	return VinculumMsg{}, errors.New("Timeout")
 
 }
 
-func(vc *VinculumClient) Stop(){
+func (vc *VinculumClient) Stop() {
 	vc.isRunning = false
 }
-

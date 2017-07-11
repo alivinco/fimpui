@@ -1,16 +1,18 @@
 package flow
 
 import (
+	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"testing"
 	"time"
+	"io/ioutil"
 )
 
 var msgChan = make(MsgPipeline)
 
 func onMsg(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
-	log.Info("New message from topic = ",topic)
+	log.Info("New message from topic = ", topic)
 
 	fMsg := Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
 	select {
@@ -24,7 +26,7 @@ func onMsg(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMe
 func sendMsg(mqtt *fimpgo.MqttTransport) {
 	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
 	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
-	mqtt.Publish(&adr,msg)
+	mqtt.Publish(&adr, msg)
 }
 
 func TestNewFlow(t *testing.T) {
@@ -40,23 +42,110 @@ func TestNewFlow(t *testing.T) {
 	time.Sleep(time.Second * 1)
 
 	ctx := Context{}
-	flow := NewFlow(&ctx,mqtt);
-	flow.SetMessageStream(msgChan);
+	flow := NewFlow("1", &ctx, mqtt)
+	flow.SetMessageStream(msgChan)
 
-	node := Node{Id:"1",Label:"Button trigger 1",Type:"trigger",Address:"pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0",Service:"out_bin_switch",ServiceInterface:"evt.binary.report",SuccessTransition:"2"}
+	node := MetaNode{Id: "1", Label: "Lux trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
 	flow.AddNode(node)
-	node = Node{Id:"1.1",Label:"Button trigger 2",Type:"trigger",Address:"pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:299_0",Service:"out_bin_switch",ServiceInterface:"evt.binary.report",SuccessTransition:"2"}
+	node = MetaNode{Id: "1.1", Label: "Button trigger 2", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:299_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
 	flow.AddNode(node)
-	node = Node{Id:"2",Label:"Bulb 1",Type:"action",Address:"pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0",Service:"out_bin_switch",ServiceInterface:"cmd.binary.set",SuccessTransition:"2.1"}
+	node = MetaNode{Id: "2", Label: "Bulb 1", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "2.1"}
 	flow.AddNode(node)
-
-	node = Node{Id:"2.1",Label:"Waiting for 500mil",Type:"wait",SuccessTransition:"3",Config:2000}
+	node = MetaNode{Id: "2.1", Label: "Waiting for 500mil", Type: "wait", SuccessTransition: "3", Config: 200}
 	flow.AddNode(node)
-	node = Node{Id:"3",Label:"Bulb 2",Type:"action",Address:"pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0",Service:"out_bin_switch",ServiceInterface:"cmd.binary.set",SuccessTransition:""}
+	node = MetaNode{Id: "3", Label: "Bulb 2", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: ""}
 	flow.AddNode(node)
 	flow.Start()
-	time.Sleep(time.Second*1)
+	time.Sleep(time.Second * 1)
 	sendMsg(mqtt)
-	time.Sleep(time.Second*5)
+	time.Sleep(time.Second * 5)
+
+}
+
+func TestNewFlow2(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx := Context{}
+	flow := NewFlow("1", &ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+
+	node := MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
+	flow.AddNode(node)
+	node = MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []IFExpression{{Value: int64(100), ValueType: "int", Operand: "gt"}}}}
+	flow.AddNode(node)
+	b, err := json.Marshal(node)
+	log.Info(string(b))
+	node = MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: DefaultValue{ValueType: "bool", Value: true}}
+	flow.AddNode(node)
+	node = MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: DefaultValue{ValueType: "bool", Value: true}}
+	flow.AddNode(node)
+
+	data, err := json.Marshal(flow)
+	if err == nil {
+		ioutil.WriteFile("testflow.json", data, 0644)
+	}
+
+
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	// send msg
+
+	msg := fimpgo.NewIntMessage("evt.sensor.report", "sensor_lumin", 150, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "sensor_lumin", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+
+	// end
+	time.Sleep(time.Second * 5)
+
+}
+
+func TestNewFlow3(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx := Context{}
+	flow := NewFlow("2", &ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+
+	node := MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "1.1"}
+	flow.AddNode(node)
+	node = MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []IFExpression{{Value: false, ValueType: "bool", Operand: "eq"}}}}
+	flow.AddNode(node)
+	node = MetaNode{Id: "2", Label: "Lights ON", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: DefaultValue{ValueType: "bool", Value: true}}
+	flow.AddNode(node)
+	node = MetaNode{Id: "3", Label: "Lights OFF", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: DefaultValue{ValueType: "bool", Value: false}}
+	flow.AddNode(node)
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	// send msg
+
+	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+	time.Sleep(time.Second * 1)
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
 
 }

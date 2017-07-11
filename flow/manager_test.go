@@ -1,0 +1,37 @@
+package flow
+
+import (
+	"testing"
+	"github.com/alivinco/fimpui/model"
+	"github.com/alivinco/fimpgo"
+	log "github.com/Sirupsen/logrus"
+	"time"
+)
+
+func TestManager_LoadFlowFromFile(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	config := model.FimpUiConfigs{MqttServerURI:"tcp://localhost:1883"}
+	man := NewManager(&config)
+	man.InitMessagingTransport()
+	man.LoadFlowFromFile("testflow.json")
+
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "sensor_lumin", ServiceAddress: "199_0"}
+
+	msg := fimpgo.NewIntMessage("evt.sensor.report", "sensor_lumin", 50, nil, nil, nil)
+	mqtt.Publish(&adr, msg)
+
+	msg = fimpgo.NewIntMessage("evt.sensor.report", "sensor_lumin", 100, nil, nil, nil)
+	mqtt.Publish(&adr, msg)
+
+	msg = fimpgo.NewIntMessage("evt.sensor.report", "sensor_lumin", 150, nil, nil, nil)
+	mqtt.Publish(&adr, msg)
+
+	// end
+	time.Sleep(time.Second * 5)
+}

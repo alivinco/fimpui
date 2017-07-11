@@ -40,15 +40,15 @@ type Client struct {
 }
 
 type Device struct {
-	Fimp   Fimp `json:"_fimp"`
-	Client Client `json:"client"`
-	Functionality string `json:"functionality"`
-	ID            int    `json:"id"`
-	Lrn           bool   `json:"lrn"`
-	Model         string `json:"model"`
-	Param         interface {} `json:"param"`
-	Problem bool        `json:"problem"`
-	Room    interface{} `json:"room"`
+	Fimp          Fimp        `json:"_fimp"`
+	Client        Client      `json:"client"`
+	Functionality string      `json:"functionality"`
+	ID            int         `json:"id"`
+	Lrn           bool        `json:"lrn"`
+	Model         string      `json:"model"`
+	Param         interface{} `json:"param"`
+	Problem       bool        `json:"problem"`
+	Room          interface{} `json:"room"`
 }
 
 type House struct {

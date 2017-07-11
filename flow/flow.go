@@ -5,95 +5,105 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-type Definition struct {
-	Id NodeID
-	Type string
-	Label string
-	Address string
-
-}
-
 type MsgPipeline chan Message
 
 type Flow struct {
-	Label string
-	globalContext *Context
-	localContext Context
-	currentNodeId NodeID
-	currentMsg Message
-	currentNode *Node
-	nodes []Node
-	msgPipeline MsgPipeline
-	msgTransport *fimpgo.MqttTransport
-	activeSubscriptions []string
-	msgInStream MsgPipeline
-	isRunning bool
+	Id                  string
+	Name                string
+	globalContext       *Context  `json:"-"`
+	localContext        Context   `json:"-"`
+	currentNodeId       NodeID    `json:"-"`
+	currentMsg          Message   `json:"-"`
+	currentNode         *MetaNode `json:"-"`
+	Nodes               []MetaNode
+	msgPipeline         MsgPipeline           `json:"-"`
+	msgTransport        *fimpgo.MqttTransport `json:"-"`
+	activeSubscriptions []string              `json:"-"`
+	msgInStream         MsgPipeline           `json:"-"`
 }
 
-
-func NewFlow(globalContext *Context,msgTransport *fimpgo.MqttTransport) *Flow  {
-	flow := Flow{globalContext:globalContext}
-	flow.msgPipeline = make (MsgPipeline)
-	flow.nodes = make([]Node,0)
+func NewFlow(Id string, globalContext *Context, msgTransport *fimpgo.MqttTransport) *Flow {
+	flow := Flow{globalContext: globalContext}
+	flow.msgPipeline = make(MsgPipeline)
+	flow.Nodes = make([]MetaNode, 0)
 	flow.msgTransport = msgTransport
+	flow.localContext = Context{isFlowRunning: true}
 	return &flow
 }
 
-func (fl *Flow) SetNodes(nodes []Node) {
-	fl.nodes = nodes
+func (fl *Flow) SetNodes(nodes []MetaNode) {
+	fl.Nodes = nodes
 }
-func (fl *Flow) AddNode(node Node) {
-	fl.nodes = append(fl.nodes,node)
+func (fl *Flow) AddNode(node MetaNode) {
+	fl.Nodes = append(fl.Nodes, node)
 }
 
 func (fl *Flow) Run() {
 
 	var transitionNode NodeID
 	for {
-		if !fl.isRunning {
+		if !fl.localContext.isFlowRunning {
 			break
 		}
-		for i := range fl.nodes {
-			if fl.currentNodeId == "" && fl.nodes[i].Type == "trigger" {
+		for i := range fl.Nodes {
+			if !fl.localContext.isFlowRunning {
+				break
+			}
+			if fl.currentNodeId == "" && fl.Nodes[i].Type == "trigger" {
 				log.Info("------Flow started and waiting for trigger event----------- ")
 				var err error
-				fl.currentMsg ,fl.currentNode ,err = Trigger(fl.nodes,fl.msgInStream,fl.msgTransport,&fl.activeSubscriptions)
+				fl.currentMsg, fl.currentNode, err = TriggerNode(fl.Nodes, &fl.localContext, fl.msgInStream, fl.msgTransport, &fl.activeSubscriptions)
 				if err != nil {
-					log.Error("Trigger failed with error :",err)
+					log.Error("TriggerNode failed with error :", err)
 					fl.currentNodeId = ""
 				}
-				log.Info("Trigger moving forward")
+				if !fl.localContext.isFlowRunning {
+					break
+				}
+				log.Info("TriggerNode moving forward")
 				fl.currentNodeId = fl.currentNode.Id
 				transitionNode = fl.currentNode.SuccessTransition
-			}else if fl.nodes[i].Id == transitionNode {
-				switch fl.nodes[i].Type {
+			} else if fl.Nodes[i].Id == transitionNode {
+				var err error
+				switch fl.Nodes[i].Type {
 				case "action":
-					log.Info("Executing Action node.")
-					Action(&fl.nodes[i],&fl.currentMsg,fl.msgTransport)
+					log.Info("Executing ActionNode node.")
+					err = ActionNode(&fl.Nodes[i], &fl.currentMsg, fl.msgTransport)
 				case "wait":
-					log.Info("Executing Wait node.")
-					Wait(&fl.nodes[i])
+					log.Info("Executing WaitNode node.")
+					err = WaitNode(&fl.Nodes[i])
+				case "if":
+					log.Info("Executing IfNode node.")
+					err = IfNode(&fl.Nodes[i], &fl.currentMsg)
 				}
-				fl.currentNodeId = fl.nodes[i].Id
-				fl.currentNode = &fl.nodes[i]
-				transitionNode = fl.nodes[i].SuccessTransition
-			}else if transitionNode == "" {
+				fl.currentNodeId = fl.Nodes[i].Id
+				fl.currentNode = &fl.Nodes[i]
+				if err == nil {
+					transitionNode = fl.Nodes[i].SuccessTransition
+				} else {
+					log.Info("Node executed with error . Doing error transition. Error :", err)
+					transitionNode = fl.Nodes[i].ErrorTransition
+				}
+
+			} else if transitionNode == "" {
 				// Flow is finished . Returning to first step.
 				fl.currentNodeId = ""
 			}
 		}
 	}
+	log.Infof("Flow %s stopped.", fl.Name)
 
 }
-func (fl *Flow) Start(){
-	log.Info("Starting flow  ",fl.Label)
-	fl.isRunning = true
+func (fl *Flow) Start() {
+	log.Info("Starting flow  ", fl.Name)
+	fl.localContext.isFlowRunning = true
 	go fl.Run()
 }
-func (fl *Flow) Stop(){
-	log.Info("Stopping flow  ",fl.Label)
-	fl.isRunning = false
+func (fl *Flow) Stop() {
+	log.Info("Stopping flow  ", fl.Name)
+	fl.localContext.isFlowRunning = false
+	fl.msgInStream <- Message{}
 }
-func (fl *Flow) SetMessageStream(msgInStream MsgPipeline){
+func (fl *Flow) SetMessageStream(msgInStream MsgPipeline) {
 	fl.msgInStream = msgInStream
 }
