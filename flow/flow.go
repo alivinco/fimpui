@@ -3,6 +3,7 @@ package flow
 import "github.com/alivinco/fimpgo"
 import (
 	log "github.com/Sirupsen/logrus"
+	"github.com/pkg/errors"
 )
 
 type MsgPipeline chan Message
@@ -10,6 +11,7 @@ type MsgPipeline chan Message
 type Flow struct {
 	Id                  string
 	Name                string
+	Description         string
 	globalContext       *Context  `json:"-"`
 	localContext        Context   `json:"-"`
 	currentNodeId       NodeID    `json:"-"`
@@ -34,6 +36,14 @@ func NewFlow(Id string, globalContext *Context, msgTransport *fimpgo.MqttTranspo
 func (fl *Flow) SetNodes(nodes []MetaNode) {
 	fl.Nodes = nodes
 }
+
+func (fl *Flow) ReloadNodes(nodes []MetaNode) {
+	fl.Stop()
+	fl.Nodes = nodes
+	fl.Start()
+}
+
+
 func (fl *Flow) AddNode(node MetaNode) {
 	fl.Nodes = append(fl.Nodes, node)
 }
@@ -50,30 +60,30 @@ func (fl *Flow) Run() {
 				break
 			}
 			if fl.currentNodeId == "" && fl.Nodes[i].Type == "trigger" {
-				log.Info("------Flow started and waiting for trigger event----------- ")
+				log.Infof("<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				var err error
 				fl.currentMsg, fl.currentNode, err = TriggerNode(fl.Nodes, &fl.localContext, fl.msgInStream, fl.msgTransport, &fl.activeSubscriptions)
 				if err != nil {
-					log.Error("TriggerNode failed with error :", err)
+					log.Error("<Flow> TriggerNode failed with error :", err)
 					fl.currentNodeId = ""
 				}
 				if !fl.localContext.isFlowRunning {
 					break
 				}
-				log.Info("TriggerNode moving forward")
 				fl.currentNodeId = fl.currentNode.Id
 				transitionNode = fl.currentNode.SuccessTransition
+				log.Debug("<Flow> Transition from Trigger to node = ",transitionNode)
 			} else if fl.Nodes[i].Id == transitionNode {
 				var err error
 				switch fl.Nodes[i].Type {
 				case "action":
-					log.Info("Executing ActionNode node.")
+					log.Info("<Flow> Executing ActionNode node.")
 					err = ActionNode(&fl.Nodes[i], &fl.currentMsg, fl.msgTransport)
 				case "wait":
-					log.Info("Executing WaitNode node.")
+					log.Info("<Flow> Executing WaitNode node.")
 					err = WaitNode(&fl.Nodes[i])
 				case "if":
-					log.Info("Executing IfNode node.")
+					log.Info("<Flow> Executing IfNode node.")
 					err = IfNode(&fl.Nodes[i], &fl.currentMsg)
 				}
 				fl.currentNodeId = fl.Nodes[i].Id
@@ -81,8 +91,8 @@ func (fl *Flow) Run() {
 				if err == nil {
 					transitionNode = fl.Nodes[i].SuccessTransition
 				} else {
-					log.Info("Node executed with error . Doing error transition. Error :", err)
 					transitionNode = fl.Nodes[i].ErrorTransition
+					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNode ,err)
 				}
 
 			} else if transitionNode == "" {
@@ -91,16 +101,32 @@ func (fl *Flow) Run() {
 			}
 		}
 	}
-	log.Infof("Flow %s stopped.", fl.Name)
+	log.Infof("Flow was %s stopped.", fl.Name)
 
 }
-func (fl *Flow) Start() {
-	log.Info("Starting flow  ", fl.Name)
+func (fl *Flow) Start() error {
+	log.Info("<Flow> Starting flow : ", fl.Name)
 	fl.localContext.isFlowRunning = true
-	go fl.Run()
+	isFlowValid := false
+	// The Flow should have at least one trigger or wait node to avoid tight loop
+	for i := range fl.Nodes {
+		if fl.Nodes[i].Type == "wait" || fl.Nodes[i].Type == "trigger" {
+			isFlowValid = true
+			break
+		}
+	}
+	if isFlowValid{
+		go fl.Run()
+		log.Infof("<Flow> Flow %s is running", fl.Name)
+		return nil
+	}
+	log.Errorf("<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
+	return errors.New("Flow should have at least one trigger or wait node")
+
+
 }
 func (fl *Flow) Stop() {
-	log.Info("Stopping flow  ", fl.Name)
+	log.Info("<Flow> Stopping flow  ", fl.Name)
 	fl.localContext.isFlowRunning = false
 	fl.msgInStream <- Message{}
 }

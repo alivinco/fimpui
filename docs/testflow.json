@@ -1,6 +1,6 @@
 {
-  "Id": "",
-  "Name": "",
+  "Id": "testflow",
+  "Name": "Test flow",
   "Nodes": [
     {
       "Id": "1",

@@ -1,0 +1,119 @@
+<div class="flow-editor">
+  <md-card class="example-card">
+    <md-card-header>
+      <!--<div md-card-avatar class="example-header-image"></div>-->
+      <md-card-title><h3>Flow editor</h3></md-card-title>
+      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
+    </md-card-header>
+    <md-card-content>
+      <md-input-container class="example-full-width">
+              <input #flowNameInput mdInput [value]="flow.Name" placeholder="Name" >
+      </md-input-container>
+      <md-input-container class="example-full-width">
+              <input #flowNameInput mdInput [value]="flow.Description" placeholder="Description" >
+      </md-input-container>
+      <p>Nodes:</p>
+      
+       <md-card *ngFor="let node of flow.Nodes;let index = index;trackBy:trackByIndex;" class="node-card">
+         <md-card-header>
+            <md-card-title>{{ node.Label }} ( Id:{{ node.Id }} ) </md-card-title>
+            <md-card-subtitle>Node type : {{ node.Type }} </md-card-subtitle>
+         </md-card-header>  
+         <div [ngSwitch]="node.Type">
+            <md-input-container class="node-label-field">
+                  <input mdInput [(ngModel)]="flow.Nodes[index].Label" placeholder="Label" >
+            </md-input-container>
+            <div *ngSwitchCase="'trigger'">  
+                  <p>
+                  <md-input-container style="width: 130px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Service" placeholder="Service" >
+                  </md-input-container>
+                  <md-input-container style="width: 200px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].ServiceInterface" placeholder="Interface" >
+                  </md-input-container>
+                  <md-input-container style="width: 450px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
+                  </md-input-container>
+                  </p>
+                  <p>
+                    <md-input-container class="node-transition-field">
+                      <input #nodeIdInput mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success node" >
+                    </md-input-container>
+                  </p>
+            </div>
+            <div *ngSwitchCase="'wait'">  
+                  <md-input-container style="width:100px ">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Config" placeholder="Delay time (milisec)" >
+                  </md-input-container>
+                  <p>
+                  <md-input-container class="node-transition-field">
+                      <input mdInput [value]="node.SuccessTransition" placeholder="Success node" >
+                  </md-input-container>
+                  </p>
+            </div>
+            <div *ngSwitchCase="'action'">  
+                 <p>
+                  <md-input-container style="width: 130px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Service" placeholder="Service" >
+                  </md-input-container>
+                  <md-input-container style="width: 200px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].ServiceInterface" placeholder="Interface" >
+                  </md-input-container>
+                  <md-input-container style="width: 450px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
+                  </md-input-container>
+                  </p>
+                  <p>
+                  <md-input-container class="node-transition-field">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success" >
+                  </md-input-container>
+                  <md-input-container class="node-transition-field">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].ErrorTransition" placeholder="Error" >
+                  </md-input-container>
+                  </p>
+            </div>
+            <div *ngSwitchCase="'if'">  
+                  <p *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
+                    <md-input-container style="width: 60px">
+                      <input mdInput [(ngModel)]="exp.Operand" placeholder="flow.Nodes[index].Config.Expression[index2].Operand" >
+                    </md-input-container>
+                    <md-input-container style="width: 60px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="Value" >
+                    </md-input-container>
+                    <md-input-container style="width: 60px">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].ValueType" placeholder="ValueType" >
+                    </md-input-container>
+                  </p>
+                  <p>
+                  <md-input-container class="node-transition-field">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.TrueTransition" placeholder="True node" >
+                  </md-input-container>
+                  <md-input-container class="node-transition-field">
+                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.FalseTransition" placeholder="False node" >
+                  </md-input-container>
+                  </p>
+            </div>
+         </div>
+         <md-card-actions>
+          <button md-raised-button (click)="deleteNode(node.Id)"  >Delete</button>
+        </md-card-actions>
+       </md-card>
+
+    
+    </md-card-content>
+    
+    <md-card-actions>
+      <md-select placeholder="Node Type">
+        <md-option>trigger</md-option>
+        <md-option>action</md-option>
+        <md-option>wait</md-option>
+        <md-option>if</md-option>
+      </md-select>
+      <button md-raised-button (click)="Add()" color="primary" >Add</button>
+      <button md-raised-button (click)="saveFlow()" color="primary" >Save</button>
+    </md-card-actions>
+  </md-card>
+
+</div>
+
+

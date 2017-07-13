@@ -5,4 +5,5 @@ type FimpUiConfigs struct {
 	ReportLogSizeLimit int64    `json:"report_log_size_limit"`
 	VinculumAddress    string   `json:"vinculum_address"`
 	MqttServerURI      string   `json:"mqtt_server_uri"`
+	FlowStorageDir     string 	`json:"flow_storage_dir"`
 }

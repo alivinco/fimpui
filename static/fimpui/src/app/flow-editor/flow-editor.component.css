@@ -1,0 +1,31 @@
+.flow-editor{
+  padding: 20px;
+}
+  
+
+.example-card {
+  width: 1000px;
+}
+
+.node-card {
+  /*padding: 0px;*/
+  margin-bottom: 20px;
+  
+}
+.example-header-image {
+  background-size: cover;
+}
+
+.mat-grid-tile .mat-figure {
+    align-items:top;
+}
+.node-id-field {
+    width: 50px;
+}
+
+.node-type-field {
+    width: 100px;
+}
+.node-label-field {
+    width: 270px;
+}

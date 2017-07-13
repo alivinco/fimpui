@@ -1,0 +1,31 @@
+<div class="flow">
+  <md-card class="example-card">
+    <md-card-header>
+      <!--<div md-card-avatar class="example-header-image"></div>-->
+      <md-card-title><h3>Flow editor</h3></md-card-title>
+      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
+    </md-card-header>
+    <md-card-content>
+         
+   <table>
+      <thead><tr><th style="width: 70px">Flow Id</th><th style="width: 150px">Name</th><th style="width: 150px">Description</th><th style="width: 150px">Actions</th></tr> </thead>
+      <tbody>
+      <tr *ngFor="let flow of flows">
+          <td> {{flow.Id}}</td> <td> {{flow.Name}}</td> <td> {{flow.Description}}</td> <td>
+             
+             <md-chip-list>
+             <md-chip class="open-chip" [routerLink]="['/flow-editor',flow.Id]">Open</md-chip>
+             <md-chip color="warn" (click)="replaceDevice(flow.Id)">Delete</md-chip>
+             </md-chip-list>
+          </td>
+          </tr>
+          </tbody> 
+    </table>
+
+    </md-card-content>
+    <md-card-actions>
+      <button md-raised-button (click)="addDevice(True)" color="primary" > Add new flow</button>
+    </md-card-actions>
+  </md-card>
+
+</div>

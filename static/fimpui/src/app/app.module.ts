@@ -9,6 +9,9 @@ import { AppComponent } from './app.component';
 import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
+import { FlowComponent } from './flow/flow.component';
+import { FlowEditorComponent } from './flow-editor/flow-editor.component';
+
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
 import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
@@ -31,6 +34,8 @@ const appRoutes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'zwave-man', component: ZwaveManComponent },
   { path: 'ikea-man', component: IkeaManComponent },
+  { path: 'flow', component: FlowComponent },
+  { path: 'flow-editor/:id', component: FlowEditorComponent },
   { path: 'timeline', component: TimelineComponent },
   { path: 'report', component: ReportComponent },
   { path: 'flight-recorder', component: FlightRecorderComponent },
@@ -68,6 +73,8 @@ export function mqttServiceFactory() {
     AppComponent,
     ZwaveManComponent,
     IkeaManComponent,
+    FlowComponent,
+    FlowEditorComponent,
     AddDeviceDialog,
     TimelineComponent,
     ThingViewComponent,

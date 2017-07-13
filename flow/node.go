@@ -26,7 +26,7 @@ type MetaNode struct {
 func TriggerNode(nodes []MetaNode, ctx *Context, msgInStream MsgPipeline, transport *fimpgo.MqttTransport, activeSubscriptions *[]string) (Message, *MetaNode, error) {
 	for i := range nodes {
 		if nodes[i].Type == "trigger" {
-			log.Info("TriggerNode is listening for events . Name = ", nodes[i].Label)
+			log.Info("<Node> TriggerNode is listening for events . Name = ", nodes[i].Label)
 			needToSubscribe := true
 			for i := range *activeSubscriptions {
 				if (*activeSubscriptions)[i] == nodes[i].Address {
@@ -35,7 +35,7 @@ func TriggerNode(nodes []MetaNode, ctx *Context, msgInStream MsgPipeline, transp
 				}
 			}
 			if needToSubscribe {
-				log.Info("Subscribing for service by address :", nodes[i].Address)
+				log.Info("<Node> Subscribing for service by address :", nodes[i].Address)
 				transport.Subscribe(nodes[i].Address)
 				*activeSubscriptions = append(*activeSubscriptions, nodes[i].Address)
 			}
@@ -43,7 +43,7 @@ func TriggerNode(nodes []MetaNode, ctx *Context, msgInStream MsgPipeline, transp
 	}
 
 	for msg := range msgInStream {
-		log.Info("New message from msgInStream")
+		log.Info("<Node> New message from msgInStream")
 		if !ctx.isFlowRunning {
 			break
 		}
@@ -68,7 +68,7 @@ type DefaultValue struct {
 }
 
 func ActionNode(node *MetaNode, msg *Message, transport *fimpgo.MqttTransport) error {
-	log.Info("Executing ActionNode . Name = ", node.Label)
+	log.Info("<Node> Executing ActionNode . Name = ", node.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.ServiceInterface, Service: node.Service}
 	defaultValue, ok := node.Config.(DefaultValue)
 	if ok {
@@ -83,7 +83,7 @@ func ActionNode(node *MetaNode, msg *Message, transport *fimpgo.MqttTransport) e
 	if err != nil {
 		return err
 	}
-	log.Debug("Action message :", fimpMsg)
+	log.Debug("<Node> Action message :", fimpMsg)
 	transport.PublishRaw(node.Address, msgBa)
 	return nil
 }
@@ -91,10 +91,10 @@ func ActionNode(node *MetaNode, msg *Message, transport *fimpgo.MqttTransport) e
 func WaitNode(node *MetaNode) error {
 	delayMilisec, ok := node.Config.(int)
 	if ok {
-		log.Info("Waiting  for = ", delayMilisec)
+		log.Info("<Node> Waiting  for = ", delayMilisec)
 		time.Sleep(time.Millisecond * time.Duration(delayMilisec))
 	} else {
-		log.Error("Wrong time format")
+		log.Error("<Node> Wrong time format")
 	}
 
 	return nil
@@ -123,7 +123,7 @@ func IfNode(node *MetaNode, msg *Message) error {
 				return errors.New("Incompatible value type")
 			}
 			var result bool
-			log.Info("Operand = ", item.Operand)
+			log.Info("<Node> Operand = ", item.Operand)
 			switch item.Operand {
 			case "eq":
 				result = item.Value == msg.Payload.Value

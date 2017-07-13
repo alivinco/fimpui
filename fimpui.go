@@ -18,6 +18,8 @@ import (
 	"github.com/labstack/echo/middleware"
 	"io/ioutil"
 	"net/url"
+	"github.com/alivinco/fimpui/flow"
+	log "github.com/Sirupsen/logrus"
 )
 
 type SystemInfo struct {
@@ -35,6 +37,7 @@ func startWsCoreProxy(backendUrl string) {
 }
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	configs := &model.FimpUiConfigs{}
 	var configFile string
 	flag.StringVar(&configFile, "c", "", "Config file")
@@ -49,13 +52,22 @@ func main() {
 	if err != nil {
 		panic("Can't load config file.")
 	}
-
+	//---------FLOW------------------------
+	flowManager := flow.NewManager(configs)
+	flowManager.InitMessagingTransport()
+	err = flowManager.LoadAllFlowsFromStorage()
+	if err != nil {
+		log.Error("Can't load Flows from storage . Error :",err)
+	}
+	//-------------------------------------
+	//---------THINGS REGISTRY-------------
+	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
+	//-------------------------------------
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
 	err = vinculumClient.Connect()
 	if err != nil {
 		fmt.Println("Vinculum is not connected")
 	}
-	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
 
 	objectStorage, _ := logexport.NewGcpObjectStorage("fh-cube-log")
 	sysInfo := SystemInfo{}
@@ -63,8 +75,10 @@ func main() {
 	if err == nil {
 		sysInfo.Version = string(versionFile)
 	}
+	//--------VINCULUM PROXY----------------
 	coreUrl := "ws://" + configs.VinculumAddress
 	go startWsCoreProxy(coreUrl)
+	//--------------------------------------
 	wsUpgrader := mqtt.WsUpgrader{"localhost:1883"}
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -119,6 +133,26 @@ func main() {
 		process.LoadVinculumDeviceInfoToStore(thingRegistryStore, vinculumClient)
 		return c.NoContent(http.StatusOK)
 	})
+
+	e.GET("/fimp/flow/list", func(c echo.Context) error {
+		resp := flowManager.GetFlowList()
+		return c.JSON(http.StatusOK, resp)
+	})
+	e.GET("/fimp/flow/definition/:id", func(c echo.Context) error {
+		resp := flowManager.GetFlowById(c.Param("id"))
+		return c.JSON(http.StatusOK, resp)
+	})
+
+	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		body ,err := ioutil.ReadAll(c.Request().Body)
+		if err != nil {
+			return err
+		}
+		flowManager.UpdateFlowFromJsonAndSaveToStorage(id,body)
+		return c.NoContent(http.StatusOK)
+	})
+
 
 	index := "static/fimpui/dist/index.html"
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
