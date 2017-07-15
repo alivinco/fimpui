@@ -72,11 +72,17 @@ func ActionNode(node *MetaNode, msg *Message, transport *fimpgo.MqttTransport) e
 	fimpMsg := fimpgo.FimpMessage{Type: node.ServiceInterface, Service: node.Service}
 	defaultValue, ok := node.Config.(DefaultValue)
 	if ok {
-		fimpMsg.Value = defaultValue.Value
-		fimpMsg.ValueType = defaultValue.ValueType
+
+		if defaultValue.Value == "" || defaultValue.ValueType == ""{
+			fimpMsg.Value = msg.Payload.Value
+			fimpMsg.ValueType = msg.Payload.ValueType
+		}else {
+			fimpMsg.Value = defaultValue.Value
+			fimpMsg.ValueType = defaultValue.ValueType
+		}
 	} else {
-		fimpMsg.Value = msg.Payload.Value
-		fimpMsg.ValueType = msg.Payload.ValueType
+			fimpMsg.Value = msg.Payload.Value
+			fimpMsg.ValueType = msg.Payload.ValueType
 	}
 
 	msgBa, err := fimpMsg.SerializeToJson()

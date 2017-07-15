@@ -24,6 +24,8 @@ type FlowListItem struct {
 	Id string
 	Name string
 	Description string
+	TriggerCounter int64
+	ErrorCounter int64
 }
 
 func NewManager(config *model.FimpUiConfigs) *Manager {
@@ -59,8 +61,9 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 
 func (mg *Manager) GenerateNewFlow() Flow {
 	fl := Flow {}
-	fl.AddNode(MetaNode{})
+	fl.AddNode(MetaNode{Id:"1",Type:"trigger",Label:"no label"})
 	fl.Id = GenerateId(10)
+
 	return fl
 }
 
@@ -179,7 +182,7 @@ func (mg *Manager) GetFlowList() []FlowListItem{
 	response := make ([]FlowListItem,len(mg.flowRegistry))
 	var c int
 	for _,flow := range mg.flowRegistry {
-		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description}
+		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter}
 		c++
 	}
 	return response
@@ -193,6 +196,7 @@ func (mg *Manager) UnloadFlow(id string) {
 	delete(mg.flowRegistry, id)
 	close(mg.msgStreams[id])
 	delete(mg.msgStreams,id)
+	log.Infof("Flow with Id = %s is unloaded",id)
 }
 
 func (mg *Manager) DeleteFlow(id string) {

@@ -1,21 +1,24 @@
 <div class="flow-editor">
+  
+  <button class="node-card" md-raised-button [routerLink]="['/flow']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Flows </button>
+  
   <md-card class="example-card">
     <md-card-header>
+     
       <!--<div md-card-avatar class="example-header-image"></div>-->
       <md-card-title><h3>Flow editor</h3></md-card-title>
-      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
     </md-card-header>
     <md-card-content>
       <md-input-container class="example-full-width">
-              <input #flowNameInput mdInput [value]="flow.Name" placeholder="Name" >
+              <input mdInput [(ngModel)]="flow.Name" placeholder="Name" >
       </md-input-container>
-      <md-input-container class="example-full-width">
-              <input #flowNameInput mdInput [value]="flow.Description" placeholder="Description" >
+      <md-input-container >
+              <input style="width: 300px" mdInput [(ngModel)]="flow.Description" placeholder="Description" >
       </md-input-container>
       <p>Nodes:</p>
       
        <md-card *ngFor="let node of flow.Nodes;let index = index;trackBy:trackByIndex;" class="node-card">
-         <md-card-header>
+         <md-card-header id = "nodeId_{{node.Id}}">
             <md-card-title>{{ node.Label }} ( Id:{{ node.Id }} ) </md-card-title>
             <md-card-subtitle>Node type : {{ node.Type }} </md-card-subtitle>
          </md-card-header>  
@@ -43,11 +46,11 @@
             </div>
             <div *ngSwitchCase="'wait'">  
                   <md-input-container style="width:100px ">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Config" placeholder="Delay time (milisec)" >
+                      <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config" placeholder="Delay time (milisec)" >
                   </md-input-container>
                   <p>
                   <md-input-container class="node-transition-field">
-                      <input mdInput [value]="node.SuccessTransition" placeholder="Success node" >
+                      <input mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success node" >
                   </md-input-container>
                   </p>
             </div>
@@ -63,6 +66,43 @@
                       <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
                   </md-input-container>
                   </p>
+                      <md-select #nodeTypeInput class="value-selector" placeholder="Value type"[(ngModel)]="flow.Nodes[index].Config.ValueType" >
+                        <md-option value = "">The same as input </md-option>
+                        <md-option value = "string">string</md-option>
+                        <md-option value = "bool">bool</md-option>
+                        <md-option value = "int">int</md-option>
+                        <md-option value = "float">float</md-option>
+                      </md-select>
+                   <div [ngSwitch]="flow.Nodes[index].Config.ValueType">  
+                    <div *ngSwitchCase="'string'">
+                      <md-input-container class="node-transition-field">
+                          <input mdInput [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
+                      </md-input-container>
+                    </div>
+                    <div *ngSwitchCase="'int'">
+                      <md-input-container class="node-transition-field">
+                          <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
+                      </md-input-container>
+                    </div>
+                    <div *ngSwitchCase="'float'">
+                      <md-input-container class="node-transition-field">
+                          <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
+                      </md-input-container>
+                    </div>
+                    <div *ngSwitchCase="''">
+                      
+                    </div>
+                    <div *ngSwitchCase="'bool'">
+                      <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="flow.Nodes[index].Config.Value">
+                        <md-radio-button class="example-radio-button" [value] = "true">
+                          true (On)
+                        </md-radio-button>
+                        <md-radio-button class="example-radio-button" [value] = "false">
+                          false (Off)
+                        </md-radio-button>
+                      </md-radio-group>
+                    </div>
+                  </div>    
                   <p>
                   <md-input-container class="node-transition-field">
                       <input mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success" >
@@ -73,17 +113,53 @@
                   </p>
             </div>
             <div *ngSwitchCase="'if'">  
-                  <p *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
-                    <md-input-container style="width: 60px">
-                      <input mdInput [(ngModel)]="exp.Operand" placeholder="flow.Nodes[index].Config.Expression[index2].Operand" >
-                    </md-input-container>
-                    <md-input-container style="width: 60px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="Value" >
-                    </md-input-container>
-                    <md-input-container style="width: 60px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].ValueType" placeholder="ValueType" >
-                    </md-input-container>
-                  </p>
+                  <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
+                    
+                    <md-select style="width: 120px" class="value-selector" placeholder="Operand"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].Operand" >
+                        <md-option value = "gt">greater</md-option>
+                        <md-option value = "lt">less</md-option>
+                        <md-option value = "eq">equals</md-option>
+                    </md-select>
+                    
+                   
+                    <md-select style="width: 120px" class="value-selector" placeholder="Value type" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].ValueType" >
+                        <md-option value = "string">string</md-option>
+                        <md-option value = "bool">bool</md-option>
+                        <md-option value = "int">int</md-option>
+                        <md-option value = "float">float</md-option>
+                     </md-select>
+                    
+                     <span [ngSwitch]="flow.Nodes[index].Config.Expression[index2].ValueType">  
+                      <span *ngSwitchCase="'string'">
+                        <md-input-container class="node-transition-field">
+                            <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                        </md-input-container>
+                      </span>
+                      <span *ngSwitchCase="'int'">
+                        <md-input-container class="node-transition-field">
+                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                        </md-input-container>
+                      </span>
+                      <span *ngSwitchCase="'float'">
+                        <md-input-container class="node-transition-field">
+                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                        </md-input-container>
+                      </span>
+                      
+                      <span *ngSwitchCase="'bool'">
+                        <md-radio-group class="example-radio-group" placeholder="value" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value">
+                          <md-radio-button class="example-radio-button" [value] = "true">
+                            true (On)
+                          </md-radio-button>
+                          <md-radio-button class="example-radio-button" [value] = "false">
+                            false (Off)
+                          </md-radio-button>
+                        </md-radio-group>
+                      </span>
+                    </span>   
+                     
+
+                  </div>
                   <p>
                   <md-input-container class="node-transition-field">
                       <input mdInput [(ngModel)]="flow.Nodes[index].Config.TrueTransition" placeholder="True node" >
@@ -95,7 +171,8 @@
             </div>
          </div>
          <md-card-actions>
-          <button md-raised-button (click)="deleteNode(node.Id)"  >Delete</button>
+          <button md-raised-button (click)="cloneNode(node)" >Clone</button>
+          <button md-raised-button (click)="deleteNode(node)" >Delete</button>
         </md-card-actions>
        </md-card>
 
@@ -103,14 +180,16 @@
     </md-card-content>
     
     <md-card-actions>
-      <md-select placeholder="Node Type">
-        <md-option>trigger</md-option>
-        <md-option>action</md-option>
-        <md-option>wait</md-option>
-        <md-option>if</md-option>
+      <md-select #nodeTypeInput placeholder="Node Type"[(ngModel)]="selectedNewNodeType" >
+        <md-option value = "trigger">trigger</md-option>
+        <md-option value = "action">action</md-option>
+        <md-option value = "wait">wait</md-option>
+        <md-option value = "if">if</md-option>
       </md-select>
-      <button md-raised-button (click)="Add()" color="primary" >Add</button>
+      <button md-raised-button (click)="addNode()" color="primary" >Add</button>
       <button md-raised-button (click)="saveFlow()" color="primary" >Save</button>
+      <button md-raised-button (click)="showSource()" color="primary" >Show source</button>
+
     </md-card-actions>
   </md-card>
 

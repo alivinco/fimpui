@@ -22,6 +22,8 @@ type Flow struct {
 	msgTransport        *fimpgo.MqttTransport `json:"-"`
 	activeSubscriptions []string              `json:"-"`
 	msgInStream         MsgPipeline           `json:"-"`
+	TriggerCounter      int64				  `json:"-"`
+	ErrorCounter        int64				  `json:"-"`
 }
 
 func NewFlow(Id string, globalContext *Context, msgTransport *fimpgo.MqttTransport) *Flow {
@@ -48,8 +50,16 @@ func (fl *Flow) AddNode(node MetaNode) {
 	fl.Nodes = append(fl.Nodes, node)
 }
 
-func (fl *Flow) Run() {
+func (fl *Flow) IsNodeIdValid(id NodeID) bool {
+	for i := range fl.Nodes {
+		if fl.Nodes[i].Id == id {
+			return true
+		}
+	}
+	return false
+}
 
+func (fl *Flow) Run() {
 	var transitionNode NodeID
 	for {
 		if !fl.localContext.isFlowRunning {
@@ -70,8 +80,13 @@ func (fl *Flow) Run() {
 				if !fl.localContext.isFlowRunning {
 					break
 				}
+				fl.TriggerCounter++
 				fl.currentNodeId = fl.currentNode.Id
 				transitionNode = fl.currentNode.SuccessTransition
+				if !fl.IsNodeIdValid(transitionNode) {
+					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
+					transitionNode = ""
+				}
 				log.Debug("<Flow> Transition from Trigger to node = ",transitionNode)
 			} else if fl.Nodes[i].Id == transitionNode {
 				var err error
@@ -92,7 +107,12 @@ func (fl *Flow) Run() {
 					transitionNode = fl.Nodes[i].SuccessTransition
 				} else {
 					transitionNode = fl.Nodes[i].ErrorTransition
+					fl.ErrorCounter++
 					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNode ,err)
+				}
+				if !fl.IsNodeIdValid(transitionNode) {
+					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
+					transitionNode = ""
 				}
 
 			} else if transitionNode == "" {
@@ -100,6 +120,7 @@ func (fl *Flow) Run() {
 				fl.currentNodeId = ""
 			}
 		}
+
 	}
 	log.Infof("Flow was %s stopped.", fl.Name)
 

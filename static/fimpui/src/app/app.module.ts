@@ -10,7 +10,7 @@ import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { FlowComponent } from './flow/flow.component';
-import { FlowEditorComponent } from './flow-editor/flow-editor.component';
+import { FlowEditorComponent ,FlowSourceDialog } from './flow-editor/flow-editor.component';
 
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
@@ -59,7 +59,8 @@ export const MQTT_SERVICE_OPTIONS = {
   connectOnCreate: true,
   hostname:mqttHost,
   port: mqttPort,
-  path: '/mqtt'
+  path: '/mqtt',
+ 
 };
 
 export function mqttServiceFactory() {
@@ -76,6 +77,7 @@ export function mqttServiceFactory() {
     FlowComponent,
     FlowEditorComponent,
     AddDeviceDialog,
+    FlowSourceDialog,
     TimelineComponent,
     ThingViewComponent,
     ThingsTableComponent,
@@ -100,7 +102,7 @@ export function mqttServiceFactory() {
     
   ],
   providers: [FimpService,ThingsDbService],
-  entryComponents:[AddDeviceDialog],
+  entryComponents:[AddDeviceDialog,FlowSourceDialog],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

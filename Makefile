@@ -1,4 +1,4 @@
-version="0.0.7"
+version="0.0.8"
 version_file=VERSION
 working_dir=$(shell pwd)
 
@@ -44,5 +44,7 @@ tar-arm: build-js build-go-arm package-deb-doc
 	@echo "The application was packaged into tar archive "
 
 make-arm : build-js build-go-arm package-deb-doc
+
+make-mac : build-js build-go
 
 .phony : clean

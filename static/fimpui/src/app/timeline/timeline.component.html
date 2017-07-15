@@ -20,7 +20,10 @@
         <ngx-datatable-row-detail [rowHeight]="100" #myDetailRow  >
           <ng-template let-row="row" ngx-datatable-row-detail-template>
             <div style="padding-left:35px;">
-              <div><strong>Message:</strong></div>
+              <div><strong>Topic :</strong> {{row.topic}}</div>
+              <div><strong>Service :</strong> {{row.service}}</div>
+              <div><strong>Interface :</strong> {{row.mtype}}</div>
+              <div><strong>Message :</strong></div>
               <div>{{row.raw}}</div>
             </div>
           </ng-template>

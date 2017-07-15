@@ -5,5 +5,7 @@
     "/etc/service/vinculum/log/main/current"
   ],
   "report_log_size_limit":500000,
-  "vinculum_address":"localhost:1989"
+  "vinculum_address":"localhost:1989",
+  "mqtt_server_uri":"tcp://localhost:1883",
+  "flow_storage_dir":"./flow_storage"
 }

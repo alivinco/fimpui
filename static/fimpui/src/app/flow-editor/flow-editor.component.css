@@ -12,6 +12,11 @@
   margin-bottom: 20px;
   
 }
+.value-selector {
+  /*padding: 0px;*/
+  margin-bottom: 10px;
+  width:200px;
+}
 .example-header-image {
   background-size: cover;
 }
@@ -28,4 +33,7 @@
 }
 .node-label-field {
     width: 270px;
+}
+.node-transition-field {
+    width: 100x;
 }

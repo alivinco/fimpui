@@ -25,3 +25,4 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 	}
 	return nil
 }
+

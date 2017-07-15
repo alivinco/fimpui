@@ -139,7 +139,15 @@ func main() {
 		return c.JSON(http.StatusOK, resp)
 	})
 	e.GET("/fimp/flow/definition/:id", func(c echo.Context) error {
-		resp := flowManager.GetFlowById(c.Param("id"))
+		id := c.Param("id")
+		var resp *flow.Flow
+		if id == "-" {
+			flow := flowManager.GenerateNewFlow()
+			resp = &flow;
+		}else {
+			resp = flowManager.GetFlowById(id)
+		}
+
 		return c.JSON(http.StatusOK, resp)
 	})
 
@@ -152,7 +160,11 @@ func main() {
 		flowManager.UpdateFlowFromJsonAndSaveToStorage(id,body)
 		return c.NoContent(http.StatusOK)
 	})
-
+	e.DELETE("/fimp/flow/definition/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		flowManager.DeleteFlow(id)
+		return c.NoContent(http.StatusOK)
+	})
 
 	index := "static/fimpui/dist/index.html"
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
@@ -166,6 +178,8 @@ func main() {
 	e.File("/fimp/settings", index)
 	e.File("/fimp/timeline", index)
 	e.File("/fimp/ikea-man", index)
+	e.File("/fimp/flow", index)
+	e.File("/fimp/flow/flow-editor/*", index)
 	e.File("/fimp/flight-recorder", index)
 	e.File("/fimp/thing-view/*", index)
 	e.Static("/fimp/static", "static/fimpui/dist/")

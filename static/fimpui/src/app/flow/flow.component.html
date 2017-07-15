@@ -8,14 +8,14 @@
     <md-card-content>
          
    <table>
-      <thead><tr><th style="width: 70px">Flow Id</th><th style="width: 150px">Name</th><th style="width: 150px">Description</th><th style="width: 150px">Actions</th></tr> </thead>
+      <thead><tr><th style="width: 130px">Flow Id</th><th style="width: 150px">Name</th><th style="width: 70px">Executed</th><th style="width: 70px">Errors</th><th style="width: 250px">Description</th><th style="width: 150px">Actions</th></tr> </thead>
       <tbody>
       <tr *ngFor="let flow of flows">
-          <td> {{flow.Id}}</td> <td> {{flow.Name}}</td> <td> {{flow.Description}}</td> <td>
+          <td> {{flow.Id}}</td> <td> {{flow.Name}}</td><td> {{flow.TriggerCounter}}</td> <td> {{flow.ErrorCounter}}</td> <td> {{flow.Description}}</td> <td>
              
              <md-chip-list>
              <md-chip class="open-chip" [routerLink]="['/flow-editor',flow.Id]">Open</md-chip>
-             <md-chip color="warn" (click)="replaceDevice(flow.Id)">Delete</md-chip>
+             <md-chip color="warn" (click)="deleteFlow(flow.Id)">Delete</md-chip>
              </md-chip-list>
           </td>
           </tr>
@@ -24,7 +24,8 @@
 
     </md-card-content>
     <md-card-actions>
-      <button md-raised-button (click)="addDevice(True)" color="primary" > Add new flow</button>
+      <button md-raised-button [routerLink]="['/flow-editor','-']" color="primary" > Add new flow</button>
+      <button md-raised-button (click)="loadListOfFlows()">Refresh</button>
     </md-card-actions>
   </md-card>
 

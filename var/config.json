@@ -6,6 +6,6 @@
   ],
   "report_log_size_limit":500000,
   "vinculum_address":"localhost:1989",
-  "mqtt_server_uri":"tcp://localhost:1883",
+  "mqtt_server_uri":"tcp://172.16.118.145:1883",
   "flow_storage_dir":"./var/flow_storage"
 }
