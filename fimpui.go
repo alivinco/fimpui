@@ -63,13 +63,19 @@ func main() {
 	//---------THINGS REGISTRY-------------
 	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
 	//-------------------------------------
+	//---------REGISTRY INTEGRATION--------
+	mqttRegInt := registry.NewMqttIntegration(configs,thingRegistryStore)
+	mqttRegInt.InitMessagingTransport()
+	//-------------------------------------
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
 	err = vinculumClient.Connect()
 	if err != nil {
 		fmt.Println("Vinculum is not connected")
 	}
 
+	//---------GOOGLE OBJECT STORE---------
 	objectStorage, _ := logexport.NewGcpObjectStorage("fh-cube-log")
+	//-------------------------------------
 	sysInfo := SystemInfo{}
 	versionFile, err := ioutil.ReadFile("VERSION")
 	if err == nil {
@@ -105,6 +111,16 @@ func main() {
 	e.GET("/fimp/registry/things", func(c echo.Context) error {
 		things := thingRegistryStore.GetAllThings()
 		return c.JSON(http.StatusOK, things)
+	})
+
+	e.GET("/fimp/registry/services", func(c echo.Context) error {
+		services := thingRegistryStore.GetAllServices()
+		return c.JSON(http.StatusOK, services)
+	})
+
+	e.GET("/fimp/registry/locations", func(c echo.Context) error {
+		locations := thingRegistryStore.GetAllLocations()
+		return c.JSON(http.StatusOK, locations)
 	})
 
 	e.GET("/fimp/registry/thing/:tech/:address", func(c echo.Context) error {

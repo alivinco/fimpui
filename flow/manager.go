@@ -36,7 +36,8 @@ func NewManager(config *model.FimpUiConfigs) *Manager {
 }
 
 func (mg *Manager) InitMessagingTransport() {
-	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, "flow_manager", "", "", true, 1, 1)
+	clientId := mg.config.MqttClientIdPrefix+"flow_manager"
+	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, clientId, "", "", true, 1, 1)
 	err := mg.msgTransport.Start()
 	log.Info("<FlMan> Mqtt transport connected")
 	if err != nil {

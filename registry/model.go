@@ -2,42 +2,58 @@ package registry
 
 type ID int
 
-type ThingRegistry []Thing
+type ThingRegistry struct {
+	Things []Thing
+	Locations []Location
+}
 
 type Thing struct {
-	Id             ID     `json:"id"`
-	Address        string `json:"address"`
-	ProductHash    string `json:"productHash"`
-	Alias          string `json:"alias"`
-	CommTechnology string `json:"commTech"`
-	ProductId      string `json:"productId"`
-	DeviceId       string `json:"deviceId"`
-	HwVersion      string `json:"hwVersion"`
-	SwVersion      string `json:"swVersion"`
-	PowerSource    string  `json:"powerSource"`
-	Tags           []string
-	Type           string
-	Location       string
+	Id             ID        `json:"id"`
+	IntegrationId  string    `json:"integr_id"`
+	Address        string    `json:"address"`
+	Type           string    `json:"type"`
+	ProductHash    string    `json:"product_hash"`
+	Alias          string    `json:"alias"`
+	CommTechnology string    `json:"comm_tech"`
+	ProductId      string    `json:"product_id"`
+	DeviceId       string    `json:"device_id"`
+	HwVersion      string    `json:"hw_ver"`
+	SwVersion      string    `json:"sw_ver"`
+	PowerSource    string    `json:"power_source"`
+	Tags           []string  `json:"tags"`
+	LocationId     string    `json:"locationId"`
 	Services       []Service `json:"services"`
-	Props          []string
+	Props          []string  `json:"props"`
 }
 
 type Service struct {
-	Id         ID
-	Name       string `json:"name"`
-	Alias      string
-	Address    string  `json:"address"`
-	Groups     []string `json:"groups"`
-	Location   string
-	Props      map[string]string `json:"props"`
-	Tags       []string
-	Interfaces []Interface `json:"interfaces"`
+	Id            ID                     `json:"id"`
+	IntegrationId string                 `json:"integr_id"`
+	Name          string                 `json:"name"`
+	Alias         string                 `json:"alias"`
+	Address       string                 `json:"address"`
+	Groups        []string               `json:"groups"`
+	LocationId    string                 `json:"location_id"`
+	Props         map[string]interface{} `json:"props"`
+	Tags          []string               `json:"tags"`
+	Interfaces    []Interface            `json:"interfaces"`
 }
 
 type Interface struct {
-	Type      string `json:"type"`
-	MsgType   string `json:"msgType"`
-	valueType string	`json:"valueType"`
-	lastValue interface{}
-	version   string
+	Type      string      `json:"intf_t"`
+	MsgType   string      `json:"msg_t"`
+	valueType string      `json:"val_t"`
+	lastValue interface{} `json:"last_val"`
+	version   string      `json:"ver"`
+}
+
+type Location struct {
+	Id             ID         `json:"id"`
+	IntegrationId  string     `json:"integr_id"`
+	Type           string     `json:"type"`
+	Alias          string     `json:"alias"`
+	Address        string     `json:"address"`
+	Image          string     `json:"image"`
+	ChildLocations []Location `json:"child_locations"`
+	State          string     `json:"state"`
 }

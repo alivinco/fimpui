@@ -14,6 +14,7 @@ type Data struct {
 type Param struct {
 	Components []string `json:"components"`
 	Device     []Device `json:"device,omitempty"`
+	Room	   []Room  	`json:"room,omitempty"`
 	House      House    `json:"house,omitempty"`
 }
 
@@ -46,9 +47,9 @@ type Device struct {
 	ID            int         `json:"id"`
 	Lrn           bool        `json:"lrn"`
 	Model         string      `json:"model"`
-	Param         interface{} `json:"param"`
+	Param         map[string]interface{} `json:"param"`
 	Problem       bool        `json:"problem"`
-	Room          interface{} `json:"room"`
+	Room          int         `json:"room"`
 }
 
 type House struct {
@@ -56,4 +57,11 @@ type House struct {
 	Mode     string      `json:"mode"`
 	Time     time.Time   `json:"time"`
 	Uptime   int         `json:"uptime"`
+}
+
+type Room struct {
+	ID            int         `json:"id"`
+	Param         interface{} `json:"param"`
+	Client        Client      `json:"client"`
+
 }

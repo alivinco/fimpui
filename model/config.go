@@ -6,4 +6,5 @@ type FimpUiConfigs struct {
 	VinculumAddress    string   `json:"vinculum_address"`
 	MqttServerURI      string   `json:"mqtt_server_uri"`
 	FlowStorageDir     string 	`json:"flow_storage_dir"`
+	MqttClientIdPrefix string   `json:"mqtt_client_id_prefix"`
 }
