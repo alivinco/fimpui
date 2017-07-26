@@ -1,12 +1,12 @@
 package mqtt
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo"
 	"net"
 	"net/http"
 	//"encoding/hex"
+	log "github.com/Sirupsen/logrus"
 	"io"
 )
 
@@ -26,11 +26,11 @@ type WsUpgrader struct {
 func (wu *WsUpgrader) Upgrade(c echo.Context) error {
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Error("<MqWsProxy> Can't upgrade . Error:", err)
 		return err
 	}
 
-	fmt.Println("Upgraded ")
+	log.Info("<MqWsProxy> Upgraded ")
 	session := MqttWsProxySession{wsConn: ws}
 	session.Connect(wu.BrokerAddress)
 	session.WsReader()
@@ -46,7 +46,7 @@ func (mp *MqttWsProxySession) Connect(address string) error {
 	var err error
 	mp.brokerConn, err = net.Dial("tcp", address)
 	if err != nil {
-		fmt.Println("Can't connect to broker error :", err)
+		log.Error("<MqWsProxy> Can't connect to broker . Error :", err)
 		return err
 	}
 	go mp.brokerReader()
@@ -59,18 +59,18 @@ func (mp *MqttWsProxySession) WsReader() {
 	for {
 		msgType, msg, err := mp.wsConn.ReadMessage()
 		if err != nil {
-			fmt.Println("Read error :", err)
+			log.Error("<MqWsProxy> Read error :", err)
 			break
 		} else if msgType == websocket.BinaryMessage {
 			//fmt.Println("Sending packet WS -> broker")
 			//fmt.Printf("%s", hex.Dump(msg))
 			mp.brokerConn.Write(msg)
 		} else {
-			fmt.Println(" Message with type = ", msgType)
+			log.Debug(" Message with type = ", msgType)
 		}
 
 	}
-	fmt.Println("Loop Kaput")
+	log.Info("<MqWsProxy> Quit from WsReader loop")
 }
 
 func (mp *MqttWsProxySession) brokerReader() {
@@ -80,7 +80,7 @@ func (mp *MqttWsProxySession) brokerReader() {
 		// reading header byte
 		_, err := io.ReadFull(mp.brokerConn, packet)
 		if err != nil {
-			fmt.Println("Can't read packets from broker error =", err)
+			log.Error("<MqWsProxy> Can't read packets from broker error =", err)
 			break
 		}
 		// reading length bytes
@@ -92,11 +92,11 @@ func (mp *MqttWsProxySession) brokerReader() {
 			io.ReadFull(mp.brokerConn, payload)
 			packet = append(packet, payload...)
 		} else {
-			fmt.Println("Empty payload")
+			log.Debug("<MqWsProxy> Empty payload")
 		}
 		err = mp.wsConn.WriteMessage(websocket.BinaryMessage, packet)
 		if err != nil {
-			fmt.Println("Write error :", err)
+			log.Error("<MqWsProxy> Write error :", err)
 			mp.wsConn.Close()
 			break
 		}

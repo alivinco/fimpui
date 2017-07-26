@@ -27,6 +27,30 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 		log.Errorf("Vinculum client error :",err)
 		return err
 	}
+
+	rooms := msg.Msg.Data.Param.Room
+	for i := range rooms {
+		location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(rooms[i].ID))
+		if location == nil {
+			newLocation := registry.Location{}
+			newLocation.IntegrationId = strconv.Itoa(rooms[i].ID)
+			if rooms[i].Client.Name == "" {
+				newLocation.Alias = rooms[i].Type
+			}else {
+				newLocation.Alias = rooms[i].Client.Name
+			}
+			newLocation.Type = "room"
+			thingRegistryStore.UpsertLocation(newLocation)
+		} else {
+			if rooms[i].Client.Name == "" {
+				location.Alias = rooms[i].Type
+			}else {
+				location.Alias = rooms[i].Client.Name
+			}
+			thingRegistryStore.SaveThingRegistry()
+		}
+	}
+
 	devices := msg.Msg.Data.Param.Device
 	for i := range devices {
 		if devices[i].Fimp.Address != "" {
@@ -49,6 +73,10 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 								if thing.Services[si].Name == vincToServiceNameMap[k] {
 									thing.Services[si].IntegrationId = strconv.Itoa(devices[i].ID)
 									thing.Services[si].Alias = devices[i].Client.Name
+									location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
+									if location != nil {
+										thing.Services[si].LocationId = location.Id
+									}
 								}
 							}
 						}
@@ -61,20 +89,7 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 		}
 	}
 
-	rooms := msg.Msg.Data.Param.Room
-	for i := range rooms {
-		location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(rooms[i].ID))
-		if location == nil {
-			newLocation := registry.Location{}
-			newLocation.IntegrationId = strconv.Itoa(rooms[i].ID)
-			newLocation.Alias = rooms[i].Client.Name
-			newLocation.Type = "room"
-			thingRegistryStore.UpsertLocation(newLocation)
-		} else {
-			location.Alias = rooms[i].Client.Name
-			thingRegistryStore.SaveThingRegistry()
-		}
-	}
+
 
 	return nil
 }

@@ -61,6 +61,14 @@ func (fl *Flow) IsNodeIdValid(id NodeID) bool {
 
 func (fl *Flow) Run() {
 	var transitionNode NodeID
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("<Flow> Flow process CRASHED with error : ",r)
+			log.Errorf("<Flow> Crashed while processing message from Current Node = %d Next Node = %d ",fl.currentNodeId,transitionNode)
+			transitionNode = ""
+		}
+	}()
+
 	for {
 		if !fl.localContext.isFlowRunning {
 			break

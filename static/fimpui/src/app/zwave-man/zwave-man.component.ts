@@ -1,5 +1,5 @@
-import { Component, OnInit , OnDestroy ,Input ,ChangeDetectorRef} from '@angular/core';
-import { MdDialog, MdDialogRef} from '@angular/material';
+import { Component, OnInit , OnDestroy ,Input ,ChangeDetectorRef,Inject} from '@angular/core';
+import { MdDialog, MdDialogRef,MD_DIALOG_DATA} from '@angular/material';
 import { FimpService} from '../fimp.service';
 import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -192,7 +192,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 export class AddDeviceDialog implements OnInit, OnDestroy  {
   private messages:string[]=[];
   globalSub : Subscription;
-  constructor(public dialogRef: MdDialogRef<AddDeviceDialog>,private fimp:FimpService) {
+  constructor(public dialogRef: MdDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
     
     console.log("Dialog constructor Opened");
   }
@@ -222,7 +222,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
     this.globalSub.unsubscribe();
   }
   stopInclusion(){
-    let msg  = new FimpMessage("zwave-ad","cmd.thing."+this.dialogRef.config.data,"bool",false,null,null)
+    let msg  = new FimpMessage("zwave-ad","cmd.thing."+this.data,"bool",false,null,null)
     
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
     this.dialogRef.close();

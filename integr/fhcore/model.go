@@ -63,5 +63,6 @@ type Room struct {
 	ID            int         `json:"id"`
 	Param         interface{} `json:"param"`
 	Client        Client      `json:"client"`
+	Type          string      `json:"type"`
 
 }

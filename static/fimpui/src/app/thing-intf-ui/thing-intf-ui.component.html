@@ -6,6 +6,9 @@
         <div *ngSwitchCase="'evt.binary.report'"> <md-chip-list> 
           <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
            </md-chip-list> </div>
+        <div *ngSwitchCase="'evt.open.report'"> <md-chip-list> 
+          <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
+           </md-chip-list> </div>
         <div *ngSwitchCase="'evt.config.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
             {{item.key}} = {{item.value}} 

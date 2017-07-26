@@ -15,6 +15,7 @@ export function MapFimpInclusionReportToThing(fimpMsg : FimpMessage ):Thing{
     thing.productHash = val.product_hash;
     thing.productId = val.product_id;
     thing.category = val.category;
+    thing.wakeupInterval = val.wakeup_interval;
     for (let fimpService of val.services ) {
         let service = new Service();
         service.name = fimpService.name;

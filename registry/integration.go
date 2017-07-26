@@ -32,6 +32,12 @@ func (mg *MqttIntegration) InitMessagingTransport() {
 }
 
 func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("<MqRegInt> MqttIntegration process CRASHED with error : ",r)
+			log.Errorf("<MqRegInt> Crashed while processing message from topic = %s msgType = ",r,addr.MsgType)
+		}
+	}()
 	if iotMsg.Type == "evt.thing.inclusion_report" {
 		mg.processInclusionReport(iotMsg)
 	}else if iotMsg.Type == "evt.thing.exclusion_report" {

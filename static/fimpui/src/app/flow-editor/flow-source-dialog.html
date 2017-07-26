@@ -1,3 +1,10 @@
-<pre>
-{{data}}
-</pre>
+<h1 md-dialog-title> Source </h1>
+<md-dialog-content >
+<md-input-container   style="width: 100%">
+    <textarea md-autosize  minRows="6" mdInput [(ngModel)]="flowSourceText" > </textarea> 
+</md-input-container>
+</md-dialog-content>
+<md-dialog-actions >
+<button md-raised-button color="warn" (click)="save()" >Save</button>
+<button md-raised-button md-dialog-close>Close</button>
+</md-dialog-actions>

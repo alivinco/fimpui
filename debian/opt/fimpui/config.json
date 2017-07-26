@@ -1,11 +1,13 @@
 {
   "report_log_files":[
     "/var/log/futurehome/zwave-ad/zwave-ad.log",
-    "/var/log/futurehome/zipgateway/main/current",
+    "/var/log/futurehome/zipgateway/current",
     "/etc/service/vinculum/log/main/current"
   ],
   "report_log_size_limit":500000,
   "vinculum_address":"localhost:1989",
   "mqtt_server_uri":"tcp://localhost:1883",
-  "flow_storage_dir":"./flow_storage"
+  "flow_storage_dir":"./flow_storage",
+  "log_file":"/var/log/fimpui.log",
+  "log_level":"debug"
 }

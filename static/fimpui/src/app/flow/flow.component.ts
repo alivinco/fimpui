@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Http, Response,URLSearchParams }  from '@angular/http';
 
-// export const BACKEND_ROOT = "http://localhost:8081"
-export const BACKEND_ROOT = ""
+export const BACKEND_ROOT = "http://localhost:8081"
+// export const BACKEND_ROOT = ""
 
 @Component({
   selector: 'app-flow',

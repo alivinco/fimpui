@@ -1,6 +1,6 @@
 <div class="flow-editor">
   
-  <button class="node-card" md-raised-button [routerLink]="['/flow']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Flows </button>
+  <button  style = "margin-bottom: 20px;" md-raised-button [routerLink]="['/flow']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Flows </button>
   
   <md-card class="example-card">
     <md-card-header>
@@ -17,7 +17,7 @@
       </md-input-container>
       <p>Nodes:</p>
       
-       <md-card *ngFor="let node of flow.Nodes;let index = index;trackBy:trackByIndex;" class="node-card">
+       <md-card *ngFor="let node of flow.Nodes;let index = index;trackBy:trackByIndex;" class="node-card" >
          <md-card-header id = "nodeId_{{node.Id}}">
             <md-card-title>{{ node.Label }} ( Id:{{ node.Id }} ) </md-card-title>
             <md-card-subtitle>Node type : {{ node.Type }} </md-card-subtitle>
@@ -39,78 +39,26 @@
                   </md-input-container>
                   </p>
                   <p>
-                    <md-input-container class="node-transition-field">
-                      <input #nodeIdInput mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success node" >
-                    </md-input-container>
+                    <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >
+                        <md-option value = "" > End! </md-option>
+                        <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+                    </md-select>
                   </p>
+                  <p> <button md-raised-button (click)="runFlow(node)" >Run</button> </p>
             </div>
             <div *ngSwitchCase="'wait'">  
                   <md-input-container style="width:100px ">
                       <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config" placeholder="Delay time (milisec)" >
                   </md-input-container>
                   <p>
-                  <md-input-container class="node-transition-field">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success node" >
-                  </md-input-container>
+                  <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >
+                        <md-option value = "" > End! </md-option>
+                        <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+                  </md-select>
                   </p>
             </div>
             <div *ngSwitchCase="'action'">  
-                 <p>
-                  <md-input-container style="width: 130px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Service" placeholder="Service" >
-                  </md-input-container>
-                  <md-input-container style="width: 200px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].ServiceInterface" placeholder="Interface" >
-                  </md-input-container>
-                  <md-input-container style="width: 450px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
-                  </md-input-container>
-                  </p>
-                      <md-select #nodeTypeInput class="value-selector" placeholder="Value type"[(ngModel)]="flow.Nodes[index].Config.ValueType" >
-                        <md-option value = "">The same as input </md-option>
-                        <md-option value = "string">string</md-option>
-                        <md-option value = "bool">bool</md-option>
-                        <md-option value = "int">int</md-option>
-                        <md-option value = "float">float</md-option>
-                      </md-select>
-                   <div [ngSwitch]="flow.Nodes[index].Config.ValueType">  
-                    <div *ngSwitchCase="'string'">
-                      <md-input-container class="node-transition-field">
-                          <input mdInput [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
-                      </md-input-container>
-                    </div>
-                    <div *ngSwitchCase="'int'">
-                      <md-input-container class="node-transition-field">
-                          <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
-                      </md-input-container>
-                    </div>
-                    <div *ngSwitchCase="'float'">
-                      <md-input-container class="node-transition-field">
-                          <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Value" placeholder="Default value" >
-                      </md-input-container>
-                    </div>
-                    <div *ngSwitchCase="''">
-                      
-                    </div>
-                    <div *ngSwitchCase="'bool'">
-                      <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="flow.Nodes[index].Config.Value">
-                        <md-radio-button class="example-radio-button" [value] = "true">
-                          true (On)
-                        </md-radio-button>
-                        <md-radio-button class="example-radio-button" [value] = "false">
-                          false (Off)
-                        </md-radio-button>
-                      </md-radio-group>
-                    </div>
-                  </div>    
-                  <p>
-                  <md-input-container class="node-transition-field">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].SuccessTransition" placeholder="Success" >
-                  </md-input-container>
-                  <md-input-container class="node-transition-field">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].ErrorTransition" placeholder="Error" >
-                  </md-input-container>
-                  </p>
+                 <action-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </action-node>
             </div>
             <div *ngSwitchCase="'if'">  
                   <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
@@ -160,14 +108,18 @@
                      
 
                   </div>
+                  
                   <p>
-                  <md-input-container class="node-transition-field">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.TrueTransition" placeholder="True node" >
-                  </md-input-container>
-                  <md-input-container class="node-transition-field">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Config.FalseTransition" placeholder="False node" >
-                  </md-input-container>
+                    <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="True node"[(ngModel)]="flow.Nodes[index].Config.TrueTransition" >
+                        <md-option value = "" > End! </md-option>
+                        <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+                    </md-select>
+                     <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="False node"[(ngModel)]="flow.Nodes[index].Config.FalseTransition" >
+                        <md-option value = "" > End! </md-option>
+                        <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+                    </md-select>
                   </p>
+                  
             </div>
          </div>
          <md-card-actions>

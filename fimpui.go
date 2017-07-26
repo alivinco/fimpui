@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"fmt"
-
 	"encoding/json"
 	"flag"
 	"github.com/alivinco/fimpui/integr/fhcore"
@@ -20,11 +19,36 @@ import (
 	"net/url"
 	"github.com/alivinco/fimpui/flow"
 	log "github.com/Sirupsen/logrus"
+	//"time"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 type SystemInfo struct {
 	Version string
 }
+
+// SetupLog configures default logger
+// Supported levels : info , degug , warn , error
+func SetupLog(logfile string,level string) {
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: true})
+	logLevel , err := log.ParseLevel(level)
+	if err == nil {
+		log.SetLevel(logLevel)
+	}else {
+		log.SetLevel(log.DebugLevel)
+	}
+
+	if logfile != "" {
+		l := lumberjack.Logger{
+			Filename:   logfile,
+			MaxSize:    5, // megabytes
+			MaxBackups: 2,
+		}
+		log.SetOutput(&l)
+	}
+
+}
+
 
 func startWsCoreProxy(backendUrl string) {
 	u, _ := url.Parse(backendUrl)
@@ -37,7 +61,6 @@ func startWsCoreProxy(backendUrl string) {
 }
 
 func main() {
-	log.SetLevel(log.DebugLevel)
 	configs := &model.FimpUiConfigs{}
 	var configFile string
 	flag.StringVar(&configFile, "c", "", "Config file")
@@ -52,29 +75,43 @@ func main() {
 	if err != nil {
 		panic("Can't load config file.")
 	}
+
+	SetupLog("fimpgo.log","debug")
+	log.Info("--------------Starting FIMPUI----------------")
 	//---------FLOW------------------------
+	log.Info("<main> Starting Flow manager")
 	flowManager := flow.NewManager(configs)
 	flowManager.InitMessagingTransport()
 	err = flowManager.LoadAllFlowsFromStorage()
 	if err != nil {
 		log.Error("Can't load Flows from storage . Error :",err)
 	}
+	log.Info("<main> Started")
 	//-------------------------------------
 	//---------THINGS REGISTRY-------------
+	log.Info("<main> Starting Things registry ")
 	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
+	log.Info("<main> Started ")
 	//-------------------------------------
 	//---------REGISTRY INTEGRATION--------
+	log.Info("<main> Starting MqttIntegration ")
 	mqttRegInt := registry.NewMqttIntegration(configs,thingRegistryStore)
 	mqttRegInt.InitMessagingTransport()
+	log.Info("<main> Started ")
 	//-------------------------------------
+	log.Info("<main> Starting VinculumClient ")
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
 	err = vinculumClient.Connect()
 	if err != nil {
-		fmt.Println("Vinculum is not connected")
+		log.Error("<main> Can't connect to Vinculum")
+	}else {
+		log.Info("<main> Started ")
 	}
 
 	//---------GOOGLE OBJECT STORE---------
+	log.Info("<main> Initializing Google Object Store ")
 	objectStorage, _ := logexport.NewGcpObjectStorage("fh-cube-log")
+	log.Info("<main> Done ")
 	//-------------------------------------
 	sysInfo := SystemInfo{}
 	versionFile, err := ioutil.ReadFile("VERSION")
@@ -101,7 +138,7 @@ func main() {
 		//logexport.UploadLogToGcp()
 		//files := []string {"/var/log/daily.out"}
 		hostAlias := c.QueryParam("hostAlias")
-		fmt.Println(hostAlias)
+		log.Info(hostAlias)
 		if hostAlias == "" {
 			hostAlias = "unknown"
 		}
@@ -200,5 +237,5 @@ func main() {
 	e.File("/fimp/thing-view/*", index)
 	e.Static("/fimp/static", "static/fimpui/dist/")
 	e.Logger.Debug(e.Start(":8081"))
-	fmt.Println("Exiting the app")
+	log.Info("Exiting the app")
 }

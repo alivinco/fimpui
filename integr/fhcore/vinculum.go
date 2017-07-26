@@ -42,7 +42,9 @@ func (vc *VinculumClient) Connect() error {
 			err := vc.client.ReadJSON(&vincMsg)
 
 			if err != nil {
-				fmt.Println("read:", err)
+				//if vincMsg.Msg.Data. != "notify" {
+				//	fmt.Println("read:", err)
+				//}
 				continue
 			}
 			if vincMsg.Msg.Type == "response" {

@@ -10,7 +10,8 @@ import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { FlowComponent } from './flow/flow.component';
-import { FlowEditorComponent ,FlowSourceDialog } from './flow-editor/flow-editor.component';
+import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog } from './flow-editor/flow-editor.component';
+import { FlowNodesComponent ,ActionNodeComponent } from './flow-nodes/flow-nodes.component';
 
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
@@ -77,7 +78,8 @@ export function mqttServiceFactory() {
     FlowComponent,
     FlowEditorComponent,
     AddDeviceDialog,
-    FlowSourceDialog,
+    FlowSourceDialog, 
+    FlowRunDialog,
     TimelineComponent,
     ThingViewComponent,
     ThingsTableComponent,
@@ -85,14 +87,16 @@ export function mqttServiceFactory() {
     ReportComponent,
     FlightRecorderComponent,
     ThingIntfUiComponent,
-    KeysPipe
+    KeysPipe,
+    FlowNodesComponent,
+    ActionNodeComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     BrowserAnimationsModule,
-    MaterialModule.forRoot(),
+    MaterialModule,
     MqttModule.forRoot({
       provide: MqttService,
       useFactory: mqttServiceFactory
@@ -102,7 +106,7 @@ export function mqttServiceFactory() {
     
   ],
   providers: [FimpService,ThingsDbService],
-  entryComponents:[AddDeviceDialog,FlowSourceDialog],
+  entryComponents:[AddDeviceDialog,FlowSourceDialog,FlowRunDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

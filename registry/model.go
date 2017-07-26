@@ -33,7 +33,7 @@ type Service struct {
 	Alias         string                 `json:"alias"`
 	Address       string                 `json:"address"`
 	Groups        []string               `json:"groups"`
-	LocationId    string                 `json:"location_id"`
+	LocationId    ID                 `json:"location_id"`
 	Props         map[string]interface{} `json:"props"`
 	Tags          []string               `json:"tags"`
 	Interfaces    []Interface            `json:"interfaces"`

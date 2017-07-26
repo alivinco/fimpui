@@ -1,16 +1,6 @@
-.flow-editor{
-  padding: 20px;
-}
-  
-
-.example-card {
-  width: 1000px;
-}
-
-.node-card {
+node-card {
   /*padding: 0px;*/
   margin-bottom: 20px;
-  background-color: lightgoldenrodyellow;
   
 }
 .value-selector {
@@ -37,11 +27,4 @@
 }
 .node-transition-field {
     width: 100x;
-}
-
-.source-editor {
-      width: 100%;
-     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-     box-sizing: border-box;         /* Opera/IE 8+ */
 }

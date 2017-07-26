@@ -1,10 +1,35 @@
 import { Component, OnInit,Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
-import {MdDialog, MdDialogRef} from '@angular/material';
+import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 import {MD_DIALOG_DATA} from '@angular/material';
-// export const BACKEND_ROOT = "http://localhost:8081"
-export const BACKEND_ROOT = ""
+import { FimpService } from "app/fimp.service";
+import { FimpMessage } from "app/fimp/Message";
+export const BACKEND_ROOT = "http://localhost:8081"
+// export const BACKEND_ROOT = ""
+const msgTypeToValueTypeMap = {
+  "evt.binary.report":"bool",
+  "evt.binary.set":"bool",
+  "evt.lvl.report":"int",
+  "cmd.lvl.set":"int",
+  "evt.meter.report":"float",
+  "evt.sensor.report":"float",
+  "evt.open.report":"bool",
+  "evt.presence.report":"bool",
+  "evt.alarm.report":"str_map",
+  "evt.setpoint.report":"str_map",
+  "cmd.setpoint.report":"str_map",
+  "cmd.mode.set":"string",
+  "evt.mode.report":"string",
+  "evt.state.report":"string",
+  "evt.lock.report":"bool_map",
+  "cmd.lock.set":"bool",
+  "cmd.color.set":"int_map",
+  "evt.color.report":"int_map",
+  "evt.scene.report":"string",
+
+}
+
 @Component({
   selector: 'app-flow-editor',
   templateUrl: './flow-editor.component.html',
@@ -71,6 +96,7 @@ export class FlowEditorComponent implements OnInit {
    cloneNode.Id = this.getNewNodeId();
    this.flow.Nodes.push(cloneNode);
  } 
+  
  addNode(){
     console.dir(this.selectedNewNodeType)
     let node  = new MetaNode()
@@ -111,11 +137,25 @@ export class FlowEditorComponent implements OnInit {
   }
   showSource() {
     let dialogRef = this.dialog.open(FlowSourceDialog,{
-            height: '90%',
-            width: '90%',
-            data:JSON.stringify(this.flow, null, 2)
+            // height: '95%',
+            width: '95%',
+            data:this.flow
           });
-    
+    dialogRef.afterClosed().subscribe(result => {
+      if(result)
+        this.flow = result;
+    });      
+  }
+
+  runFlow(node:MetaNode) {
+    let dialogRef = this.dialog.open(FlowRunDialog,{
+            // height: '95%',
+            width: '95%',
+            data:node
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      // this.flow = result;
+    });      
   }
 }
 
@@ -142,7 +182,34 @@ export class Flow {
 @Component({
   selector: 'flow-source-dialog',
   templateUrl: 'flow-source-dialog.html',
+  styleUrls: ['flow-editor.component.css']
 })
 export class FlowSourceDialog {
-  constructor(@Inject(MD_DIALOG_DATA) public data: any) {}
+  flowSourceText :string ;
+  constructor(public dialogRef: MdDialogRef<FlowSourceDialog>,@Inject(MD_DIALOG_DATA) public data: Flow) {
+    this.flowSourceText = JSON.stringify(data, null, 2)
+  }
+  save(){
+    this.data = JSON.parse(this.flowSourceText)
+    this.dialogRef.close(this.data);
+    
+  }
+}
+
+@Component({
+  selector: 'flow-run-dialog',
+  templateUrl: 'flow-run-dialog.html',
+})
+export class FlowRunDialog {
+  constructor(public dialogRef: MdDialogRef<FlowRunDialog>,@Inject(MD_DIALOG_DATA) public data: MetaNode,private fimp:FimpService,public snackBar: MdSnackBar) {
+
+    data.Config = {"Value":true,"ValueType":msgTypeToValueTypeMap[data.ServiceInterface]}
+    // console.dir(data)
+  }
+  
+  run(){
+    let msg  = new FimpMessage(this.data.Service,this.data.ServiceInterface,this.data.Config.ValueType,this.data.Config.Value,null,null)
+    this.fimp.publish(this.data.Address,msg.toString());
+    let snackBarRef = this.snackBar.open('Message was sent',"",{duration:1000});
+  }
 }
