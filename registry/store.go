@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type ThingRegistryStore struct {
@@ -148,6 +149,51 @@ func (st *ThingRegistryStore) GetLocationByIntegrationId(id string) *Location {
 	return nil
 }
 
+func (st *ThingRegistryStore) GetFlatInterfaces() []InterfaceFlatView {
+	var result []InterfaceFlatView
+	for thi := range st.thingRegistry.Things {
+		for si := range st.thingRegistry.Things[thi].Services {
+			for inti := range st.thingRegistry.Things[thi].Services[si].Interfaces{
+				flatIntf := InterfaceFlatView{}
+				flatIntf.ThingId = st.thingRegistry.Things[thi].Id
+				flatIntf.ThingAddress = st.thingRegistry.Things[thi].Address
+				flatIntf.ThingAlias = st.thingRegistry.Things[thi].Alias
+				flatIntf.ServiceId = st.thingRegistry.Things[thi].Services[si].Id
+				flatIntf.ServiceName = st.thingRegistry.Things[thi].Services[si].Name
+				flatIntf.ServiceAlias = st.thingRegistry.Things[thi].Services[si].Alias
+				flatIntf.ServiceAddress = st.thingRegistry.Things[thi].Services[si].Address
+				flatIntf.InterfaceType = st.thingRegistry.Things[thi].Services[si].Interfaces[inti].Type
+				flatIntf.InterfaceMsgType = st.thingRegistry.Things[thi].Services[si].Interfaces[inti].MsgType
+				//pt:j1/mt:evt/rt:dev/rn:zw/ad:1/sv:meter_elec/ad:21_0
+				prefix := "pt:j1/mt:evt"
+				if strings.Contains(prefix+st.thingRegistry.Things[thi].Services[si].Interfaces[inti].MsgType,"cmd"){
+					prefix = "pt:j1/mt:cmd"
+				}
+				flatIntf.InterfaceAddress = prefix+st.thingRegistry.Things[thi].Services[si].Address
+				location := st.GetLocationById(st.thingRegistry.Things[thi].Services[si].LocationId)
+				if location != nil {
+					flatIntf.LocationId = location.Id
+					flatIntf.LocationAlias = location.Alias
+					flatIntf.LocationType = location.Type
+
+				}
+				location = st.GetLocationById(st.thingRegistry.Things[thi].LocationId)
+				if location != nil {
+					if location.Alias != flatIntf.LocationAlias{
+						flatIntf.LocationAlias = location.Alias +" "+flatIntf.LocationAlias
+					}
+					if flatIntf.LocationType == "" {
+						flatIntf.LocationType = location.Type
+					}
+				}
+
+				result = append(result,flatIntf)
+			}
+		}
+	}
+	return result
+}
+
 func (st *ThingRegistryStore) UpsertThing(thing Thing) error {
 	exThing, err := st.GetThingByAddress(thing.CommTechnology, thing.Address)
 	if err != nil {
@@ -169,7 +215,7 @@ func (st *ThingRegistryStore) UpsertLocation(location Location) error {
 	exLocation := st.GetLocationById(location.Id)
 
 	if exLocation == nil {
-		location.Id = st.getNewId()
+		location.Id = st.getNewLocationId()
 		st.thingRegistry.Locations = append(st.thingRegistry.Locations, location)
 	} else {
 		location.Id = location.Id

@@ -5,30 +5,8 @@ import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 import {MD_DIALOG_DATA} from '@angular/material';
 import { FimpService } from "app/fimp.service";
 import { FimpMessage } from "app/fimp/Message";
-export const BACKEND_ROOT = "http://localhost:8081"
-// export const BACKEND_ROOT = ""
-const msgTypeToValueTypeMap = {
-  "evt.binary.report":"bool",
-  "evt.binary.set":"bool",
-  "evt.lvl.report":"int",
-  "cmd.lvl.set":"int",
-  "evt.meter.report":"float",
-  "evt.sensor.report":"float",
-  "evt.open.report":"bool",
-  "evt.presence.report":"bool",
-  "evt.alarm.report":"str_map",
-  "evt.setpoint.report":"str_map",
-  "cmd.setpoint.report":"str_map",
-  "cmd.mode.set":"string",
-  "evt.mode.report":"string",
-  "evt.state.report":"string",
-  "evt.lock.report":"bool_map",
-  "cmd.lock.set":"bool",
-  "cmd.color.set":"int_map",
-  "evt.color.report":"int_map",
-  "evt.scene.report":"string",
-
-}
+import { msgTypeToValueTypeMap } from "app/things-db/mapping";
+import { BACKEND_ROOT } from "app/globals";
 
 @Component({
   selector: 'app-flow-editor',
@@ -146,7 +124,24 @@ export class FlowEditorComponent implements OnInit {
         this.flow = result;
     });      
   }
+  serviceLookupDialog(nodeId:string) {
+    let dialogRef = this.dialog.open(ServiceLookupDialog,{
+            width: '95%'
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+        this.flow.Nodes.forEach(element => {
+            if (element.Id==nodeId) {
+              element.Service = result.service_name
+              element.ServiceInterface = result.intf_msg_type
+              element.Address = result.intf_address
+              element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
+            }
+        });
 
+
+    });      
+  }
   runFlow(node:MetaNode) {
     let dialogRef = this.dialog.open(FlowRunDialog,{
             // height: '95%',
@@ -211,5 +206,37 @@ export class FlowRunDialog {
     let msg  = new FimpMessage(this.data.Service,this.data.ServiceInterface,this.data.Config.ValueType,this.data.Config.Value,null,null)
     this.fimp.publish(this.data.Address,msg.toString());
     let snackBarRef = this.snackBar.open('Message was sent',"",{duration:1000});
+  }
+}
+
+@Component({
+  selector: 'service-lookup-dialog',
+  templateUrl: 'service-lookup-dialog.html',
+  styleUrls: ['./flow-editor.component.css']
+})
+export class ServiceLookupDialog {
+  interfaces :any;
+  constructor(public dialogRef: MdDialogRef<ServiceLookupDialog>,private http : Http) {
+    this.http
+      .get(BACKEND_ROOT+'/fimp/registry/interfaces')
+      .map(function(res: Response){
+        let body = res.json();
+        let filteredBody = [];
+        body.forEach(element => {
+          if (element.service_name!="dev_sys"){
+            filteredBody.push(element);
+          }
+        });
+        return filteredBody;
+      }).subscribe ((result) => {
+         this.interfaces = result;
+      });
+    
+    // console.dir(data)
+  }
+  
+  select(intf :any){
+    this.dialogRef.close(intf);
+
   }
 }

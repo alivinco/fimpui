@@ -9,6 +9,7 @@
         <md-input-container style="width: 450px">
             <input mdInput [(ngModel)]="node.Address" placeholder="Address">
         </md-input-container>
+        <button md-raised-button (click)="serviceLookupDialog(node.Id)" >Lookup</button>
     </p>
     <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueType">
         <md-option value="">The same as input </md-option>

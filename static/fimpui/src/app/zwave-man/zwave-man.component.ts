@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs/Subscription';
 import {Router} from '@angular/router';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
 import { Http, Response,URLSearchParams }  from '@angular/http';
+import { BACKEND_ROOT } from "app/globals";
 import {
   MqttMessage,
   MqttModule,
@@ -85,7 +86,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 
   loadThingsFromRegistry() {
      this.http
-      .get('/fimp/registry/things')
+      .get(BACKEND_ROOT+'/fimp/registry/interfaces')
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);
@@ -95,8 +96,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
          for(let node of this.nodes) {
            for (let thing of result) {
               // change node.id to node.address
-               if (node.address == thing.address) {
-                  node["alias"] = thing.alias
+               if (node.address == thing.thing_address) {
+                  node["alias"] = thing.location_alias + thing.thing_alias
                }
            }
          }
@@ -105,7 +106,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   vinculumSync(){
     this.http
-      .get('/fimp/vinculum/import_to_registry')
+      .get(BACKEND_ROOT+'/fimp/vinculum/import_to_registry')
       .subscribe ((result) => {
          console.log("Synced");
          this.reloadNodes();

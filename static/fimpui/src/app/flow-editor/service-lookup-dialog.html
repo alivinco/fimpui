@@ -1,0 +1,28 @@
+<h1 md-dialog-title>Service selector</h1>
+<md-dialog-content>
+    <table>
+        <thead>
+            <tr><th style="width: 160px">Location</th>
+                <th style="width: 160px">Name</th>
+                <th style="width: 160px">Service</th>
+                <th style="width: 200px">Interface</th>
+                <th style="width: 100px">Thing addr.</th>
+                <th style="width: 100px"></th>
+            </tr>
+        </thead>
+        <tbody>
+             <tr *ngFor="let intf of interfaces" > 
+                 <td>{{ intf.location_alias }}</td>
+                 <td>{{ intf.service_alias }} </td>
+                 <td>{{ intf.service_name }}</td>
+                 <td>{{ intf.intf_msg_type }} </td>
+                 <td>{{ intf.thing_address }} </td>
+                 <td><md-chip-list><md-chip (click)="select(intf)">Select</md-chip> </md-chip-list> </td>
+             </tr>    
+        </tbody>
+    </table> 
+
+</md-dialog-content>
+<md-dialog-actions>
+<button md-raised-button md-dialog-close>Close</button>
+</md-dialog-actions> 

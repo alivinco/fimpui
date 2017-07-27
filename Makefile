@@ -1,4 +1,4 @@
-version="0.0.8"
+version="0.0.10"
 version_file=VERSION
 working_dir=$(shell pwd)
 

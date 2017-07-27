@@ -50,12 +50,21 @@ func (fl *Flow) AddNode(node MetaNode) {
 	fl.Nodes = append(fl.Nodes, node)
 }
 
-func (fl *Flow) IsNodeIdValid(id NodeID) bool {
+func (fl *Flow) IsNodeIdValid(currentNodeId NodeID, transitionNodeId NodeID) bool {
+	if transitionNodeId == ""{
+		return true
+	}
+
+	if currentNodeId == transitionNodeId {
+		log.Error("Transition node can't be the same as current")
+		return false
+	}
 	for i := range fl.Nodes {
-		if fl.Nodes[i].Id == id {
+		if fl.Nodes[i].Id == transitionNodeId {
 			return true
 		}
 	}
+	log.Error("<Flow> Transition node doesn't exist")
 	return false
 }
 
@@ -91,7 +100,7 @@ func (fl *Flow) Run() {
 				fl.TriggerCounter++
 				fl.currentNodeId = fl.currentNode.Id
 				transitionNode = fl.currentNode.SuccessTransition
-				if !fl.IsNodeIdValid(transitionNode) {
+				if !fl.IsNodeIdValid(fl.currentNodeId,transitionNode) {
 					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
 					transitionNode = ""
 				}
@@ -118,7 +127,7 @@ func (fl *Flow) Run() {
 					fl.ErrorCounter++
 					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNode ,err)
 				}
-				if !fl.IsNodeIdValid(transitionNode) {
+				if !fl.IsNodeIdValid(fl.currentNodeId,transitionNode) {
 					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
 					transitionNode = ""
 				}

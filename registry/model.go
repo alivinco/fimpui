@@ -3,7 +3,7 @@ package registry
 type ID int
 
 type ThingRegistry struct {
-	Things []Thing
+	Things    []Thing
 	Locations []Location
 }
 
@@ -21,7 +21,7 @@ type Thing struct {
 	SwVersion      string    `json:"sw_ver"`
 	PowerSource    string    `json:"power_source"`
 	Tags           []string  `json:"tags"`
-	LocationId     string    `json:"locationId"`
+	LocationId     ID        `json:"location_id"`
 	Services       []Service `json:"services"`
 	Props          []string  `json:"props"`
 }
@@ -33,7 +33,7 @@ type Service struct {
 	Alias         string                 `json:"alias"`
 	Address       string                 `json:"address"`
 	Groups        []string               `json:"groups"`
-	LocationId    ID                 `json:"location_id"`
+	LocationId    ID                     `json:"location_id"`
 	Props         map[string]interface{} `json:"props"`
 	Tags          []string               `json:"tags"`
 	Interfaces    []Interface            `json:"interfaces"`
@@ -56,4 +56,35 @@ type Location struct {
 	Image          string     `json:"image"`
 	ChildLocations []Location `json:"child_locations"`
 	State          string     `json:"state"`
+}
+
+type ServiceResponse struct {
+	Id            ID                     `json:"id"`
+	IntegrationId string                 `json:"integr_id"`
+	Name          string                 `json:"name"`
+	Alias         string                 `json:"alias"`
+	Address       string                 `json:"address"`
+	Groups        []string               `json:"groups"`
+	LocationId    ID                     `json:"location_id"`
+	LocationAlias string                 `json:"location_alias"`
+	Props         map[string]interface{} `json:"props"`
+	Tags          []string               `json:"tags"`
+	Interfaces    []Interface            `json:"interfaces"`
+}
+
+type InterfaceFlatView struct {
+	ThingId          ID       `json:"thing_id"`
+	ThingAddress     string   `json:"thing_address"`
+	ThingAlias       string   `json:"thing_alias"`
+	ServiceId        ID       `json:"service_id"`
+	ServiceName      string   `json:"service_name"`
+	ServiceAlias     string   `json:"service_alias"`
+	ServiceAddress   string   `json:"service_address"`
+	InterfaceType    string   `json:"intf_type"`
+	InterfaceMsgType string   `json:"intf_msg_type"`
+	InterfaceAddress string   `json:"intf_address"`
+	LocationId       ID       `json:"location_id"`
+	LocationAlias    string   `json:"location_alias"`
+	LocationType     string   `json:"location_type"`
+	Groups           []string `json:"groups"`
 }

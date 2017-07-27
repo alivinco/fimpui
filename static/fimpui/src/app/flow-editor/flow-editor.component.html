@@ -37,6 +37,7 @@
                   <md-input-container style="width: 450px">
                       <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
                   </md-input-container>
+                    <button md-raised-button (click)="serviceLookupDialog(flow.Nodes[index].Id)" >Lookup</button>
                   </p>
                   <p>
                     <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >

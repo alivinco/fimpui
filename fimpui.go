@@ -21,6 +21,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	//"time"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"strings"
 )
 
 type SystemInfo struct {
@@ -76,7 +77,7 @@ func main() {
 		panic("Can't load config file.")
 	}
 
-	SetupLog("fimpgo.log","debug")
+	SetupLog(configs.LogFile,configs.LogLevel)
 	log.Info("--------------Starting FIMPUI----------------")
 	//---------FLOW------------------------
 	log.Info("<main> Starting Flow manager")
@@ -122,7 +123,8 @@ func main() {
 	coreUrl := "ws://" + configs.VinculumAddress
 	go startWsCoreProxy(coreUrl)
 	//--------------------------------------
-	wsUpgrader := mqtt.WsUpgrader{"localhost:1883"}
+
+	wsUpgrader := mqtt.WsUpgrader{strings.Replace(configs.MqttServerURI,"tcp://","",-1)}
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -152,6 +154,11 @@ func main() {
 
 	e.GET("/fimp/registry/services", func(c echo.Context) error {
 		services := thingRegistryStore.GetAllServices()
+		return c.JSON(http.StatusOK, services)
+	})
+
+	e.GET("/fimp/registry/interfaces", func(c echo.Context) error {
+		services := thingRegistryStore.GetFlatInterfaces()
 		return c.JSON(http.StatusOK, services)
 	})
 

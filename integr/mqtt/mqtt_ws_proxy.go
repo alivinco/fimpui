@@ -92,7 +92,7 @@ func (mp *MqttWsProxySession) brokerReader() {
 			io.ReadFull(mp.brokerConn, payload)
 			packet = append(packet, payload...)
 		} else {
-			log.Debug("<MqWsProxy> Empty payload")
+			//log.Debug("<MqWsProxy> Empty payload")
 		}
 		err = mp.wsConn.WriteMessage(websocket.BinaryMessage, packet)
 		if err != nil {

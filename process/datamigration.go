@@ -76,6 +76,7 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 									location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
 									if location != nil {
 										thing.Services[si].LocationId = location.Id
+										thing.LocationId = location.Id
 									}
 								}
 							}
