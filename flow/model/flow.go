@@ -1,6 +1,8 @@
-package flow
+package model
 
 import "github.com/alivinco/fimpgo"
+
+type MsgPipeline chan Message
 
 type Message struct {
 	AddressStr string

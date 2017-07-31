@@ -9,3 +9,10 @@
 .example-header-image {
   background-size: cover;
 }
+
+.open-chip {
+  color: green
+}
+md-chip {
+  cursor: pointer;
+}

@@ -7,14 +7,17 @@ import (
 	"testing"
 	"time"
 	"io/ioutil"
+	//"github.com/alivinco/fimpui/flow/node"
+	"github.com/alivinco/fimpui/flow/model"
+	flownode "github.com/alivinco/fimpui/flow/node"
 )
 
-var msgChan = make(MsgPipeline)
+var msgChan = make(model.MsgPipeline)
 
 func onMsg(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
 	log.Info("New message from topic = ", topic)
 
-	fMsg := Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
+	fMsg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
 	select {
 	case msgChan <- fMsg:
 		log.Info("Message was sent")
@@ -41,19 +44,19 @@ func TestNewFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := Context{}
+	ctx := model.Context{}
 	flow := NewFlow("1", &ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 
-	node := MetaNode{Id: "1", Label: "Lux trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
+	node := model.MetaNode{Id: "1", Label: "Lux trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
 	flow.AddNode(node)
-	node = MetaNode{Id: "1.1", Label: "Button trigger 2", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:299_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
+	node = model.MetaNode{Id: "1.1", Label: "Button trigger 2", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:299_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
 	flow.AddNode(node)
-	node = MetaNode{Id: "2", Label: "Bulb 1", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "2.1"}
+	node = model.MetaNode{Id: "2", Label: "Bulb 1", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "2.1"}
 	flow.AddNode(node)
-	node = MetaNode{Id: "2.1", Label: "Waiting for 500mil", Type: "wait", SuccessTransition: "3", Config: 200}
+	node = model.MetaNode{Id: "2.1", Label: "Waiting for 500mil", Type: "wait", SuccessTransition: "3", Config: 200}
 	flow.AddNode(node)
-	node = MetaNode{Id: "3", Label: "Bulb 2", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: ""}
+	node = model.MetaNode{Id: "3", Label: "Bulb 2", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: ""}
 	flow.AddNode(node)
 	flow.Start()
 	time.Sleep(time.Second * 1)
@@ -74,21 +77,23 @@ func TestNewFlow2(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := Context{}
+	ctx := model.Context{IsFlowRunning:true}
 	flow := NewFlow("1", &ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 
-	node := MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
+	node := model.MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
 	flow.AddNode(node)
-	node = MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []IFExpression{{Value: int64(100), ValueType: "int", Operand: "gt"}}}}
+	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{
+		{Value: int64(100), ValueType: "int", Operand: "gt" ,BooleanOperator:"and"},
+		{Value: int64(200), ValueType: "int", Operand: "lt" }}}}
 	flow.AddNode(node)
 	b, err := json.Marshal(node)
 	log.Info(string(b))
-	node = MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: DefaultValue{ValueType: "bool", Value: true}}
+	node = model.MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: flownode.DefaultValue{ValueType: "bool", Value: true}}
 	flow.AddNode(node)
-	node = MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: DefaultValue{ValueType: "bool", Value: true}}
+	node = model.MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: flownode.DefaultValue{ValueType: "bool", Value: true}}
 	flow.AddNode(node)
 
 	data, err := json.Marshal(flow)
@@ -122,19 +127,19 @@ func TestNewFlow3(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := Context{}
+	ctx := model.Context{}
 	flow := NewFlow("2", &ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 
-	node := MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "1.1"}
+	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "1.1"}
 	flow.AddNode(node)
-	node = MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []IFExpression{{Value: false, ValueType: "bool", Operand: "eq"}}}}
+	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{{Value: false, ValueType: "bool", Operand: "eq"}}}}
 	flow.AddNode(node)
-	node = MetaNode{Id: "2", Label: "Lights ON", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: DefaultValue{ValueType: "bool", Value: true}}
+	node = model.MetaNode{Id: "2", Label: "Lights ON", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: flownode.DefaultValue{ValueType: "bool", Value: true}}
 	flow.AddNode(node)
-	node = MetaNode{Id: "3", Label: "Lights OFF", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: DefaultValue{ValueType: "bool", Value: false}}
+	node = model.MetaNode{Id: "3", Label: "Lights OFF", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
+		Config: flownode.DefaultValue{ValueType: "bool", Value: false}}
 	flow.AddNode(node)
 	flow.Start()
 	time.Sleep(time.Second * 1)

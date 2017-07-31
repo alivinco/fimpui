@@ -32,6 +32,11 @@ export class IkeaManComponent implements OnInit {
     
   }
   
+  generateExclusionReport(address:string){
+    let msg  = new FimpMessage("ikea-ad","evt.thing.exclusion_report","object",{"address":String(address)},null,null)
+    this.fimp.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",msg.toString());
+    
+  }
 
   ngOnInit() {
     

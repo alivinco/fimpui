@@ -8,6 +8,6 @@
   "vinculum_address":"localhost:1989",
   "mqtt_server_uri":"tcp://localhost:1883",
   "flow_storage_dir":"./flow_storage",
-  "log_file":"/var/log/fimpui.log",
+  "log_file":"./fimpui.log",
   "log_level":"debug"
 }

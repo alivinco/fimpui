@@ -12,18 +12,20 @@
           <tbody>
          <tr *ngFor="let node of nodes">
           <td> {{node.id}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> {{node.alias}} </td>
-           <td> <a [routerLink]="['/thing-view','ikea',node.id]"><i class="material-icons">info_outline</i></a>
-           <a (click)="removeNode(node.id)"><i class="material-icons">remove_circle_outline</i></a>
+           <td> 
+            <md-chip-list>
+             <md-chip class="open-chip" [routerLink]="['/thing-view','ikea',node.address]">Services</md-chip>
+             <md-chip color="warn" (click)="generateExclusionReport(node.address)">Delete</md-chip>
+            </md-chip-list>
            </td>
           </tr>
           </tbody> 
          </table>
     </md-card-content>
     <md-card-actions>
-      <button md-mini-fab (click)="addDevice(True)"> <md-icon>add_circel_outline</md-icon></button>
-      <button md-mini-fab (click)="removeDevice()" color="warn" ><md-icon>remove_circel_outlinechevron_left</md-icon></button>
-      <button md-mini-fab (click)="reloadIkeaDevices()"><md-icon>refresh</md-icon></button>
-    
+      <button md-raised-button (click)="addDevice(True)" color="primary" > Connect system</button>
+      <button md-raised-button (click)="removeDevice()" color="warn" >Disconnect system</button>
+      <button md-raised-button (click)="reloadIkeaDevices()" color="primary" >Reload list</button>
    </md-card-actions>
   </md-card>
 

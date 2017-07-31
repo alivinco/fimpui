@@ -3,7 +3,10 @@ package flow
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
-	"github.com/alivinco/fimpui/model"
+	"github.com/alivinco/fimpui/flow/node"
+	"github.com/alivinco/fimpui/flow/model"
+	"github.com/alivinco/fimpui/flow/utils"
+	fimpuimodel "github.com/alivinco/fimpui/model"
 	"io/ioutil"
 	"fmt"
 	"encoding/json"
@@ -14,10 +17,10 @@ import (
 
 type Manager struct {
 	flowRegistry  map[string]*Flow
-	msgStreams    map[string]MsgPipeline
+	msgStreams    map[string]model.MsgPipeline
 	msgTransport  *fimpgo.MqttTransport
-	globalContext Context
-	config        *model.FimpUiConfigs
+	globalContext model.Context
+	config        *fimpuimodel.FimpUiConfigs
 }
 
 type FlowListItem struct {
@@ -28,9 +31,9 @@ type FlowListItem struct {
 	ErrorCounter int64
 }
 
-func NewManager(config *model.FimpUiConfigs) *Manager {
+func NewManager(config *fimpuimodel.FimpUiConfigs) *Manager {
 	man := Manager{config:config}
-	man.msgStreams = make(map[string]MsgPipeline)
+	man.msgStreams = make(map[string]model.MsgPipeline)
 	man.flowRegistry = make(map[string]*Flow)
 	return &man
 }
@@ -48,7 +51,7 @@ func (mg *Manager) InitMessagingTransport() {
 }
 
 func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
-	msg := Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
+	msg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
 	// Message broadcast to all flows
 	for id, stream := range mg.msgStreams {
 		select {
@@ -62,14 +65,14 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 
 func (mg *Manager) GenerateNewFlow() Flow {
 	fl := Flow {}
-	fl.AddNode(MetaNode{Id:"1",Type:"trigger",Label:"no label"})
-	fl.Id = GenerateId(10)
+	fl.AddNode(model.MetaNode{Id:"1",Type:"trigger",Label:"no label"})
+	fl.Id = utils.GenerateId(10)
 
 	return fl
 }
 
 func (mg *Manager) InitNewFlow(flow *Flow) string {
-	msgStream := make(MsgPipeline,10)
+	msgStream := make(model.MsgPipeline,10)
 	flow.SetMessageStream(msgStream)
 	mg.msgStreams[flow.Id] = msgStream
 	mg.flowRegistry[flow.Id] = flow
@@ -114,7 +117,7 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 	for i := range flow.Nodes {
 		switch flow.Nodes[i].Type  {
 		case "if":
-			exp := IFExpressions{}
+			exp := node.IFExpressions{}
 			err = mapstructure.Decode(flow.Nodes[i].Config,&exp)
 			if err != nil{
 				log.Error(err)
@@ -122,7 +125,7 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 				flow.Nodes[i].Config = exp
 			}
 		case "action":
-			defValue := DefaultValue{}
+			defValue := node.DefaultValue{}
 			err = mapstructure.Decode(flow.Nodes[i].Config,&defValue)
 			if err != nil{
 				log.Error(err)

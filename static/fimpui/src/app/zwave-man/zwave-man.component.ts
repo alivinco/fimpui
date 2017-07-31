@@ -92,7 +92,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         //console.log(body.Version);
         return body;
       }).subscribe ((result) => {
-         console.log(result.report_log_files);
+        //  console.log(result.report_log_files);
          for(let node of this.nodes) {
            for (let thing of result) {
               // change node.id to node.address
