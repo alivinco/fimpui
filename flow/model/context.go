@@ -1,5 +1,6 @@
 package model
 
+import "github.com/pkg/errors"
 
 type Variable struct {
 	Value     interface{}
@@ -20,8 +21,12 @@ func (ctx *Context) SetVariable(name string,valueType string,value interface{}) 
 	ctx.variables[name] = Variable{ValueType:valueType,Value:value}
 }
 
-func (ctx *Context) GetVariable(name string) (string , interface{}) {
-	return ctx.variables[name].ValueType,ctx.variables[name].Value
+func (ctx *Context) GetVariable(name string) (Variable,error) {
+	variable , ok := ctx.variables[name]
+	if ok {
+		return variable,nil
+	}
+	return Variable{},errors.New("Variable doesn't exist")
 }
 
 func (ctx *Context) GetAllVariables() map[string]Variable  {

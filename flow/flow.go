@@ -4,8 +4,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"github.com/alivinco/fimpgo"
-	"github.com/alivinco/fimpui/flow/node"
 	"github.com/alivinco/fimpui/flow/model"
+	"github.com/alivinco/fimpui/flow/node"
 )
 
 type Flow struct {
@@ -15,9 +15,9 @@ type Flow struct {
 	globalContext       *model.Context  `json:"-"`
 	localContext        model.Context   `json:"-"`
 	currentNodeId       model.NodeID    `json:"-"`
-	currentMsg          model.Message   `json:"-"`
-	currentNode         *model.MetaNode `json:"-"`
-	Nodes               []model.MetaNode
+	currentMsg          *model.Message   `json:"-"`
+	currentNode         *model.Node `json:"-"`
+	Nodes               []model.Node
 	msgPipeline         model.MsgPipeline           `json:"-"`
 	msgTransport        *fimpgo.MqttTransport `json:"-"`
 	activeSubscriptions []string              `json:"-"`
@@ -30,28 +30,56 @@ type Flow struct {
 func NewFlow(Id string, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
 	flow := Flow{globalContext: globalContext}
 	flow.msgPipeline = make(model.MsgPipeline)
-	flow.Nodes = make([]model.MetaNode, 0)
+	flow.Nodes = make([]model.Node, 0)
 	flow.msgTransport = msgTransport
 	flow.localContext = model.NewContext()
 	flow.localContext.IsFlowRunning = true
 	return &flow
 }
 
-func (fl *Flow) SetNodes(nodes []model.MetaNode) {
+func (fl *Flow) InitFromMetaFlow(meta model.FlowMeta) {
+	fl.Id = meta.Id
+	fl.Name = meta.Name
+	fl.Description = meta.Description
+	for _,metaNode := range meta.Nodes {
+		var newNode model.Node
+		log.Infof("<Flow> Loading node . Type = %s , Label = %s",metaNode.Type,metaNode.Label)
+		switch metaNode.Type {
+		case "trigger":
+			newNode = node.NewTriggerNode(metaNode,&fl.localContext,fl.msgTransport,&fl.activeSubscriptions,fl.msgInStream)
+		default:
+			constructor ,ok := node.Registry[metaNode.Type]
+			if ok {
+				newNode = constructor(metaNode,&fl.localContext,fl.msgTransport)
+			}else {
+				log.Errorf("<Flow> Node type = %s isn't supported",metaNode.Type)
+			}
+		}
+		err := newNode.LoadNodeConfig()
+		if err == nil {
+			fl.AddNode(newNode)
+			log.Info("<Flow> Node is loaded.")
+		}else {
+			log.Errorf("<Flow> Node type %s can't be loaded . Error : %s",metaNode.Type,err)
+		}
+	}
+}
+
+func (fl *Flow) SetNodes(nodes []model.Node) {
 	fl.Nodes = nodes
 }
 
-func (fl *Flow) ReloadNodes(nodes []model.MetaNode) {
+func (fl *Flow) ReloadNodes(nodes []model.Node) {
 	fl.Stop()
 	fl.Nodes = nodes
 	fl.Start()
 }
 
-func (fl *Flow)GetCurrentNode()*model.MetaNode {
+func (fl *Flow)GetCurrentNode()*model.Node {
 	return fl.currentNode
 }
 
-func (fl *Flow) AddNode(node model.MetaNode) {
+func (fl *Flow) AddNode(node model.Node) {
 	fl.Nodes = append(fl.Nodes, node)
 }
 
@@ -65,7 +93,7 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 		return false
 	}
 	for i := range fl.Nodes {
-		if fl.Nodes[i].Id == transitionNodeId {
+		if fl.Nodes[i].GetMetaNode().Id == transitionNodeId {
 			return true
 		}
 	}
@@ -74,12 +102,12 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 }
 
 func (fl *Flow) Run() {
-	var transitionNode model.NodeID
+	var transitionNodeId model.NodeID
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("<Flow> Flow process CRASHED with error : ",r)
-			log.Errorf("<Flow> Crashed while processing message from Current Node = %d Next Node = %d ",fl.currentNodeId,transitionNode)
-			transitionNode = ""
+			log.Errorf("<Flow> Crashed while processing message from Current Node = %d Next Node = %d ",fl.currentNodeId, transitionNodeId)
+			transitionNodeId = ""
 		}
 	}()
 
@@ -91,10 +119,12 @@ func (fl *Flow) Run() {
 			if !fl.isFlowRunning {
 				break
 			}
-			if fl.currentNodeId == "" && fl.Nodes[i].Type == "trigger" {
+			if fl.currentNodeId == "" && fl.Nodes[i].IsStartNode() {
 				log.Infof("<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				var err error
-				fl.currentMsg, fl.currentNode, err = node.TriggerNode(fl.Nodes, &fl.localContext, fl.msgInStream, fl.msgTransport, &fl.activeSubscriptions)
+				newMsg := model.Message{}
+				nextNodes, err := fl.Nodes[i].OnInput (&newMsg)
+				fl.currentMsg = &newMsg
 				if err != nil {
 					log.Error("<Flow> TriggerNode failed with error :", err)
 					fl.currentNodeId = ""
@@ -103,41 +133,33 @@ func (fl *Flow) Run() {
 					break
 				}
 				fl.TriggerCounter++
-				fl.currentNodeId = fl.currentNode.Id
-				transitionNode = fl.currentNode.SuccessTransition
-				if !fl.IsNodeIdValid(fl.currentNodeId,transitionNode) {
-					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
-					transitionNode = ""
+				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
+				transitionNodeId = nextNodes[0]
+				if !fl.IsNodeIdValid(fl.currentNodeId, transitionNodeId) {
+					log.Errorf("Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					transitionNodeId = ""
 				}
-				log.Debug("<Flow> Transition from Trigger to node = ",transitionNode)
-			} else if fl.Nodes[i].Id == transitionNode {
+				log.Debug("<Flow> Transition from Trigger to node = ", transitionNodeId)
+			} else if fl.Nodes[i].GetMetaNode().Id == transitionNodeId {
 				var err error
-				switch fl.Nodes[i].Type {
-				case "action":
-					log.Info("<Flow> Executing ActionNode node.")
-					err = node.ActionNode(&fl.Nodes[i], &fl.currentMsg, fl.msgTransport)
-				case "wait":
-					log.Info("<Flow> Executing WaitNode node.")
-					err = node.WaitNode(&fl.Nodes[i])
-				case "if":
-					log.Info("<Flow> Executing IfNode node.")
-					err = node.IfNode(&fl.Nodes[i], &fl.currentMsg)
-				}
-				fl.currentNodeId = fl.Nodes[i].Id
+				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
+				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = &fl.Nodes[i]
-				if err == nil {
-					transitionNode = fl.Nodes[i].SuccessTransition
-				} else {
-					transitionNode = fl.Nodes[i].ErrorTransition
+				if err != nil {
 					fl.ErrorCounter++
-					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNode ,err)
+					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNodeId,err)
 				}
-				if !fl.IsNodeIdValid(fl.currentNodeId,transitionNode) {
-					log.Errorf("Unknown transition mode %s.Switching back to first node",transitionNode)
-					transitionNode = ""
+				if len(nextNodes)>0 {
+					transitionNodeId = nextNodes[0]
+				}else {
+					transitionNodeId = ""
+				}
+				if !fl.IsNodeIdValid(fl.currentNodeId, transitionNodeId) {
+					log.Errorf("Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					transitionNodeId = ""
 				}
 
-			} else if transitionNode == "" {
+			} else if transitionNodeId == "" {
 				// Flow is finished . Returning to first step.
 				fl.currentNodeId = ""
 			}
@@ -154,7 +176,7 @@ func (fl *Flow) Start() error {
 	isFlowValid := false
 	// The Flow should have at least one trigger or wait node to avoid tight loop
 	for i := range fl.Nodes {
-		if fl.Nodes[i].Type == "wait" || fl.Nodes[i].Type == "trigger" {
+		if fl.Nodes[i].GetMetaNode().Type == "wait" || fl.Nodes[i].GetMetaNode().Type == "trigger" {
 			isFlowValid = true
 			break
 		}

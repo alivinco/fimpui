@@ -16,6 +16,16 @@ type MetaNode struct {
 	Config            interface{}
 }
 
+type Node interface {
+	OnInput( msg *Message) ([]NodeID,error)
+	GetMetaNode()*MetaNode
+	GetNextSuccessNodes()[]NodeID
+	GetNextErrorNode()NodeID
+	GetNextTimeoutNode()NodeID
+	LoadNodeConfig() error
+	IsStartNode() bool
+}
+
 
 
 

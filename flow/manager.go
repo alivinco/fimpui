@@ -3,14 +3,13 @@ package flow
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
-	"github.com/alivinco/fimpui/flow/node"
+	//"github.com/alivinco/fimpui/flow/node"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/flow/utils"
 	fimpuimodel "github.com/alivinco/fimpui/model"
 	"io/ioutil"
-	"fmt"
 	"encoding/json"
-	"github.com/mitchellh/mapstructure"
+	//"github.com/mitchellh/mapstructure"
 	"path/filepath"
 	"os"
 )
@@ -63,11 +62,10 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 	}
 }
 
-func (mg *Manager) GenerateNewFlow() Flow {
-	fl := Flow {}
-	fl.AddNode(model.MetaNode{Id:"1",Type:"trigger",Label:"no label"})
+func (mg *Manager) GenerateNewFlow() model.FlowMeta {
+	fl := model.FlowMeta{}
+	fl.Nodes = []model.MetaNode{{Id:"1",Type:"trigger",Label:"no label"}}
 	fl.Id = utils.GenerateId(10)
-
 	return fl
 }
 
@@ -108,42 +106,16 @@ func (mg *Manager) LoadFlowFromFile(fileName string) error{
 }
 
 func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
-	flow := NewFlow("", &mg.globalContext, mg.msgTransport)
-	err := json.Unmarshal(flowJsonDef, flow)
+	flowMeta := model.FlowMeta{}
+	err := json.Unmarshal(flowJsonDef, &flowMeta)
 	if err != nil {
-		fmt.Println("<FlMan> Can't unmarshel DB file.")
+		log.Error("<FlMan> Can't unmarshel DB file.")
 		return err
 	}
-	for i := range flow.Nodes {
-		switch flow.Nodes[i].Type  {
-		case "if":
-			exp := node.IFExpressions{}
-			err = mapstructure.Decode(flow.Nodes[i].Config,&exp)
-			if err != nil{
-				log.Error(err)
-			}else {
-				flow.Nodes[i].Config = exp
-			}
-		case "action":
-			defValue := node.DefaultValue{}
-			err = mapstructure.Decode(flow.Nodes[i].Config,&defValue)
-			if err != nil{
-				log.Error(err)
-			}else {
-				flow.Nodes[i].Config = defValue
-			}
-		case "wait":
-			delay ,ok := flow.Nodes[i].Config.(float64)
-			if ok {
-				flow.Nodes[i].Config = int(delay)
-			}else {
-				log.Error("<FlMan> Can't cast Wait node delay value")
-			}
 
-		}
-	}
+	flow := NewFlow("", &mg.globalContext, mg.msgTransport)
 	mg.InitNewFlow(flow)
-
+	flow.InitFromMetaFlow(flowMeta)
 	flow.Start()
 	return nil
 }

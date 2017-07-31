@@ -12,12 +12,21 @@ func GenerateId(len int) string {
 
 func ConfigValueToNumber(valueType string,value interface{})(float64,error){
 	if valueType == "int" {
-		intVal,ok := value.(int64)
-		if ok {
-			return float64(intVal),nil
-		}else {
+		switch val := value.(type) {
+		case int64 :
+			return float64(val),nil
+		case float64:
+			return val,nil
+		default:
 			return 0, errors.New("Can't convert interface{} to int64")
+
 		}
+		//intVal,ok := value.(int64)
+		//if ok {
+		//	return float64(intVal),nil
+		//}else {
+		//	return 0, errors.New("Can't convert interface{} to int64")
+		//}
 	}else
 	if valueType == "float" {
 		floatVal,ok := value.(float64)
