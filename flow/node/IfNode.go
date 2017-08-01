@@ -55,31 +55,31 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	if ok {
 		booleanOperator := ""
 		var finalResult bool
-		for _, item := range conf.Expression {
-			if item.RightVariable.ValueType == "" {
+		for i := range conf.Expression {
+			if conf.Expression[i].RightVariable.ValueType == "" {
 				return nil,errors.New("Right variable is not defined. IfNode is skipped.")
 			}
-			if item.LeftVariableName == ""{
-				item.LeftVariable = model.Variable{ValueType:msg.Payload.ValueType,Value:msg.Payload.Value}
+			if conf.Expression[i].LeftVariableName == ""{
+				conf.Expression[i].LeftVariable = model.Variable{ValueType:msg.Payload.ValueType,Value:msg.Payload.Value}
 			}else {
-				item.LeftVariable ,err = node.ctx.GetVariable(item.LeftVariableName)
+				conf.Expression[i].LeftVariable ,err = node.ctx.GetVariable(conf.Expression[i].LeftVariableName)
 			}
-			if item.LeftVariable.ValueType != item.RightVariable.ValueType {
+			if conf.Expression[i].LeftVariable.ValueType != conf.Expression[i].RightVariable.ValueType {
 				return nil,errors.New(" Right and left of expression have different types ")
 			}
 
 
 			var result bool
-			log.Debug("<IfNode> Operand = ", item.Operand)
+			log.Debug("<IfNode> Operand = ", conf.Expression[i].Operand)
 
-			if item.Operand == "gt" || item.Operand == "lt"  {
-				if item.LeftVariable.ValueType == "int" || item.LeftVariable.ValueType  == "float" {
-					leftNumericValue , err = utils.ConfigValueToNumber(item.LeftVariable.ValueType,item.LeftVariable.Value)
+			if conf.Expression[i].Operand == "gt" || conf.Expression[i].Operand == "lt"  {
+				if conf.Expression[i].LeftVariable.ValueType == "int" || conf.Expression[i].LeftVariable.ValueType  == "float" {
+					leftNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].LeftVariable.ValueType,conf.Expression[i].LeftVariable.Value)
 					if err != nil {
 						log.Error("<IfNode> Error while converting left variable to number.Error : ",err)
 						return nil,err
 					}
-					rightNumericValue , err = utils.ConfigValueToNumber(item.RightVariable.ValueType,item.RightVariable.Value)
+					rightNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].RightVariable.ValueType,conf.Expression[i].RightVariable.Value)
 					if err != nil {
 						log.Error("<IfNode> Error while converting right variable to number.Error : ",err)
 						return nil,err
@@ -91,26 +91,36 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			}
 			log.Debug("<IfNode> Left numeric value = ", leftNumericValue)
 			log.Debug("<IfNode> Right numeric value = ", rightNumericValue)
-			switch item.Operand {
+			switch conf.Expression[i].Operand {
 			case "eq":
-				result = item.LeftVariable.Value == item.RightVariable.Value
+				result = conf.Expression[i].LeftVariable.Value == conf.Expression[i].RightVariable.Value
 			case "gt":
 				result = leftNumericValue > rightNumericValue
 			case "lt":
 				result = leftNumericValue < rightNumericValue
 			}
-			
-			switch booleanOperator {
-			case "":
+			if len(conf.Expression) > 1 {
+				if i > 0 {
+					// boolean operator between current and previous element
+					booleanOperator = conf.Expression[i-1].BooleanOperator
+					switch booleanOperator {
+					case "":
+						// empty = and
+						finalResult = finalResult && result
+					case "and":
+						finalResult = finalResult && result
+					case "or":
+						finalResult = finalResult || result
+					case "not":
+						finalResult = !result
+					}
+				}else {
+					// first element
+					finalResult = result
+				}
+
+			}else {
 				finalResult = result
-			case "and":
-				finalResult = finalResult && result
-				booleanOperator = item.BooleanOperator
-			case "or":
-				finalResult = finalResult || result
-				booleanOperator = item.BooleanOperator
-			case "not":
-				finalResult = !result
 			}
 		}
 		if finalResult {
