@@ -49,3 +49,21 @@ export class ActionNodeComponent implements OnInit {
   }
 
 }
+
+@Component({
+  selector: 'set-variable-node',
+  templateUrl: './set-variable-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class SetVariableNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MdDialog) { }
+
+  ngOnInit() { 
+  }
+  serviceLookupDialog(nodeId:string) {
+   
+  }
+
+}

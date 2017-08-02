@@ -10,3 +10,10 @@ type Message struct {
 	Payload    fimpgo.FimpMessage
 	Header     map[string]string
 }
+
+type FlowMeta struct {
+	Id          string
+	Name        string
+	Description string
+	Nodes       []MetaNode
+}

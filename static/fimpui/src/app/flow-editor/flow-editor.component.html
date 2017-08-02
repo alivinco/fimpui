@@ -22,12 +22,16 @@
             <md-card-title>{{ node.Label }} ( Id:{{ node.Id }} ) </md-card-title>
             <md-card-subtitle>Node type : {{ node.Type }} </md-card-subtitle>
          </md-card-header>  
-         <div [ngSwitch]="node.Type">
+       <md-card-content>
+        
+         <div [ngSwitch]="node.Type"  >
+
             <md-input-container class="node-label-field">
                   <input mdInput [(ngModel)]="flow.Nodes[index].Label" placeholder="Label" >
             </md-input-container>
             <div *ngSwitchCase="'trigger'">  
-                  <p>
+                 <div #nodebody hidden> 
+                 <p>
                   <md-input-container style="width: 130px">
                       <input mdInput [(ngModel)]="flow.Nodes[index].Service" placeholder="Service" >
                   </md-input-container>
@@ -39,31 +43,49 @@
                   </md-input-container>
                     <button md-raised-button (click)="serviceLookupDialog(flow.Nodes[index].Id)" >Lookup</button>
                   </p>
+                   </div>
                   <p>
                     <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >
                         <md-option value = "" > End! </md-option>
                         <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
                     </md-select>
                   </p>
-                  <p> <button md-raised-button (click)="runFlow(node)" >Run</button> </p>
+                  <p>
+                    <button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> 
+                    <button md-raised-button (click)="runFlow(node)" >Run</button>
+                   </p>
             </div>
-            <div *ngSwitchCase="'wait'">  
+            <div *ngSwitchCase="'wait'"> 
+              <div #nodebody hidden> 
                   <md-input-container style="width:100px ">
                       <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config" placeholder="Delay time (milisec)" >
                   </md-input-container>
+              </div>
                   <p>
                   <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >
                         <md-option value = "" > End! </md-option>
                         <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
                   </md-select>
                   </p>
+                  <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
             </div>
             <div *ngSwitchCase="'action'">  
                  <action-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </action-node>
             </div>
+            <div *ngSwitchCase="'set_variable'">  
+                 <set-variable-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </set-variable-node>
+            </div>    
             <div *ngSwitchCase="'if'">  
+               <div #nodebody hidden>
                   <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
                     
+                    <div style="margin-top: 10px;">
+                    <md-select style="width: 120px" class="value-selector" placeholder="Left value"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].LeftVariableName" >
+                        <md-option value = "">Default Input</md-option>
+                        <md-option *ngFor="let vari of localVars" [value]="vari" >{{vari}}</md-option>
+                        <md-option *ngFor="let vari of globalVars" [value]="vari" >Shared:{{vari}}</md-option>
+                    </md-select>
+
                     <md-select style="width: 120px" class="value-selector" placeholder="Operand"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].Operand" >
                         <md-option value = "gt">greater</md-option>
                         <md-option value = "lt">less</md-option>
@@ -71,32 +93,32 @@
                     </md-select>
                     
                    
-                    <md-select style="width: 120px" class="value-selector" placeholder="Value type" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].ValueType" >
+                    <md-select style="width: 120px" class="value-selector" placeholder="Value type" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].RightVariable.ValueType" >
+                        <md-option value = "int">int number</md-option>
+                        <md-option value = "float">float number</md-option>
                         <md-option value = "string">string</md-option>
                         <md-option value = "bool">bool</md-option>
-                        <md-option value = "int">int</md-option>
-                        <md-option value = "float">float</md-option>
                      </md-select>
                     
-                     <span [ngSwitch]="flow.Nodes[index].Config.Expression[index2].ValueType">  
+                     <span [ngSwitch]="flow.Nodes[index].Config.Expression[index2].RightVariable.ValueType">  
                       <span *ngSwitchCase="'string'">
                         <md-input-container class="node-transition-field">
-                            <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                            <input mdInput [(ngModel)]="flow.Nodes[index].Config.Expression[index2].RightVariable.Value" placeholder=" Right value" >
                         </md-input-container>
                       </span>
                       <span *ngSwitchCase="'int'">
                         <md-input-container class="node-transition-field">
-                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].RightVariable.Value" placeholder="value" >
                         </md-input-container>
                       </span>
                       <span *ngSwitchCase="'float'">
                         <md-input-container class="node-transition-field">
-                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value" placeholder="value" >
+                            <input mdInput type="number" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].RightVariable.Value" placeholder="value" >
                         </md-input-container>
                       </span>
                       
                       <span *ngSwitchCase="'bool'">
-                        <md-radio-group class="example-radio-group" placeholder="value" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].Value">
+                        <md-radio-group class="example-radio-group" placeholder="value" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].RightVariable.Value">
                           <md-radio-button class="example-radio-button" [value] = "true">
                             true (On)
                           </md-radio-button>
@@ -106,10 +128,17 @@
                         </md-radio-group>
                       </span>
                     </span>   
-                     
+                    </div>
+                    <md-select style="width: 200px" class="value-selector" placeholder="Boolean operation"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].BooleanOperator" >
+                        <md-option value = ""></md-option>
+                        <md-option value = "and">and</md-option>
+                        <md-option value = "or">or</md-option>
+                        <md-option value = "not">not</md-option>
+                    </md-select> 
+                    <button md-raised-button (click)="addIfExpression(node)" >Add expression</button>
 
                   </div>
-                  
+               </div>   
                   <p>
                     <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="True node"[(ngModel)]="flow.Nodes[index].Config.TrueTransition" >
                         <md-option value = "" > End! </md-option>
@@ -120,9 +149,12 @@
                         <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
                     </md-select>
                   </p>
+                  <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
                   
             </div>
          </div>
+         
+       </md-card-content>  
          <md-card-actions>
           <button md-raised-button (click)="cloneNode(node)" >Clone</button>
           <button md-raised-button (click)="deleteNode(node)" >Delete</button>
@@ -138,10 +170,12 @@
         <md-option value = "action">action</md-option>
         <md-option value = "wait">wait</md-option>
         <md-option value = "if">if</md-option>
+        <md-option value = "set_variable">set variable</md-option>
       </md-select>
       <button md-raised-button (click)="addNode()" color="primary" >Add</button>
       <button md-raised-button (click)="saveFlow()" color="primary" >Save</button>
       <button md-raised-button (click)="showSource()" color="primary" >Show source</button>
+      <button md-raised-button (click)="showContextDialog()" color="primary" >Show variables</button>
 
     </md-card-actions>
   </md-card>

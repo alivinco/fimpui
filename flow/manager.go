@@ -26,6 +26,7 @@ type FlowListItem struct {
 	Id string
 	Name string
 	Description string
+	State string
 	TriggerCounter int64
 	ErrorCounter int64
 }
@@ -34,6 +35,7 @@ func NewManager(config *fimpuimodel.FimpUiConfigs) *Manager {
 	man := Manager{config:config}
 	man.msgStreams = make(map[string]model.MsgPipeline)
 	man.flowRegistry = make(map[string]*Flow)
+	man.globalContext = *model.NewContext(nil)
 	return &man
 }
 
@@ -69,12 +71,14 @@ func (mg *Manager) GenerateNewFlow() model.FlowMeta {
 	return fl
 }
 
-func (mg *Manager) InitNewFlow(flow *Flow) string {
+func (mg *Manager) GetNewStream(Id string) model.MsgPipeline {
 	msgStream := make(model.MsgPipeline,10)
-	flow.SetMessageStream(msgStream)
-	mg.msgStreams[flow.Id] = msgStream
-	mg.flowRegistry[flow.Id] = flow
-	return flow.Id
+	mg.msgStreams[Id] = msgStream
+	return msgStream
+}
+
+func (mg *Manager) GetGlobalContext() *model.Context {
+	return &mg.globalContext
 }
 
 func (mg *Manager) GetFlowFileNameById(id string ) string {
@@ -113,9 +117,10 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 		return err
 	}
 
-	flow := NewFlow("", &mg.globalContext, mg.msgTransport)
-	mg.InitNewFlow(flow)
-	flow.InitFromMetaFlow(flowMeta)
+	flow := NewFlow(flowMeta, &mg.globalContext, mg.msgTransport)
+	flow.SetMessageStream(mg.GetNewStream(flow.Id))
+	flow.InitAllNodes()
+	mg.flowRegistry[flow.Id] = flow
 	flow.Start()
 	return nil
 }
@@ -158,7 +163,8 @@ func (mg *Manager) GetFlowList() []FlowListItem{
 	response := make ([]FlowListItem,len(mg.flowRegistry))
 	var c int
 	for _,flow := range mg.flowRegistry {
-		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter}
+		log.Info("Adding flow with id = ",flow.Id)
+		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter,State:flow.State}
 		c++
 	}
 	return response

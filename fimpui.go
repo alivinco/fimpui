@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-
 	"fmt"
 	"encoding/json"
 	"flag"
@@ -18,6 +17,7 @@ import (
 	"io/ioutil"
 	"net/url"
 	"github.com/alivinco/fimpui/flow"
+	flowmodel "github.com/alivinco/fimpui/flow/model"
 	log "github.com/Sirupsen/logrus"
 	//"time"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
@@ -200,15 +200,26 @@ func main() {
 	})
 	e.GET("/fimp/flow/definition/:id", func(c echo.Context) error {
 		id := c.Param("id")
-		var resp *flow.Flow
+		var resp *flowmodel.FlowMeta
 		if id == "-" {
 			flow := flowManager.GenerateNewFlow()
 			resp = &flow;
 		}else {
-			resp = flowManager.GetFlowById(id)
+			resp = flowManager.GetFlowById(id).FlowMeta
 		}
 
 		return c.JSON(http.StatusOK, resp)
+	})
+
+	e.GET("/fimp/flow/context/:id", func(c echo.Context) error {
+		id := c.Param("id")
+		ctx := flowManager.GetFlowById(id).GetContext().GetRecords()
+		return c.JSON(http.StatusOK, ctx)
+	})
+
+	e.GET("/fimp/flow/context/global", func(c echo.Context) error {
+		ctx := flowManager.GetGlobalContext().GetRecords()
+		return c.JSON(http.StatusOK, ctx)
 	})
 
 	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {

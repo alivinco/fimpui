@@ -16,6 +16,9 @@ import { BACKEND_ROOT } from "app/globals";
 export class FlowEditorComponent implements OnInit {
   flow :Flow;
   selectedNewNodeType:string;
+  localVars:any;
+  globalVars:any;
+  
   constructor(private route: ActivatedRoute,private http : Http,public dialog: MdDialog) {
     this.flow = new Flow();
    }
@@ -23,6 +26,7 @@ export class FlowEditorComponent implements OnInit {
   ngOnInit() {
     let id  = this.route.snapshot.params['id'];
     this.loadFlow(id);
+    
   }
  
   loadFlow(id:string) {
@@ -36,8 +40,35 @@ export class FlowEditorComponent implements OnInit {
          this.flow = result;
          console.dir(this.flow)
          console.log(this.flow.Name)
+         this.loadContext();
       });
   }
+  loadContext() {
+    this.http
+      .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flow.Id)
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+         this.localVars = [];
+         for (var key in result){
+            this.localVars.push(result[key].Name);
+         }
+         
+      });
+    
+    this.http
+      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+        this.globalVars = [];
+        for (var key in result){
+            this.globalVars.push(result[key].Name);
+         }
+      });  
+  }  
   saveFlow() {
     console.dir(this.flow)
     let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -73,6 +104,17 @@ export class FlowEditorComponent implements OnInit {
    Object.assign(cloneNode,node);
    cloneNode.Id = this.getNewNodeId();
    this.flow.Nodes.push(cloneNode);
+ }
+ addIfExpression(node:MetaNode){ 
+     let rightVariable = {};
+     let expr = {};
+     expr["Operand"] = "eq";
+     expr["LeftVariableName"] = "";
+     rightVariable["Value"] = 100;
+     rightVariable["ValueType"] = "int";
+     expr["RightVariable"] = rightVariable
+     expr["BooleanOperator"] = "";
+     node.Config["Expression"].push(expr);
  } 
   
  addNode(){
@@ -100,16 +142,29 @@ export class FlowEditorComponent implements OnInit {
         node.Config["TrueTransition"] = ""
         node.Config["FalseTransition"] = ""
         node.Config["Expression"] = [];
-        let expr = {}
+        let expr = {};
+        let rightVariable = {};
         expr["Operand"] = "eq";
-        expr["Value"] = 100;
-        expr["ValueType"] = "int";
+        expr["LeftVariableName"] = "";
+        rightVariable["Value"] = 100;
+        rightVariable["ValueType"] = "int";
+        expr["RightVariable"] = rightVariable
         expr["BooleanOperator"] = "";
         node.Config["Expression"].push(expr);
         break;
       case "wait":
         node.Config = 1000;
-        break;      
+        break;
+      case "set_variable":
+        node.Config = {}; 
+        node.Config["Name"] = ""
+        node.Config["UpdateGlobal"] = false
+        node.Config["UpdateInputMsg"] = false
+        let variable = {};
+        variable["Value"] = 100;
+        variable["ValueType"] = "int";
+        node.Config["DefaultValue"] = variable
+        break; 
     }
     this.flow.Nodes.push(node) 
   }
@@ -124,6 +179,17 @@ export class FlowEditorComponent implements OnInit {
         this.flow = result;
     });      
   }
+  
+  showContextDialog() {
+    let dialogRef = this.dialog.open(ContextDialog,{
+            width: '95%',
+            data:this.flow
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      
+    });      
+  }
+ 
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
             width: '95%'
@@ -150,6 +216,7 @@ export class FlowEditorComponent implements OnInit {
           });
     dialogRef.afterClosed().subscribe(result => {
       // this.flow = result;
+      this.loadContext();
     });      
   }
 }
@@ -189,6 +256,40 @@ export class FlowSourceDialog {
     this.dialogRef.close(this.data);
     
   }
+}
+
+@Component({
+  selector: 'context-dialog',
+  templateUrl: 'context-dialog.html',
+  styleUrls: ['flow-editor.component.css']
+})
+export class ContextDialog {
+  localContext :string ;
+  globalContext : string;
+  constructor(public dialogRef: MdDialogRef<ContextDialog>,@Inject(MD_DIALOG_DATA) public data: Flow,private http : Http) {
+     this.http
+      .get(BACKEND_ROOT+'/fimp/flow/context/'+data.Id)
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+         this.localContext = JSON.stringify(result, null, 2);
+      });
+    
+    this.http
+      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+         this.globalContext = JSON.stringify(result, null, 2);
+      });
+      
+      
+    // this.localContext = JSON.stringify(data, null, 2)
+    // this.globalContext = JSON.stringify(data, null, 2)
+  }
+  
 }
 
 @Component({

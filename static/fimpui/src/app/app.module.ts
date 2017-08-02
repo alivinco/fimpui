@@ -10,8 +10,8 @@ import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { FlowComponent } from './flow/flow.component';
-import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog } from './flow-editor/flow-editor.component';
-import { FlowNodesComponent ,ActionNodeComponent } from './flow-nodes/flow-nodes.component';
+import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog } from './flow-editor/flow-editor.component';
+import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent } from './flow-nodes/flow-nodes.component';
 
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
@@ -81,6 +81,7 @@ export function mqttServiceFactory() {
     FlowSourceDialog,
     ServiceLookupDialog, 
     FlowRunDialog,
+    ContextDialog,
     TimelineComponent,
     ThingViewComponent,
     ThingsTableComponent,
@@ -90,7 +91,8 @@ export function mqttServiceFactory() {
     ThingIntfUiComponent,
     KeysPipe,
     FlowNodesComponent,
-    ActionNodeComponent
+    ActionNodeComponent,
+    SetVariableNodeComponent,
   ],
   imports: [
     BrowserModule,
@@ -107,7 +109,7 @@ export function mqttServiceFactory() {
     
   ],
   providers: [FimpService,ThingsDbService],
-  entryComponents:[AddDeviceDialog,FlowSourceDialog,FlowRunDialog,ServiceLookupDialog], 
+  entryComponents:[AddDeviceDialog,FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

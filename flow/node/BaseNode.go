@@ -10,6 +10,7 @@ type BaseNode struct {
 	ctx *model.Context
 	isStartNode bool    // true - if node is first in a flow
 	transport *fimpgo.MqttTransport
+
 }
 
 func (node *BaseNode) GetMetaNode()*model.MetaNode {

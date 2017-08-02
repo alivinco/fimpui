@@ -16,7 +16,13 @@
 .value-selector {
   /*padding: 0px;*/
   margin-bottom: 10px;
+  margin-top: 10px;
   width:200px;
+}
+
+.if-expression-div {
+  margin-bottom: 15px;
+  margin-top: 15px;
 }
 .example-header-image {
   background-size: cover;

@@ -56,6 +56,7 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		booleanOperator := ""
 		var finalResult bool
 		for i := range conf.Expression {
+
 			if conf.Expression[i].RightVariable.ValueType == "" {
 				return nil,errors.New("Right variable is not defined. IfNode is skipped.")
 			}
@@ -63,6 +64,11 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				conf.Expression[i].LeftVariable = model.Variable{ValueType:msg.Payload.ValueType,Value:msg.Payload.Value}
 			}else {
 				conf.Expression[i].LeftVariable ,err = node.ctx.GetVariable(conf.Expression[i].LeftVariableName)
+				if err != nil {
+					log.Error("<IfNode> Can't get variable from context.Error : ",err)
+					return nil,err
+				}
+				log.Debug(conf.Expression[i].LeftVariable)
 			}
 			if conf.Expression[i].LeftVariable.ValueType != conf.Expression[i].RightVariable.ValueType {
 				return nil,errors.New(" Right and left of expression have different types ")

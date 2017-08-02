@@ -12,36 +12,44 @@ type Flow struct {
 	Id                  string
 	Name                string
 	Description         string
-	globalContext       *model.Context  `json:"-"`
-	localContext        model.Context   `json:"-"`
-	currentNodeId       model.NodeID    `json:"-"`
-	currentMsg          *model.Message   `json:"-"`
-	currentNode         *model.Node `json:"-"`
+	FlowMeta 			*model.FlowMeta
+	globalContext       *model.Context
+	localContext        model.Context
+	currentNodeId       model.NodeID
+	currentMsg          *model.Message
+	currentNode         *model.Node
 	Nodes               []model.Node
-	msgPipeline         model.MsgPipeline           `json:"-"`
-	msgTransport        *fimpgo.MqttTransport `json:"-"`
-	activeSubscriptions []string              `json:"-"`
-	msgInStream         model.MsgPipeline           `json:"-"`
-	TriggerCounter      int64				  `json:"-"`
-	ErrorCounter        int64				  `json:"-"`
+	msgPipeline         model.MsgPipeline
+	msgTransport        *fimpgo.MqttTransport
+	activeSubscriptions []string
+	msgInStream         model.MsgPipeline
+	TriggerCounter      int64
+	ErrorCounter        int64
 	isFlowRunning       bool
+	State               string
 }
 
-func NewFlow(Id string, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
+func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
 	flow := Flow{globalContext: globalContext}
 	flow.msgPipeline = make(model.MsgPipeline)
 	flow.Nodes = make([]model.Node, 0)
 	flow.msgTransport = msgTransport
-	flow.localContext = model.NewContext()
+	flow.localContext = *model.NewContext(globalContext)
 	flow.localContext.IsFlowRunning = true
+	flow.initFromMetaFlow(&metaFlow)
 	return &flow
 }
 
-func (fl *Flow) InitFromMetaFlow(meta model.FlowMeta) {
+func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 	fl.Id = meta.Id
 	fl.Name = meta.Name
 	fl.Description = meta.Description
-	for _,metaNode := range meta.Nodes {
+	fl.FlowMeta = meta
+}
+
+func (fl *Flow) InitAllNodes() {
+	log.Infof("<Flow> ---------Initializing Flow Id = %s , Name = %s -----------",fl.Id,fl.Name)
+	for _,metaNode := range fl.FlowMeta.Nodes {
 		var newNode model.Node
 		log.Infof("<Flow> Loading node . Type = %s , Label = %s",metaNode.Type,metaNode.Label)
 		switch metaNode.Type {
@@ -63,6 +71,10 @@ func (fl *Flow) InitFromMetaFlow(meta model.FlowMeta) {
 			log.Errorf("<Flow> Node type %s can't be loaded . Error : %s",metaNode.Type,err)
 		}
 	}
+}
+
+func (fl*Flow) GetContext()*model.Context {
+	return &fl.localContext
 }
 
 func (fl *Flow) SetNodes(nodes []model.Node) {
@@ -166,12 +178,15 @@ func (fl *Flow) Run() {
 		}
 
 	}
+	fl.State = "STOPPED"
 	log.Infof("Flow was %s stopped.", fl.Name)
 
 }
 
+// Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
 func (fl *Flow) Start() error {
 	log.Info("<Flow> Starting flow : ", fl.Name)
+	fl.State = "STARTING"
 	fl.isFlowRunning = true
 	isFlowValid := false
 	// The Flow should have at least one trigger or wait node to avoid tight loop
@@ -183,6 +198,7 @@ func (fl *Flow) Start() error {
 	}
 	if isFlowValid{
 		go fl.Run()
+		fl.State = "RUNNING"
 		log.Infof("<Flow> Flow %s is running", fl.Name)
 		return nil
 	}
@@ -191,11 +207,13 @@ func (fl *Flow) Start() error {
 
 
 }
+// Terminates flow loop , stops goroutine .
 func (fl *Flow) Stop() {
 	log.Info("<Flow> Stopping flow  ", fl.Name)
 	fl.isFlowRunning = false
 	fl.msgInStream <- model.Message{}
 }
+
 func (fl *Flow) SetMessageStream(msgInStream model.MsgPipeline) {
 	fl.msgInStream = msgInStream
 }
