@@ -18,6 +18,7 @@ type SetVariableNodeConfig struct {
 	Name string
 	UpdateGlobal bool                    // true - update global variable ; false - update local variable
 	UpdateInputMsg bool               // true - update input message  ; false - update context variable
+	PersistOnUpdate bool              // true - is saved on disk ; false - in memory only
 	DefaultValue model.Variable
 }
 

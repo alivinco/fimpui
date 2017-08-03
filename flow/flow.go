@@ -189,23 +189,21 @@ func (fl *Flow) Start() error {
 	fl.State = "STARTING"
 	fl.isFlowRunning = true
 	isFlowValid := false
-	// The Flow should have at least one trigger or wait node to avoid tight loop
+	// Starting flow loop for every trigger.
 	for i := range fl.Nodes {
-		if fl.Nodes[i].GetMetaNode().Type == "wait" || fl.Nodes[i].GetMetaNode().Type == "trigger" {
+		if fl.Nodes[i].IsStartNode() {
+			go fl.Run()
 			isFlowValid = true
-			break
+			fl.State = "RUNNING"
+			log.Infof("<Flow> Flow %s is running", fl.Name)
 		}
 	}
-	if isFlowValid{
-		go fl.Run()
-		fl.State = "RUNNING"
-		log.Infof("<Flow> Flow %s is running", fl.Name)
-		return nil
+	if !isFlowValid{
+		fl.State = "STOPPED"
+		log.Errorf("<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
+		return errors.New("Flow should have at least one trigger or wait node")
 	}
-	log.Errorf("<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
-	return errors.New("Flow should have at least one trigger or wait node")
-
-
+	return nil
 }
 // Terminates flow loop , stops goroutine .
 func (fl *Flow) Stop() {
