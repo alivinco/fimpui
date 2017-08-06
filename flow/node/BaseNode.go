@@ -6,8 +6,10 @@ import (
 )
 
 type BaseNode struct {
+
 	meta model.MetaNode
 	ctx *model.Context
+	flowOpCtx *model.FlowOperationalContext
 	isStartNode bool    // true - if node is first in a flow
 	transport *fimpgo.MqttTransport
 

@@ -17,3 +17,9 @@ type FlowMeta struct {
 	Description string
 	Nodes       []MetaNode
 }
+
+type FlowOperationalContext struct {
+	FlowId string
+	IsFlowRunning bool
+	State string
+}

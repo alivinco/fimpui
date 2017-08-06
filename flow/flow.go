@@ -14,7 +14,7 @@ type Flow struct {
 	Description         string
 	FlowMeta 			*model.FlowMeta
 	globalContext       *model.Context
-	localContext        model.Context
+	opContext           model.FlowOperationalContext
 	currentNodeId       model.NodeID
 	currentMsg          *model.Message
 	currentNode         *model.Node
@@ -25,8 +25,6 @@ type Flow struct {
 	msgInStream         model.MsgPipeline
 	TriggerCounter      int64
 	ErrorCounter        int64
-	isFlowRunning       bool
-	State               string
 }
 
 func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
@@ -34,10 +32,15 @@ func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport
 	flow.msgPipeline = make(model.MsgPipeline)
 	flow.Nodes = make([]model.Node, 0)
 	flow.msgTransport = msgTransport
-	flow.localContext = *model.NewContext(globalContext)
-	flow.localContext.IsFlowRunning = true
+	flow.globalContext = globalContext
+	flow.opContext = model.FlowOperationalContext{}
 	flow.initFromMetaFlow(&metaFlow)
+	flow.globalContext.RegisterFlow(flow.Id)
 	return &flow
+}
+
+func (fl *Flow) CleanupBeforeDelete() {
+	fl.globalContext.UnregisterFlow(fl.Id)
 }
 
 func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
@@ -45,6 +48,7 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 	fl.Name = meta.Name
 	fl.Description = meta.Description
 	fl.FlowMeta = meta
+	fl.opContext.FlowId = meta.Id
 }
 
 func (fl *Flow) InitAllNodes() {
@@ -54,11 +58,11 @@ func (fl *Flow) InitAllNodes() {
 		log.Infof("<Flow> Loading node . Type = %s , Label = %s",metaNode.Type,metaNode.Label)
 		switch metaNode.Type {
 		case "trigger":
-			newNode = node.NewTriggerNode(metaNode,&fl.localContext,fl.msgTransport,&fl.activeSubscriptions,fl.msgInStream)
+			newNode = node.NewTriggerNode(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport,&fl.activeSubscriptions,fl.msgInStream)
 		default:
 			constructor ,ok := node.Registry[metaNode.Type]
 			if ok {
-				newNode = constructor(metaNode,&fl.localContext,fl.msgTransport)
+				newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
 			}else {
 				log.Errorf("<Flow> Node type = %s isn't supported",metaNode.Type)
 			}
@@ -74,7 +78,7 @@ func (fl *Flow) InitAllNodes() {
 }
 
 func (fl*Flow) GetContext()*model.Context {
-	return &fl.localContext
+	return fl.globalContext
 }
 
 func (fl *Flow) SetNodes(nodes []model.Node) {
@@ -124,11 +128,11 @@ func (fl *Flow) Run() {
 	}()
 
 	for {
-		if !fl.isFlowRunning {
+		if !fl.opContext.IsFlowRunning {
 			break
 		}
 		for i := range fl.Nodes {
-			if !fl.isFlowRunning {
+			if !fl.opContext.IsFlowRunning {
 				break
 			}
 			if fl.currentNodeId == "" && fl.Nodes[i].IsStartNode() {
@@ -141,7 +145,7 @@ func (fl *Flow) Run() {
 					log.Error("<Flow> TriggerNode failed with error :", err)
 					fl.currentNodeId = ""
 				}
-				if !fl.isFlowRunning {
+				if !fl.opContext.IsFlowRunning {
 					break
 				}
 				fl.TriggerCounter++
@@ -178,7 +182,7 @@ func (fl *Flow) Run() {
 		}
 
 	}
-	fl.State = "STOPPED"
+	fl.opContext.State = "STOPPED"
 	log.Infof("Flow was %s stopped.", fl.Name)
 
 }
@@ -186,20 +190,20 @@ func (fl *Flow) Run() {
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
 func (fl *Flow) Start() error {
 	log.Info("<Flow> Starting flow : ", fl.Name)
-	fl.State = "STARTING"
-	fl.isFlowRunning = true
+	fl.opContext.State = "STARTING"
+	fl.opContext.IsFlowRunning = true
 	isFlowValid := false
 	// Starting flow loop for every trigger.
 	for i := range fl.Nodes {
 		if fl.Nodes[i].IsStartNode() {
 			go fl.Run()
 			isFlowValid = true
-			fl.State = "RUNNING"
+			fl.opContext.State = "RUNNING"
 			log.Infof("<Flow> Flow %s is running", fl.Name)
 		}
 	}
 	if !isFlowValid{
-		fl.State = "STOPPED"
+		fl.opContext.State = "STOPPED"
 		log.Errorf("<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
 		return errors.New("Flow should have at least one trigger or wait node")
 	}
@@ -208,7 +212,7 @@ func (fl *Flow) Start() error {
 // Terminates flow loop , stops goroutine .
 func (fl *Flow) Stop() {
 	log.Info("<Flow> Stopping flow  ", fl.Name)
-	fl.isFlowRunning = false
+	fl.opContext.IsFlowRunning = false
 	fl.msgInStream <- model.Message{}
 }
 

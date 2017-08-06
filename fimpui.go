@@ -81,7 +81,10 @@ func main() {
 	log.Info("--------------Starting FIMPUI----------------")
 	//---------FLOW------------------------
 	log.Info("<main> Starting Flow manager")
-	flowManager := flow.NewManager(configs)
+	flowManager,err := flow.NewManager(configs)
+	if err != nil {
+		log.Error("Can't Init Flow manager . Error :",err)
+	}
 	flowManager.InitMessagingTransport()
 	err = flowManager.LoadAllFlowsFromStorage()
 	if err != nil {
@@ -211,14 +214,9 @@ func main() {
 		return c.JSON(http.StatusOK, resp)
 	})
 
-	e.GET("/fimp/flow/context/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		ctx := flowManager.GetFlowById(id).GetContext().GetRecords()
-		return c.JSON(http.StatusOK, ctx)
-	})
-
-	e.GET("/fimp/flow/context/global", func(c echo.Context) error {
-		ctx := flowManager.GetGlobalContext().GetRecords()
+	e.GET("/fimp/flow/context/:flowid", func(c echo.Context) error {
+		id := c.Param("flowid")
+		ctx := flowManager.GetGlobalContext().GetRecords(id)
 		return c.JSON(http.StatusOK, ctx)
 	})
 

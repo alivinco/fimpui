@@ -18,7 +18,7 @@ type Manager struct {
 	flowRegistry  map[string]*Flow
 	msgStreams    map[string]model.MsgPipeline
 	msgTransport  *fimpgo.MqttTransport
-	globalContext model.Context
+	globalContext *model.Context
 	config        *fimpuimodel.FimpUiConfigs
 }
 
@@ -31,12 +31,14 @@ type FlowListItem struct {
 	ErrorCounter int64
 }
 
-func NewManager(config *fimpuimodel.FimpUiConfigs) *Manager {
+func NewManager(config *fimpuimodel.FimpUiConfigs) (*Manager,error) {
+	var err error
 	man := Manager{config:config}
 	man.msgStreams = make(map[string]model.MsgPipeline)
 	man.flowRegistry = make(map[string]*Flow)
-	man.globalContext = *model.NewContext(nil)
-	return &man
+	man.globalContext,err = model.NewContextDB(config.ContextStorageDir)
+	man.globalContext.RegisterFlow("global")
+	return &man,err
 }
 
 func (mg *Manager) InitMessagingTransport() {
@@ -78,7 +80,7 @@ func (mg *Manager) GetNewStream(Id string) model.MsgPipeline {
 }
 
 func (mg *Manager) GetGlobalContext() *model.Context {
-	return &mg.globalContext
+	return mg.globalContext
 }
 
 func (mg *Manager) GetFlowFileNameById(id string ) string {
@@ -91,7 +93,6 @@ func (mg *Manager) LoadAllFlowsFromStorage () error {
 		log.Error(err)
 		return err
 	}
-
 	for _, file := range files {
 		mg.LoadFlowFromFile(filepath.Join(mg.config.FlowStorageDir,file.Name()))
 	}
@@ -117,7 +118,7 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 		return err
 	}
 
-	flow := NewFlow(flowMeta, &mg.globalContext, mg.msgTransport)
+	flow := NewFlow(flowMeta, mg.globalContext, mg.msgTransport)
 	flow.SetMessageStream(mg.GetNewStream(flow.Id))
 	flow.InitAllNodes()
 	mg.flowRegistry[flow.Id] = flow
@@ -164,7 +165,7 @@ func (mg *Manager) GetFlowList() []FlowListItem{
 	var c int
 	for _,flow := range mg.flowRegistry {
 		log.Info("Adding flow with id = ",flow.Id)
-		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter,State:flow.State}
+		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter,State:flow.opContext.State}
 		c++
 	}
 	return response
@@ -182,10 +183,13 @@ func (mg *Manager) UnloadFlow(id string) {
 }
 
 func (mg *Manager) DeleteFlow(id string) {
-	if mg.GetFlowById(id) == nil {
+	flow := mg.GetFlowById(id)
+	if flow == nil {
 		return
 	}
+	flow.CleanupBeforeDelete()
 	mg.UnloadFlow(id)
+
 	os.Remove(mg.GetFlowFileNameById(id))
 }
 

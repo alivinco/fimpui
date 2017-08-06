@@ -80,10 +80,10 @@
                   <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
                     
                     <div style="margin-top: 10px;">
-                    <md-select style="width: 120px" class="value-selector" placeholder="Left value"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].LeftVariableName" >
+                    <md-select style="width: 120px" class="value-selector" (change)="variableSelected($event,flow.Nodes[index].Config.Expression[index2])" placeholder="Left value" [(ngModel)]="flow.Nodes[index].Config.Expression[index2].LeftVariableName" >
                         <md-option value = "">Default Input</md-option>
                         <md-option *ngFor="let vari of localVars" [value]="vari" >{{vari}}</md-option>
-                        <md-option *ngFor="let vari of globalVars" [value]="vari" >Shared:{{vari}}</md-option>
+                        <md-option *ngFor="let vari of globalVars" value="__global__{{vari}}">Shared:{{vari}}</md-option>
                     </md-select>
 
                     <md-select style="width: 120px" class="value-selector" placeholder="Operand"[(ngModel)]="flow.Nodes[index].Config.Expression[index2].Operand" >

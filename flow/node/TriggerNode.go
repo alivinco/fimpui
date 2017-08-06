@@ -15,9 +15,10 @@ type TriggerNode struct {
 	msgInStream model.MsgPipeline
 }
 
-func NewTriggerNode(meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport,activeSubscriptions *[]string,msgInStream model.MsgPipeline) model.Node {
+func NewTriggerNode(flowOpCtx *model.FlowOperationalContext ,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport,activeSubscriptions *[]string,msgInStream model.MsgPipeline) model.Node {
 	node := TriggerNode{ctx:ctx,transport:transport,activeSubscriptions:activeSubscriptions}
 	node.isStartNode = true
+	node.flowOpCtx = flowOpCtx
 	node.meta = meta
 	node.msgInStream = msgInStream
 	node.initSubscriptions()
@@ -50,7 +51,7 @@ func (node *TriggerNode) LoadNodeConfig() error {
 func (node *TriggerNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	for inMsg := range node.msgInStream {
 				log.Info("<Node> New message from msgInStream")
-				if !node.ctx.IsFlowRunning {
+				if !node.flowOpCtx.IsFlowRunning {
 					break
 				}
 				if node.meta.Type == "trigger" {
@@ -66,42 +67,3 @@ func (node *TriggerNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	return nil, nil
 }
 
-
-//func TriggerNode(ctx *model.Context,nodes []model.MetaNode, msgInStream model.MsgPipeline, transport *fimpgo.MqttTransport, activeSubscriptions *[]string) (model.Message, *model.MetaNode, error) {
-//	for i := range nodes {
-//		if nodes[i].Type == "trigger" {
-//			log.Info("<Node> TriggerNode is listening for events . Name = ", nodes[i].Label)
-//			needToSubscribe := true
-//			for i := range *activeSubscriptions {
-//				if (*activeSubscriptions)[i] == nodes[i].Address {
-//					needToSubscribe = false
-//					break
-//				}
-//			}
-//			if needToSubscribe {
-//				log.Info("<Node> Subscribing for service by address :", nodes[i].Address)
-//				transport.Subscribe(nodes[i].Address)
-//				*activeSubscriptions = append(*activeSubscriptions, nodes[i].Address)
-//			}
-//		}
-//	}
-//
-//	for msg := range msgInStream {
-//		log.Info("<Node> New message from msgInStream")
-//		if !ctx.IsFlowRunning {
-//			break
-//		}
-//		for i := range nodes {
-//			if nodes[i].Type == "trigger" {
-//				if (msg.AddressStr == nodes[i].Address || nodes[i].Address == "*") &&
-//					(msg.Payload.Service == nodes[i].Service || nodes[i].Service == "*") &&
-//					(msg.Payload.Type == nodes[i].ServiceInterface || nodes[i].ServiceInterface == "*") {
-//					//log.Info("New message.")
-//					return msg, &nodes[i], nil
-//				}
-//			}
-//
-//		}
-//	}
-//	return model.Message{}, nil, nil
-//}

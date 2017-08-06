@@ -5,7 +5,7 @@ import (
 	"github.com/alivinco/fimpui/flow/model"
 )
 
-type Constructor func(meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node
+type Constructor func(context *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node
 
 var Registry = map[string]Constructor {
 	"if":NewIfNode,

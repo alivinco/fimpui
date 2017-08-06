@@ -51,6 +51,7 @@ export class FlowEditorComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
          this.localVars = [];
+         
          for (var key in result){
             this.localVars.push(result[key].Name);
          }
@@ -69,6 +70,13 @@ export class FlowEditorComponent implements OnInit {
          }
       });  
   }  
+  variableSelected(event:any,config:any){
+    if (config.LeftVariableName.indexOf("__global__")!=-1) {
+      config.LeftVariableName = config.LeftVariableName.replace("__global__","");
+      config.LeftVariableIsGlobal = true;
+    }
+  }
+
   saveFlow() {
     console.dir(this.flow)
     let headers = new Headers({ 'Content-Type': 'application/json' });
@@ -146,6 +154,7 @@ export class FlowEditorComponent implements OnInit {
         let rightVariable = {};
         expr["Operand"] = "eq";
         expr["LeftVariableName"] = "";
+        expr["LeftVariableIsGlobal"] = false;
         rightVariable["Value"] = 100;
         rightVariable["ValueType"] = "int";
         expr["RightVariable"] = rightVariable

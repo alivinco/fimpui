@@ -13,9 +13,10 @@ type ActionNode struct {
 	transport *fimpgo.MqttTransport
 }
 
-func NewActionNode(meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
+func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
 	node := ActionNode{ctx:ctx,transport:transport}
 	node.meta = meta
+	node.flowOpCtx = flowOpCtx
 	return &node
 }
 

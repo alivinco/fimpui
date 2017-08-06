@@ -81,7 +81,8 @@ func TestIfFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := model.Context{IsFlowRunning:true}
+	ctx := model.Context{}
+
 	flowMeta := model.FlowMeta{Id:"1234",Name:"If flow test"}
 	node := model.MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
 	flowMeta.Nodes = append(flowMeta.Nodes,node)
@@ -192,7 +193,7 @@ func TestSetVariableFlow(t *testing.T) {
 	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
 	mqtt.Publish(&adr, msg)
 	time.Sleep(time.Second * 1)
-	variable,err := flow.GetContext().GetVariable("volume")
+	variable,err := flow.GetContext().GetVariable("volume","1")
 	if err != nil {
 		t.Error("Variable is not set",err)
 	}

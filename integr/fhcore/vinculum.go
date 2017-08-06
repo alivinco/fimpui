@@ -1,12 +1,12 @@
 package fhcore
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 	"math/rand"
 	"net/url"
 	"time"
+	log "github.com/Sirupsen/logrus"
 )
 
 type VinculumClient struct {
@@ -23,13 +23,18 @@ func NewVinculumClient(host string) *VinculumClient {
 }
 
 func (vc *VinculumClient) Connect() error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("<VincClient> Process CRASHED with error : ",r)
+		}
+	}()
 	vc.runningRequests = make(map[int]chan VinculumMsg)
 	u := url.URL{Scheme: "ws", Host: vc.host, Path: "/ws"}
-	fmt.Println("Connecting to %s", u.String())
+	log.Infof("<VincClient> Connecting to %s", u.String())
 	var err error
 	vc.client, _, err = websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
-		fmt.Println("dial:", err)
+		log.Error("<VincClient> Dial error",err)
 		vc.isRunning = false
 		return err
 	}
@@ -50,7 +55,7 @@ func (vc *VinculumClient) Connect() error {
 			if vincMsg.Msg.Type == "response" {
 				for k, vchan := range vc.runningRequests {
 					if k == vincMsg.Msg.Data.RequestID {
-						fmt.Println("Response match")
+						//log.Debugf("Connecting to %s", u.String())
 						vchan <- vincMsg
 					}
 				}
@@ -79,7 +84,7 @@ func (vc *VinculumClient) GetMessage(components []string) (VinculumMsg, error) {
 		delete(vc.runningRequests, reqId)
 		return msg, nil
 	case <-time.After(time.Second * 5):
-		fmt.Println("timeout 5 sec")
+		log.Info("<VincClient> imeout 5 sec")
 	}
 	delete(vc.runningRequests, reqId)
 
