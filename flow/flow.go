@@ -17,12 +17,13 @@ type Flow struct {
 	opContext           model.FlowOperationalContext
 	currentNodeId       model.NodeID
 	currentMsg          *model.Message
-	currentNode         *model.Node
+	currentNode         model.Node
 	Nodes               []model.Node
 	msgPipeline         model.MsgPipeline
 	msgTransport        *fimpgo.MqttTransport
 	activeSubscriptions []string
 	msgInStream         model.MsgPipeline
+	localMsgInStream    map[model.NodeID]model.MsgPipeline
 	TriggerCounter      int64
 	ErrorCounter        int64
 }
@@ -49,6 +50,7 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 	fl.Description = meta.Description
 	fl.FlowMeta = meta
 	fl.opContext.FlowId = meta.Id
+	fl.localMsgInStream = make(map[model.NodeID]model.MsgPipeline)
 }
 
 func (fl *Flow) InitAllNodes() {
@@ -56,16 +58,18 @@ func (fl *Flow) InitAllNodes() {
 	for _,metaNode := range fl.FlowMeta.Nodes {
 		var newNode model.Node
 		log.Infof("<Flow> Loading node . Type = %s , Label = %s",metaNode.Type,metaNode.Label)
-		switch metaNode.Type {
-		case "trigger":
-			newNode = node.NewTriggerNode(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport,&fl.activeSubscriptions,fl.msgInStream)
-		default:
-			constructor ,ok := node.Registry[metaNode.Type]
-			if ok {
-				newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
-			}else {
-				log.Errorf("<Flow> Node type = %s isn't supported",metaNode.Type)
+		constructor ,ok := node.Registry[metaNode.Type]
+		if ok {
+			newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
+			if newNode.IsMsgReactorNode() {
+				// Creating channel for each message reactor
+				nodeChannel := make(model.MsgPipeline)
+				fl.localMsgInStream[metaNode.Id] = nodeChannel
+				// Configuring input message stream for nodes like trigger , receive , etc.
+				newNode.ConfigureInStream(&fl.activeSubscriptions,nodeChannel)
 			}
+		}else {
+			log.Errorf("<Flow> Node type = %s isn't supported",metaNode.Type)
 		}
 		err := newNode.LoadNodeConfig()
 		if err == nil {
@@ -91,7 +95,7 @@ func (fl *Flow) ReloadNodes(nodes []model.Node) {
 	fl.Start()
 }
 
-func (fl *Flow)GetCurrentNode()*model.Node {
+func (fl *Flow)GetCurrentNode()model.Node {
 	return fl.currentNode
 }
 
@@ -137,6 +141,8 @@ func (fl *Flow) Run() {
 			}
 			if fl.currentNodeId == "" && fl.Nodes[i].IsStartNode() {
 				log.Infof("<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
+				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
+				fl.currentNode = fl.Nodes[i]
 				var err error
 				newMsg := model.Message{}
 				nextNodes, err := fl.Nodes[i].OnInput (&newMsg)
@@ -160,7 +166,7 @@ func (fl *Flow) Run() {
 				var err error
 				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
-				fl.currentNode = &fl.Nodes[i]
+				fl.currentNode = fl.Nodes[i]
 				if err != nil {
 					fl.ErrorCounter++
 					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNodeId,err)
@@ -187,6 +193,29 @@ func (fl *Flow) Run() {
 
 }
 
+func (fl *Flow) InStreamMsgRouter() {
+	// fetching all messages
+	for inMsg := range fl.msgInStream {
+		//log.Debug("<Flow> Router : New message from msgInStream")
+		if !fl.opContext.IsFlowRunning {
+			break
+		}
+		currNode := fl.currentNode.GetMetaNode()
+		// doing filtering
+		if (inMsg.AddressStr == currNode.Address || currNode.Address == "*") &&
+			(inMsg.Payload.Service == currNode.Service || currNode.Service == "*") &&
+			(inMsg.Payload.Type == currNode.ServiceInterface || currNode.ServiceInterface == "*") {
+			// sending message to each channel
+			select {
+				case fl.localMsgInStream[currNode.Id] <- inMsg:
+					log.Debug("<Flow> Router: Message was sent to Node Id = ", fl.currentNodeId)
+				default:
+					log.Debug("<Flow> Router: Message is dropped (no listeners).")
+			}
+		}
+	}
+}
+
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
 func (fl *Flow) Start() error {
 	log.Info("<Flow> Starting flow : ", fl.Name)
@@ -197,6 +226,7 @@ func (fl *Flow) Start() error {
 	for i := range fl.Nodes {
 		if fl.Nodes[i].IsStartNode() {
 			go fl.Run()
+			go fl.InStreamMsgRouter()
 			isFlowValid = true
 			fl.opContext.State = "RUNNING"
 			log.Infof("<Flow> Flow %s is running", fl.Name)

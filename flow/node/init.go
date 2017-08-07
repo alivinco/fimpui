@@ -8,6 +8,8 @@ import (
 type Constructor func(context *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node
 
 var Registry = map[string]Constructor {
+	"trigger":NewTriggerNode,
+	"receive":NewReceiveNode,
 	"if":NewIfNode,
 	"action":NewActionNode,
 	"wait":NewWaitNode,

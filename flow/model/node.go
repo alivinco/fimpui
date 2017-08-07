@@ -1,6 +1,5 @@
 package model
 
-
 type NodeID string
 
 type MetaNode struct {
@@ -24,6 +23,8 @@ type Node interface {
 	GetNextTimeoutNode()NodeID
 	LoadNodeConfig() error
 	IsStartNode() bool
+	IsMsgReactorNode() bool
+    ConfigureInStream(activeSubscriptions *[]string,msgInStream MsgPipeline)
 }
 
 

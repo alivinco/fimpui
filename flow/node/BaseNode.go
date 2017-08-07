@@ -10,7 +10,8 @@ type BaseNode struct {
 	meta model.MetaNode
 	ctx *model.Context
 	flowOpCtx *model.FlowOperationalContext
-	isStartNode bool    // true - if node is first in a flow
+	isStartNode bool   // true - if node is first in a flow
+	isMsgReactor bool  // true - node reacts on messages and requires input stream .
 	transport *fimpgo.MqttTransport
 
 }
@@ -32,4 +33,11 @@ func (node *BaseNode) GetNextTimeoutNode()model.NodeID{
 
 func (node *BaseNode) IsStartNode() bool {
 	return node.isStartNode
+}
+
+func (node *BaseNode) IsMsgReactorNode() bool {
+	return node.isMsgReactor
+}
+
+func (node *BaseNode) ConfigureInStream(activeSubscriptions *[]string,msgInStream model.MsgPipeline) {
 }
