@@ -3,14 +3,11 @@ package flow
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
-	"testing"
-	"time"
-	//"io/ioutil"
-	//"github.com/alivinco/fimpui/flow/node"
 	"github.com/alivinco/fimpui/flow/model"
 	flownode "github.com/alivinco/fimpui/flow/node"
-	"encoding/json"
-	"io/ioutil"
+	"os"
+	"testing"
+	"time"
 )
 
 var msgChan = make(model.MsgPipeline)
@@ -45,27 +42,28 @@ func TestWaitFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := model.Context{}
-
+	ctx, err := model.NewContextDB("TestWaitFlow.db")
 
 	flowMeta := model.FlowMeta{}
 	node := model.MetaNode{Id: "1", Label: "Lux trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	//node = model.MetaNode{Id: "1.1", Label: "Button trigger 2", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:299_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
-	//flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	// Node
 	node = model.MetaNode{Id: "2", Label: "Bulb 1", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "2.1"}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	// Node
 	node = model.MetaNode{Id: "2.1", Label: "Waiting for 500mil", Type: "wait", SuccessTransition: "3", Config: float64(200)}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	// Node
 	node = model.MetaNode{Id: "3", Label: "Bulb 2", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: ""}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	flow := NewFlow(flowMeta, &ctx, mqtt)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 	flow.InitAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	sendMsg(mqtt)
 	time.Sleep(time.Second * 5)
+	os.Remove("TestWaitFlow.db")
 
 }
 
@@ -81,27 +79,40 @@ func TestIfFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := model.Context{}
+	ctx, err := model.NewContextDB("TestIfFlow.db")
 
-	flowMeta := model.FlowMeta{Id:"1234",Name:"If flow test"}
+	flowMeta := model.FlowMeta{Id: "TestIfFlow", Name: "If flow test"}
+
 	node := model.MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{
-		{ RightVariable:model.Variable{Value: int64(100), ValueType:"int"}, Operand: "gt" ,BooleanOperator:"and"},
-		{ RightVariable:model.Variable{Value: int64(200), ValueType:"int"}, Operand: "lt" }}}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	node = model.MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: model.Variable{ValueType: "bool", Value: true}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	node = model.MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: model.Variable{ValueType: "bool", Value: true}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
-	data, err := json.Marshal(flowMeta)
-	if err == nil {
-		ioutil.WriteFile("testflow.json", data, 0644)
-	}
-	flow := NewFlow(flowMeta, &ctx, mqtt)
+	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{
+		{RightVariable: model.Variable{Value: int64(100), ValueType: "int"}, Operand: "gt", BooleanOperator: "and"},
+		{RightVariable: model.Variable{Value: int64(200), ValueType: "int"}, Operand: "lt"}}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "4",
+		Config: model.Variable{ValueType: "bool", Value: true}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "5",
+		Config: model.Variable{ValueType: "bool", Value: true}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "mode", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "correct", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "5", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "mode", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "wrong", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	//data, err := json.Marshal(flowMeta)
+	//if err == nil {
+	//	ioutil.WriteFile("testflow.json", data, 0644)
+	//}
+
+	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 	flow.InitAllNodes()
 	flow.Start()
@@ -113,9 +124,20 @@ func TestIfFlow(t *testing.T) {
 	mqtt.Publish(&adr, msg)
 
 	// end
-	time.Sleep(time.Second * 5)
-
+	time.Sleep(time.Second * 1)
+	variable, err := flow.GetContext().GetVariable("mode", "TestIfFlow")
+	if err != nil {
+		t.Error("Variable is not set", err)
+	}
+	if variable.Value.(string) == "correct" {
+		t.Log("Ok , variable is = ", variable.Value.(string))
+	} else {
+		t.Error("Wrong value")
+	}
+	flow.Stop()
+	os.Remove("TestIfFlow.db")
 }
+
 //
 func TestNewFlow3(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
@@ -129,20 +151,25 @@ func TestNewFlow3(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := model.Context{}
-	flowMeta := model.FlowMeta{}
+	ctx, err := model.NewContextDB("TestNewFlow3.db")
+	flowMeta := model.FlowMeta{Id: "TestNewFlow3"}
+
 	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "1.1"}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
 	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{
-		{ RightVariable:model.Variable{Value: false, ValueType: "bool"}, Operand: "eq"}}}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+		{RightVariable: model.Variable{Value: false, ValueType: "bool"}, Operand: "eq"}}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
 	node = model.MetaNode{Id: "2", Label: "Lights ON", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
 		Config: model.Variable{ValueType: "bool", Value: true}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
 	node = model.MetaNode{Id: "3", Label: "Lights OFF", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
 		Config: model.Variable{ValueType: "bool", Value: false}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	flow := NewFlow(flowMeta, &ctx, mqtt)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 	flow.InitAllNodes()
 	flow.Start()
@@ -156,6 +183,7 @@ func TestNewFlow3(t *testing.T) {
 	flow.Stop()
 	// end
 	time.Sleep(time.Second * 2)
+	os.Remove("TestNewFlow3.db")
 
 }
 
@@ -171,18 +199,20 @@ func TestSetVariableFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx := model.Context{}
-	flowMeta := model.FlowMeta{}
+	ctx, err := model.NewContextDB("TestSetVariableFlow.db")
+	flowMeta := model.FlowMeta{Id: "TestSetVariableFlow"}
+
 	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
 	node = model.MetaNode{Id: "2", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
-		Config: flownode.SetVariableNodeConfig{Name: "volume", UpdateGlobal:false,UpdateInputMsg:false,DefaultValue:model.Variable{Value:65,ValueType:"int"}}}
-	flowMeta.Nodes = append(flowMeta.Nodes,node)
-	data, err := json.Marshal(flowMeta)
-	if err == nil {
-		ioutil.WriteFile("testflow2.json", data, 0644)
-	}
-	flow := NewFlow(flowMeta, &ctx, mqtt)
+		Config: flownode.SetVariableNodeConfig{Name: "volume", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: 65, ValueType: "int"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	//data, err := json.Marshal(flowMeta)
+	//if err == nil {
+	//	ioutil.WriteFile("testflow2.json", data, 0644)
+	//}
+	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
 	flow.InitAllNodes()
 	flow.Start()
@@ -193,17 +223,18 @@ func TestSetVariableFlow(t *testing.T) {
 	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
 	mqtt.Publish(&adr, msg)
 	time.Sleep(time.Second * 1)
-	variable,err := flow.GetContext().GetVariable("volume","1")
+	variable, err := flow.GetContext().GetVariable("volume", "TestSetVariableFlow")
 	if err != nil {
-		t.Error("Variable is not set",err)
+		t.Error("Variable is not set", err)
 	}
 	if variable.Value.(int) != 65 {
 		t.Error("Wrong value")
-	}else {
-		t.Log("Ok , variable is = ",variable.Value.(int))
+	} else {
+		t.Log("Ok , variable is = ", variable.Value.(int))
 	}
 	flow.Stop()
 	// end
 	time.Sleep(time.Second * 2)
+	os.Remove("TestSetVariableFlow.db")
 
 }

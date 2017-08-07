@@ -12,12 +12,15 @@ import (
 func TestManager_LoadFlowFromFile(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	config := model.FimpUiConfigs{MqttServerURI:"tcp://localhost:1883",FlowStorageDir:"./flows"}
-	man := NewManager(&config)
+	man,err := NewManager(&config)
+	if err != nil {
+		t.Error(err)
+	}
 	man.InitMessagingTransport()
 	man.LoadFlowFromFile("testflow.json")
 
 	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
-	err := mqtt.Start()
+	err = mqtt.Start()
 	t.Log("Connected")
 	if err != nil {
 		t.Error("Error while connecting to broker ", err)
@@ -42,12 +45,15 @@ func TestManager_LoadFlowFromFile(t *testing.T) {
 func TestManager_LoadAllFlowsFromStorage(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	config := model.FimpUiConfigs{MqttServerURI:"tcp://localhost:1883",FlowStorageDir:"./flows"}
-	man := NewManager(&config)
+	man,err := NewManager(&config)
+	if err != nil {
+		t.Error(err)
+	}
 	man.InitMessagingTransport()
 	man.LoadAllFlowsFromStorage()
 
 	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
-	err := mqtt.Start()
+	err = mqtt.Start()
 	t.Log("Connected")
 	if err != nil {
 		t.Error("Error while connecting to broker ", err)
@@ -72,7 +78,10 @@ func TestManager_LoadAllFlowsFromStorage(t *testing.T) {
 func TestManager_GenerateNewFlow(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	config := model.FimpUiConfigs{MqttServerURI:"tcp://localhost:1883",FlowStorageDir:"../var/flow_storage"}
-	man := NewManager(&config)
+	man,err := NewManager(&config)
+	if err != nil {
+		t.Error(err)
+	}
 	flow :=  man.GenerateNewFlow()
 	data, _ := json.Marshal(flow)
 	man.UpdateFlowFromJsonAndSaveToStorage(flow.Id,data)
@@ -81,7 +90,10 @@ func TestManager_GenerateNewFlow(t *testing.T) {
 func TestManager_GetFlowList(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	config := model.FimpUiConfigs{MqttServerURI:"tcp://localhost:1883",FlowStorageDir:"./flows"}
-	man := NewManager(&config)
+	man,err := NewManager(&config)
+	if err != nil {
+		t.Error(err)
+	}
 	man.InitMessagingTransport()
 	man.LoadAllFlowsFromStorage()
 	flows := man.GetFlowList()

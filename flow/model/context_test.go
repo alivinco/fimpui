@@ -7,7 +7,7 @@ func TestContext_SetVariable(t *testing.T) {
 	if err != nil {
 		t.Error("Fail to create context ",err)
 	}
-	ctx.SetVariable("mode","string","away","global",false)
+	ctx.SetVariable("mode","string","away","home mode","global",false)
 	ctx.Close()
 
 	ctx ,err = NewContextDB("context_test_1.db")

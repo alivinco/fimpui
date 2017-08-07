@@ -36,7 +36,6 @@ func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport
 	flow.globalContext = globalContext
 	flow.opContext = model.FlowOperationalContext{}
 	flow.initFromMetaFlow(&metaFlow)
-	flow.globalContext.RegisterFlow(flow.Id)
 	return &flow
 }
 
@@ -51,6 +50,7 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 	fl.FlowMeta = meta
 	fl.opContext.FlowId = meta.Id
 	fl.localMsgInStream = make(map[model.NodeID]model.MsgPipeline)
+	fl.globalContext.RegisterFlow(fl.Id)
 }
 
 func (fl *Flow) InitAllNodes() {

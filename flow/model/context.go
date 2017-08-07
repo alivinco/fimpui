@@ -96,7 +96,7 @@ func (ctx *Context) UnregisterFlow(flowId string) error {
 //}
 
 func (ctx *Context) SetVariable(name string,valueType string,value interface{},description string,flowId string,inMemory bool ) error {
-	rec := ContextRecord{Name:name,UpdatedAt:time.Now(),Variable: Variable{ValueType:valueType,Value:value}}
+	rec := ContextRecord{Name:name,UpdatedAt:time.Now(),Description:description,Variable: Variable{ValueType:valueType,Value:value}}
 	return ctx.PutRecord(&rec,flowId,inMemory)
 }
 
