@@ -34,7 +34,7 @@ func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport
 	flow.Nodes = make([]model.Node, 0)
 	flow.msgTransport = msgTransport
 	flow.globalContext = globalContext
-	flow.opContext = model.FlowOperationalContext{}
+	flow.opContext = model.FlowOperationalContext{NodeIsReady:make(chan bool),NodeControlSignalChannel:make(chan int)}
 	flow.initFromMetaFlow(&metaFlow)
 	return &flow
 }
@@ -62,6 +62,7 @@ func (fl *Flow) InitAllNodes() {
 		if ok {
 			newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
 			if newNode.IsMsgReactorNode() {
+				log.Debug("<Flow> Creatin a chnannel for node id = ",metaNode.Id)
 				// Creating channel for each message reactor
 				nodeChannel := make(model.MsgPipeline)
 				fl.localMsgInStream[metaNode.Id] = nodeChannel
@@ -121,6 +122,13 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 	return false
 }
 
+func (fl *Flow) SignalNodeIsReady(){
+	select {
+	case fl.opContext.NodeIsReady <- true:
+	default:
+	}
+}
+
 func (fl *Flow) Run() {
 	var transitionNodeId model.NodeID
 	defer func() {
@@ -140,10 +148,11 @@ func (fl *Flow) Run() {
 				break
 			}
 			if fl.currentNodeId == "" && fl.Nodes[i].IsStartNode() {
+				var err error
 				log.Infof("<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = fl.Nodes[i]
-				var err error
+				fl.SignalNodeIsReady()
 				newMsg := model.Message{}
 				nextNodes, err := fl.Nodes[i].OnInput (&newMsg)
 				fl.currentMsg = &newMsg
@@ -155,7 +164,7 @@ func (fl *Flow) Run() {
 					break
 				}
 				fl.TriggerCounter++
-				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
+				//fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				transitionNodeId = nextNodes[0]
 				if !fl.IsNodeIdValid(fl.currentNodeId, transitionNodeId) {
 					log.Errorf("Unknown transition mode %s.Switching back to first node", transitionNodeId)
@@ -164,9 +173,10 @@ func (fl *Flow) Run() {
 				log.Debug("<Flow> Transition from Trigger to node = ", transitionNodeId)
 			} else if fl.Nodes[i].GetMetaNode().Id == transitionNodeId {
 				var err error
-				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = fl.Nodes[i]
+				fl.SignalNodeIsReady()
+				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
 				if err != nil {
 					fl.ErrorCounter++
 					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNodeId,err)
@@ -189,17 +199,18 @@ func (fl *Flow) Run() {
 
 	}
 	fl.opContext.State = "STOPPED"
-	log.Infof("Flow was %s stopped.", fl.Name)
+	log.Infof("<Flow> Runner for flow %s stopped.", fl.Name)
 
 }
 
 func (fl *Flow) InStreamMsgRouter() {
-	// fetching all messages
+	// fetching all messages from upstream
 	for inMsg := range fl.msgInStream {
-		//log.Debug("<Flow> Router : New message from msgInStream")
+		log.Debug("<Flow> Router : New message from msgInStream")
 		if !fl.opContext.IsFlowRunning {
 			break
 		}
+		log.Debug("<Flow> Router: Current Node Id = ", fl.currentNodeId)
 		currNode := fl.currentNode.GetMetaNode()
 		// doing filtering
 		if (inMsg.AddressStr == currNode.Address || currNode.Address == "*") &&
@@ -212,8 +223,16 @@ func (fl *Flow) InStreamMsgRouter() {
 				default:
 					log.Debug("<Flow> Router: Message is dropped (no listeners).")
 			}
+		}else {
+			log.Debug("<Flow> Router : No routing target")
 		}
+		// Wait while node is ready to accept new command .
+		<- fl.opContext.NodeIsReady
+		log.Debug("<Flow> Router : Is ready for next message.")
+
 	}
+	log.Infof("<Flow> InStreamMsgRouter for flow %s was stopped.", fl.Name)
+
 }
 
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
@@ -243,7 +262,13 @@ func (fl *Flow) Start() error {
 func (fl *Flow) Stop() {
 	log.Info("<Flow> Stopping flow  ", fl.Name)
 	fl.opContext.IsFlowRunning = false
+	select {
+	case fl.opContext.NodeControlSignalChannel <- model.SIGNAL_STOP:
+	default:
+		log.Debug("<Flow> No signal listener.")
+	}
 	fl.msgInStream <- model.Message{}
+	log.Info("<Flow> Stooped .  ", fl.Name)
 }
 
 func (fl *Flow) SetMessageStream(msgInStream model.MsgPipeline) {

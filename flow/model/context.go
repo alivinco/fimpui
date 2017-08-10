@@ -9,6 +9,7 @@ import (
 	"github.com/boltdb/bolt"
 	log "github.com/Sirupsen/logrus"
 	"encoding/gob"
+	"github.com/pkg/errors"
 )
 
 type Variable struct {
@@ -121,7 +122,12 @@ func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) e
 
 func (ctx *Context) GetVariable(name string,flowId string) (Variable,error) {
 	rec , err := ctx.GetRecord(name,flowId)
-	return rec.Variable , err
+	if err == nil {
+		return rec.Variable , err
+	}else {
+		return Variable{},err
+	}
+
 }
 
 func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) {
@@ -135,7 +141,11 @@ func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) 
 	ctx.db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
 			data := b.Get([]byte(name))
-			ctxRec,err = ctx.decodeRecord(data)
+		    if data == nil {
+				err = errors.New("Not Found")
+			}else {
+				ctxRec,err = ctx.decodeRecord(data)
+			}
 			return nil
 	})
 	if err != nil {

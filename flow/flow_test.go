@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-var msgChan = make(model.MsgPipeline)
+var msgChan = make(model.MsgPipeline,10)
 
 func onMsg(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
 	log.Info("New message from topic = ", topic)
@@ -18,9 +18,9 @@ func onMsg(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMe
 	fMsg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
 	select {
 	case msgChan <- fMsg:
-		log.Info("Message was sent")
+		log.Info("<Test> Message was sent")
 	default:
-		log.Info("Message dropped , no receiver ")
+		log.Info("<Test> Message dropped , no receiver ")
 	}
 }
 
@@ -236,5 +236,78 @@ func TestSetVariableFlow(t *testing.T) {
 	// end
 	time.Sleep(time.Second * 2)
 	os.Remove("TestSetVariableFlow.db")
+
+}
+
+func TestReceiveFlow(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB("TestReceiveFlow.db")
+	flowMeta := model.FlowMeta{Id: "TestReceiveFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report",
+		SuccessTransition: "2"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Receive", Type: "receive", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report",
+		SuccessTransition: "3",TimeoutTransition:"5" , Config:flownode.ReceiveConfig{Timeout:5}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "3", Label: "Receive", Type: "receive", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:201_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report",
+		SuccessTransition: "4",TimeoutTransition:"5" , Config:flownode.ReceiveConfig{Timeout:1}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "in_time", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "5", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "timeout", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	//data, err := json.Marshal(flowMeta)
+	//if err == nil {
+	//	ioutil.WriteFile("testflow2.json", data, 0644)
+	//}
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	// send msg
+
+	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+	//time.Sleep(time.Millisecond * 10)
+	msg = fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
+	adr = fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "200_0"}
+	mqtt.Publish(&adr, msg)
+	//time.Sleep(time.Second * 2)
+	msg = fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
+	adr = fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "201_0"}
+	mqtt.Publish(&adr, msg)
+
+	time.Sleep(time.Second * 1)
+	variable, err := flow.GetContext().GetVariable("status", "TestReceiveFlow")
+	if err != nil {
+		t.Error("Variable is not set", err)
+	}else if variable.Value.(string) == "in_time" {
+		t.Log("Ok , result is in time")
+	} else {
+		t.Error("Error timed out")
+	}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove("TestReceiveFlow.db")
 
 }

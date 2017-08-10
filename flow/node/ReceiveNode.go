@@ -4,7 +4,8 @@ import (
 "github.com/alivinco/fimpgo"
 "github.com/alivinco/fimpui/flow/model"
 log "github.com/Sirupsen/logrus"
-//"github.com/mitchellh/mapstructure"
+	"github.com/mitchellh/mapstructure"
+	"time"
 )
 
 type ReceiveNode struct {
@@ -13,7 +14,13 @@ type ReceiveNode struct {
 	transport *fimpgo.MqttTransport
 	activeSubscriptions *[]string
 	msgInStream model.MsgPipeline
-	waitTimeout int;
+	config ReceiveConfig
+
+}
+
+type ReceiveConfig struct {
+	Timeout int64
+	ValueFilter model.Variable
 }
 
 func NewReceiveNode(flowOpCtx *model.FlowOperationalContext ,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
@@ -22,6 +29,7 @@ func NewReceiveNode(flowOpCtx *model.FlowOperationalContext ,meta model.MetaNode
 	node.isMsgReactor = true
 	node.flowOpCtx = flowOpCtx
 	node.meta = meta
+	node.config = ReceiveConfig{}
 	return &node
 }
 
@@ -41,7 +49,7 @@ func (node *ReceiveNode) initSubscriptions() {
 			}
 	}
 	if needToSubscribe {
-			log.Info("<Node> Subscribing for service by address :", node.meta.Address)
+			log.Info("<ReceiveNode> Subscribing for service by address :", node.meta.Address)
 			node.transport.Subscribe(node.meta.Address)
 			*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
 	}
@@ -49,30 +57,39 @@ func (node *ReceiveNode) initSubscriptions() {
 
 
 func (node *ReceiveNode) LoadNodeConfig() error {
-	delay ,ok := node.meta.Config.(float64)
-	if ok {
-		node.waitTimeout = int(delay)
-	}else {
-		log.Error("<FlMan> Can't cast Wait node delay value")
+	err := mapstructure.Decode(node.meta.Config,&node.config)
+	if err != nil{
+		log.Error(err)
 	}
-
-	return nil
+	return err
 }
 
 func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	for inMsg := range node.msgInStream {
-		log.Debug("<Node> New message from msgInStream")
-		if !node.flowOpCtx.IsFlowRunning {
-			break
-		}
-		if (inMsg.AddressStr == node.meta.Address || node.meta.Address == "*") &&
-			(inMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
-			(inMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
-			//log.Info("New message.")
-			*msg = inMsg
-		return []model.NodeID{node.meta.SuccessTransition}, nil
+	log.Debug("<ReceiveNode> Waiting for event ")
+	start := time.Now()
+	timeout := node.config.Timeout
+	for {
+		select {
+		case newMsg := <-node.msgInStream:
+			log.Info("<ReceiveNode> New message :")
+			if node.config.ValueFilter.ValueType == "" {
+				return []model.NodeID{node.meta.SuccessTransition}, nil
+			}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
+				return []model.NodeID{node.meta.SuccessTransition}, nil
+			}else {
+				elapsed := time.Since(start)
+				timeout =  timeout - int64(elapsed.Seconds())
+			}
+		case <-time.After(time.Second * time.Duration(timeout)):
+			log.Debug("<ReceiveNode> Timeout ")
+			return []model.NodeID{node.meta.TimeoutTransition}, nil
+		case signal := <-node.flowOpCtx.NodeControlSignalChannel:
+			log.Debug("<ReceiveNode> Control signal ")
+			if signal == model.SIGNAL_STOP {
+				return nil,nil
+			}
 		}
 	}
-	return nil, nil
+
 }
 

@@ -18,8 +18,15 @@ type FlowMeta struct {
 	Nodes       []MetaNode
 }
 
+const (
+	SIGNAL_STOP = 1
+
+)
+
 type FlowOperationalContext struct {
 	FlowId string
 	IsFlowRunning bool
 	State string
+	NodeControlSignalChannel chan int // the channel should be used to stop all waiting nodes .
+	NodeIsReady chan bool // Flow should notify message router when next node is ready to process new message .
 }

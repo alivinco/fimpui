@@ -42,15 +42,4 @@ func (node *WaitNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }
 
-//func WaitNode(ctx *model.Context,node *model.MetaNode) error {
-//	delayMilisec, ok := node.Config.(int)
-//	if ok {
-//		log.Info("<Node> Waiting  for = ", delayMilisec)
-//		time.Sleep(time.Millisecond * time.Duration(delayMilisec))
-//	} else {
-//		log.Error("<Node> Wrong time format")
-//	}
-//
-//	return nil
-//}
 
