@@ -311,3 +311,72 @@ func TestReceiveFlow(t *testing.T) {
 	os.Remove("TestReceiveFlow.db")
 
 }
+
+func TestCounterFlow(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB("TestCounterFlow.db")
+	flowMeta := model.FlowMeta{Id: "TestCounterFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report",
+		SuccessTransition: "2"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Counter", Type: "counter", SuccessTransition: "4",
+		Config: flownode.CounterNodeConfig{StartValue:0,EndValue:4,EndValueTransition:"5"}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "counting", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "5", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "reset", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	//data, err := json.Marshal(flowMeta)
+	//if err == nil {
+	//	ioutil.WriteFile("testflow2.json", data, 0644)
+	//}
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	// send msg
+
+	for i:=0;i<4;i++ {
+		msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", true, nil, nil, nil)
+		adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
+		mqtt.Publish(&adr, msg)
+		time.Sleep(time.Millisecond * 10)
+	}
+
+	//time.Sleep(time.Millisecond * 10)
+
+
+	time.Sleep(time.Second * 1)
+	variable, err := flow.GetContext().GetVariable("status", "TestCounterFlow")
+	if err != nil {
+		t.Error("Variable is not set", err)
+	}else if variable.Value.(string) == "reset" {
+		t.Log("Ok ")
+	} else {
+		t.Error("Error.")
+	}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove("TestCounterFlow.db")
+
+}
+
+

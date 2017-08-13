@@ -241,9 +241,15 @@ func (fl *Flow) Start() error {
 	fl.opContext.State = "STARTING"
 	fl.opContext.IsFlowRunning = true
 	isFlowValid := false
+	// Init all nodes
+	for i := range fl.Nodes{
+		fl.Nodes[i].Init()
+	}
+
 	// Starting flow loop for every trigger.
 	for i := range fl.Nodes {
 		if fl.Nodes[i].IsStartNode() {
+
 			go fl.Run()
 			go fl.InStreamMsgRouter()
 			isFlowValid = true
@@ -268,6 +274,10 @@ func (fl *Flow) Stop() {
 		log.Debug("<Flow> No signal listener.")
 	}
 	fl.msgInStream <- model.Message{}
+	for i := range fl.Nodes{
+		fl.Nodes[i].Cleanup()
+	}
+
 	log.Info("<Flow> Stooped .  ", fl.Name)
 }
 

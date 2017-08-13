@@ -25,6 +25,8 @@ type Node interface {
 	IsStartNode() bool
 	IsMsgReactorNode() bool
     ConfigureInStream(activeSubscriptions *[]string,msgInStream MsgPipeline)
+	Init() error
+	Cleanup() error
 }
 
 

@@ -38,6 +38,15 @@ func (node *BaseNode) IsStartNode() bool {
 func (node *BaseNode) IsMsgReactorNode() bool {
 	return node.isMsgReactor
 }
+// is invoked when node is started
+func (node *BaseNode) Init() error {
+	return nil
+}
+
+// is invoked when node flow is stopped
+func (node *BaseNode) Cleanup() error {
+	return nil
+}
 
 func (node *BaseNode) ConfigureInStream(activeSubscriptions *[]string,msgInStream model.MsgPipeline) {
 }
