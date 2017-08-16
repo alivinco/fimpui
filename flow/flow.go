@@ -265,7 +265,7 @@ func (fl *Flow) Start() error {
 	return nil
 }
 // Terminates flow loop , stops goroutine .
-func (fl *Flow) Stop() {
+func (fl *Flow) Stop() error {
 	log.Info("<Flow> Stopping flow  ", fl.Name)
 	fl.opContext.IsFlowRunning = false
 	select {
@@ -277,8 +277,12 @@ func (fl *Flow) Stop() {
 	for i := range fl.Nodes{
 		fl.Nodes[i].Cleanup()
 	}
+	log.Info("<Flow> Stopped .  ", fl.Name)
+	return nil
+}
 
-	log.Info("<Flow> Stooped .  ", fl.Name)
+func (fl *Flow) GetFlowState() string {
+	return fl.opContext.State
 }
 
 func (fl *Flow) SetMessageStream(msgInStream model.MsgPipeline) {

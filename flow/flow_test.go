@@ -379,4 +379,58 @@ func TestCounterFlow(t *testing.T) {
 
 }
 
+func TestTimeTriggerFlow(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB("TestTimeTriggerFlow.db")
+	flowMeta := model.FlowMeta{Id: "TestTimeTriggerFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Turn ever 1 second", Type: "time_trigger",
+		SuccessTransition: "2", Config:flownode.TimeTriggerConfig{Expressions:[]flownode.TimeExpression{ {Name:"every second",Expression:"@every 1s"} } }}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Counter", Type: "counter", SuccessTransition: "4",
+		Config: flownode.CounterNodeConfig{StartValue:0,EndValue:3,EndValueTransition:"5"}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "counting", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "5", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
+		Config: flownode.SetVariableNodeConfig{Name: "status", UpdateGlobal: false, UpdateInputMsg: false, PersistOnUpdate: true, DefaultValue: model.Variable{Value: "reset", ValueType: "string"}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	//data, err := json.Marshal(flowMeta)
+	//if err == nil {
+	//	ioutil.WriteFile("testflow2.json", data, 0644)
+	//}
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 3)
+	// send msg
+	variable, err := flow.GetContext().GetVariable("status", "TestTimeTriggerFlow")
+	if err != nil {
+		t.Error("Variable is not set", err)
+	}else if variable.Value.(string) == "reset" {
+		t.Log("Ok ")
+	} else {
+		t.Error("Error.")
+	}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove("TestTimeTriggerFlow.db")
+
+}
 

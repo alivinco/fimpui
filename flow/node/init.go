@@ -15,4 +15,5 @@ var Registry = map[string]Constructor {
 	"wait":NewWaitNode,
 	"set_variable":NewSetVariableNode,
 	"counter":NewCounterNode,
+	"time_trigger":NewTimeTriggerNode,
 }

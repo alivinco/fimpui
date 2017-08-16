@@ -12,6 +12,8 @@ import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { FlowComponent } from './flow/flow.component';
 import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent } from './flow-nodes/flow-nodes.component';
+import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
+
 
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
@@ -92,6 +94,7 @@ export function mqttServiceFactory() {
     KeysPipe,
     FlowNodesComponent,
     ActionNodeComponent,
+    ReceiveNodeComponent,
     SetVariableNodeComponent,
   ],
   imports: [

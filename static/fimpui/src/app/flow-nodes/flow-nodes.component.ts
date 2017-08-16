@@ -43,8 +43,6 @@ export class ActionNodeComponent implements OnInit {
               element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
             }
         });
-
-
     });      
   }
 
@@ -56,6 +54,24 @@ export class ActionNodeComponent implements OnInit {
   styleUrls: ['./flow-nodes.component.css']
 })
 export class SetVariableNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MdDialog) { }
+
+  ngOnInit() { 
+  }
+  serviceLookupDialog(nodeId:string) {
+   
+  }
+
+}
+
+@Component({
+  selector: 'receive-node',
+  templateUrl: './receive-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class ReceiveNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MdDialog) { }

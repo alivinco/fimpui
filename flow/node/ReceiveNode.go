@@ -19,7 +19,7 @@ type ReceiveNode struct {
 }
 
 type ReceiveConfig struct {
-	Timeout int64
+	Timeout int64 // in seconds
 	ValueFilter model.Variable
 }
 

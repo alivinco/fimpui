@@ -71,31 +71,6 @@ func (ctx *Context) UnregisterFlow(flowId string) error {
 	return nil
 }
 
-//func (ctx *Context) SaveToStorage() error {
-	//fullPath := path.Join(ctx.storageLocation,ctx.flowName,"json")
-	//log.Debugf("<FlMan> Saving context to file %s ",ctx.flowName)
-	//binBody , err := json.Marshal(ctx)
-	//if err != nil {
-	//	log.Error("<Ctx> Can't serialize context . Error : ",err)
-	//	return err
-	//}
-	//err = ioutil.WriteFile(fullPath, binBody, 0644)
-	//if err != nil {
-	//	log.Error("<Ctx> Can't save context to file . Error : ",err)
-	//	return err
-	//}
-	//return nil
-//}
-
-//func (ctx *Context) LoadFromStorage() {
-	//fullPath := path.Join(ctx.storageLocation,ctx.flowName,"json")
-	//contextFileBody, err := ioutil.ReadFile(fullPath)
-	//err = json.Unmarshal(contextFileBody, ctx)
-	//if err != nil {
-	//	log.Error("")
-	//}
-//}
-
 func (ctx *Context) SetVariable(name string,valueType string,value interface{},description string,flowId string,inMemory bool ) error {
 	rec := ContextRecord{Name:name,UpdatedAt:time.Now(),Description:description,Variable: Variable{ValueType:valueType,Value:value}}
 	return ctx.PutRecord(&rec,flowId,inMemory)
@@ -140,6 +115,10 @@ func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) 
 	var err error
 	ctx.db.View(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
+			if b == nil {
+				err = errors.New("Flow doesn't exist")
+				return nil
+			}
 			data := b.Get([]byte(name))
 		    if data == nil {
 				err = errors.New("Not Found")

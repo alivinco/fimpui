@@ -52,11 +52,9 @@ func (node *CounterNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	} else {
 		node.counter--
 	}
-	log.Debug("<CounterNode> New counter value = ",node.counter )
-	log.Debug("<CounterNode> End value = ",node.config.EndValue )
+	log.Debug("<CounterNode> value = ",node.counter )
 	if (node.countUp && node.counter >= node.config.EndValue) || (!node.countUp && node.counter <= node.config.EndValue) {
 		node.counter = node.config.StartValue
-		log.Debug("<CounterNode> Doing counter reset ")
 		return []model.NodeID{node.config.EndValueTransition},nil
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil

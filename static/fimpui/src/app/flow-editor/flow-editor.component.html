@@ -1,7 +1,27 @@
+
+ 
+
 <div class="flow-editor">
   
   <button  style = "margin-bottom: 20px;" md-raised-button [routerLink]="['/flow']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Flows </button>
   
+<md-sidenav-container>
+  <md-sidenav #sidenav mode="side" opened="false" style="background-color:beige">
+    <!-- sidenav content -->
+    <md-list>
+    <md-list-item><h3> Nodes </h3></md-list-item> 
+    <md-list-item> <button md-raised-button (click)="addNode('trigger')"  >Trigger</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('time_trigger')"  >Time trigger</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('action')" >Action</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('receive')" >Receive</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('if')" >If</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('counter')" >Counter</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('wait')" >Wait</button> </md-list-item>
+    <md-list-item> <button md-raised-button (click)="addNode('set_variable')" >Set variable</button> </md-list-item>
+    </md-list>
+  </md-sidenav>
+
+
   <md-card class="example-card">
     <md-card-header>
      
@@ -74,7 +94,10 @@
             </div>
             <div *ngSwitchCase="'set_variable'">  
                  <set-variable-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </set-variable-node>
-            </div>    
+            </div> 
+             <div *ngSwitchCase="'receive'">  
+                 <receive-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </receive-node>
+            </div>        
             <div *ngSwitchCase="'if'">  
                <div #nodebody hidden>
                   <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">
@@ -161,24 +184,21 @@
         </md-card-actions>
        </md-card>
 
-    
+    <button md-mini-fab class="example-fab" (click)="sidenav.toggle()">
+    <md-icon>add</md-icon>
+  </button>
     </md-card-content>
     
     <md-card-actions>
-      <md-select #nodeTypeInput placeholder="Node Type"[(ngModel)]="selectedNewNodeType" >
-        <md-option value = "trigger">trigger</md-option>
-        <md-option value = "action">action</md-option>
-        <md-option value = "wait">wait</md-option>
-        <md-option value = "if">if</md-option>
-        <md-option value = "set_variable">set variable</md-option>
-      </md-select>
-      <button md-raised-button (click)="addNode()" color="primary" >Add</button>
       <button md-raised-button (click)="saveFlow()" color="primary" >Save</button>
       <button md-raised-button (click)="showSource()" color="primary" >Show source</button>
       <button md-raised-button (click)="showContextDialog()" color="primary" >Show variables</button>
 
     </md-card-actions>
   </md-card>
+
+ <!-- primary content -->
+</md-sidenav-container>
 
 </div>
 

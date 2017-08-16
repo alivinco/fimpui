@@ -171,6 +171,17 @@ func (mg *Manager) GetFlowList() []FlowListItem{
 	return response
 }
 
+func (mg *Manager) ControlFlow(cmd string , flowId string) error {
+	switch cmd {
+	case "START":
+		return mg.GetFlowById(flowId).Start()
+	case "STOP":
+		return mg.GetFlowById(flowId).Stop()
+
+	}
+	return nil
+}
+
 func (mg *Manager) UnloadFlow(id string) {
 	if mg.GetFlowById(id) == nil {
 		return

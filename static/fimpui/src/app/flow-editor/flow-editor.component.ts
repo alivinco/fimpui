@@ -125,11 +125,11 @@ export class FlowEditorComponent implements OnInit {
      node.Config["Expression"].push(expr);
  } 
   
- addNode(){
+ addNode(nodeType:string){
     console.dir(this.selectedNewNodeType)
     let node  = new MetaNode()
     node.Id = this.getNewNodeId();
-    node.Type = this.selectedNewNodeType;
+    node.Type = nodeType;
     node.Address = ""
     node.Service = ""
     node.ServiceInterface = ""
@@ -145,6 +145,11 @@ export class FlowEditorComponent implements OnInit {
         node.Config["Value"] = true;
         node.Config["ValueType"] = "bool";
         break;
+      case "receive":
+        node.Config = {}; 
+        node.Config["Timeout"] = 120;
+         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
+        break;  
       case "if":
         node.Config = {}; 
         node.Config["TrueTransition"] = ""
