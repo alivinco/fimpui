@@ -3,11 +3,11 @@ import { Http, Response,URLSearchParams }  from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
 
 @Component({
-  selector: 'app-flow',
-  templateUrl: './flow.component.html',
-  styleUrls: ['./flow.component.css']
+  selector: 'flow-overview',
+  templateUrl: './flow-overview.component.html',
+  styleUrls: ['./flow-overview.component.css']
 })
-export class FlowComponent implements OnInit {
+export class FlowOverviewComponent implements OnInit {
   flows : any[];
   constructor(private http : Http) {  }
 

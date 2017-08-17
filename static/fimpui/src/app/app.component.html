@@ -29,11 +29,12 @@
 </md-toolbar>
 
 <nav md-tab-nav-bar>
-<a md-tab-link [routerLink]="['zwave-man']" >Z-Wave</a>
-<a md-tab-link [routerLink]="['ikea-man']" >Ikea Tradfri</a>
+<a md-tab-link [routerLink]="['zwave-man']" >Registry</a>
+<a md-tab-link [routerLink]="['/flow/overview']" >Flow</a>
+<a md-tab-link [routerLink]="['/zwave-man']" >Adapters</a>
 <a md-tab-link [routerLink]="['timeline']" >Message stream</a>
-<a md-tab-link [routerLink]="['flow']" >Flow</a>
 </nav>
+
 <md-sidenav-container class="example-container">
 <router-outlet ></router-outlet>
 

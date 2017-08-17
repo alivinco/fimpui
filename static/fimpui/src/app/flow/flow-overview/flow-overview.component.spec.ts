@@ -3,21 +3,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
-import { FlowComponent } from './flow.component';
+import { FlowOverviewComponent } from './flow-overview.component';
 
-describe('FlowComponent', () => {
-  let component: FlowComponent;
-  let fixture: ComponentFixture<FlowComponent>;
+describe('FlowOverviewComponent', () => {
+  let component: FlowOverviewComponent;
+  let fixture: ComponentFixture<FlowOverviewComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FlowComponent ]
+      declarations: [ FlowOverviewComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(FlowComponent);
+    fixture = TestBed.createComponent(FlowOverviewComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

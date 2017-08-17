@@ -1,0 +1,119 @@
+<div>
+    <div #nodebody hidden> 
+    <p>
+        <md-input-container style="width: 130px">
+            <input mdInput [(ngModel)]="node.Service" placeholder="Service">
+        </md-input-container>
+        <md-input-container style="width: 200px">
+            <input mdInput [(ngModel)]="node.ServiceInterface" placeholder="Interface">
+        </md-input-container>
+        <md-input-container style="width: 450px">
+            <input mdInput [(ngModel)]="node.Address" placeholder="Address">
+        </md-input-container>
+        <button md-raised-button (click)="serviceLookupDialog(node.Id)" >Lookup</button>
+    </p>
+    <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueType">
+        <md-option value="">The same as input </md-option>
+        <md-option value="string">string</md-option>
+        <md-option value="bool">bool</md-option>
+        <md-option value="int">int</md-option>
+        <md-option value="float">float</md-option>
+        <md-option value="null">null</md-option>
+        <md-option value="str_array">array of strings</md-option>
+        <md-option value="int_array">array of integers</md-option>
+        <md-option value="float_array">array of floats</md-option>
+        <md-option value="bool_array">array of floats</md-option>
+        <md-option value="str_map">map of string</md-option>
+        <md-option value="int_map">map of integers</md-option>
+        <md-option value="float_map">map of floats</md-option>
+        <md-option value="bool_map">map of booleans</md-option>
+        <md-option value="object">object</md-option>
+    </md-select>
+    <div [ngSwitch]="node.Config.ValueType">
+        <div *ngSwitchCase="'string'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'int'">
+            <md-input-container class="node-transition-field">
+                <input mdInput type="number" [(ngModel)]="node.Config.Value" placeholder="Default value">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'float'">
+            <md-input-container class="node-transition-field">
+                <input mdInput type="number" [(ngModel)]="node.Config.Value" placeholder="Default value">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="''">
+
+        </div>
+        <div *ngSwitchCase="'bool'">
+            <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.Value">
+                <md-radio-button class="example-radio-button" [value]="true">
+                    true (On)
+                </md-radio-button>
+                <md-radio-button class="example-radio-button" [value]="false">
+                    false (Off)
+                </md-radio-button>
+            </md-radio-group>
+        </div>
+         <div *ngSwitchCase="'str_array'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : ['abc','cde']">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'int_array'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [1,2] ">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'float_array'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [1.2,0.5] ">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'bool_array'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [true,false]">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'str_map'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'int_map'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':1,'b':2}">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'float_map'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'bool_map'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':true,'b':false}">
+            </md-input-container>
+        </div>
+        <div *ngSwitchCase="'object'">
+            <md-input-container class="node-transition-field">
+                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':'b','b':3}">
+            </md-input-container>
+        </div>
+    </div>
+    </div>
+    <p>
+        <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
+            <md-option value = "" > End! </md-option>
+            <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+        </md-select>
+        <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
+            <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+        </md-select>
+    </p>
+    <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
+ 
+</div>

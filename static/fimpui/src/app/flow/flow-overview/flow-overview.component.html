@@ -14,7 +14,7 @@
           <td> {{flow.Name}}</td><td> {{flow.TriggerCounter}}</td> <td> {{flow.ErrorCounter}}</td> <td> {{flow.Description}}</td> <td>
              
              <md-chip-list>
-             <md-chip class="open-chip" [routerLink]="['/flow-editor',flow.Id]">Open</md-chip>
+             <md-chip class="open-chip" [routerLink]="['/flow/editor',flow.Id]">Open</md-chip>
              <md-chip color="warn" (click)="deleteFlow(flow.Id)">Delete</md-chip>
              </md-chip-list>
           </td>
@@ -24,7 +24,7 @@
 
     </md-card-content>
     <md-card-actions>
-      <button md-raised-button [routerLink]="['/flow-editor','-']" color="primary" > Add new flow</button>
+      <button md-raised-button [routerLink]="['/flow/editor','-']" color="primary" > Add new flow</button>
       <button md-raised-button (click)="loadListOfFlows()">Refresh</button>
     </md-card-actions>
   </md-card>

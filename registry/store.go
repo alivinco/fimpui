@@ -11,7 +11,6 @@ import (
 
 type ThingRegistryStore struct {
 	thingRegistryStoreFile string
-	thingRegistry          ThingRegistry
 	db *storm.DB
 }
 
@@ -77,7 +76,7 @@ func (st *ThingRegistryStore) GetAllServices() ([]Service,error) {
 	}
 	var result []Service
 	for i := range things {
-		result = append(result,st.thingRegistry.Things[i].Services...)
+		result = append(result,things[i].Services...)
 	}
 	return result,nil
 }

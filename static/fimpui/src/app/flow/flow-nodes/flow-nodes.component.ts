@@ -1,5 +1,5 @@
 import { Component, OnInit ,Input } from '@angular/core';
-import { MetaNode, ServiceLookupDialog } from "app/flow-editor/flow-editor.component";
+import { MetaNode, ServiceLookupDialog } from "../flow-editor/flow-editor.component";
 import {MdDialog, MdDialogRef} from '@angular/material';
 import { msgTypeToValueTypeMap } from "app/things-db/mapping";
 
@@ -60,10 +60,7 @@ export class SetVariableNodeComponent implements OnInit {
 
   ngOnInit() { 
   }
-  serviceLookupDialog(nodeId:string) {
-   
-  }
-
+  
 }
 
 @Component({
@@ -79,7 +76,19 @@ export class ReceiveNodeComponent implements OnInit {
   ngOnInit() { 
   }
   serviceLookupDialog(nodeId:string) {
-   
+    let dialogRef = this.dialog.open(ServiceLookupDialog,{
+            width: '95%'
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+        this.nodes.forEach(element => {
+            if (element.Id==nodeId) {
+              element.Service = result.service_name
+              element.ServiceInterface = result.intf_msg_type
+              element.Address = result.intf_address
+              element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
+            }
+        });
+    });      
   }
-
 }

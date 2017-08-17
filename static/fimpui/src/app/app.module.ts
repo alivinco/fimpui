@@ -3,18 +3,12 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 
 import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
-import { FlowComponent } from './flow/flow.component';
-import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog } from './flow-editor/flow-editor.component';
-import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent } from './flow-nodes/flow-nodes.component';
-import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
-
-
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
 import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
@@ -31,14 +25,13 @@ import {
 import { ThingViewComponent } from './thing-view/thing-view.component';
 import { ThingsTableComponent } from './things-table/things-table.component';
 import { SettingsComponent } from './settings/settings.component';
+import { FlowModule} from './flow/flow.module'
 
 
 const appRoutes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'zwave-man', component: ZwaveManComponent },
   { path: 'ikea-man', component: IkeaManComponent },
-  { path: 'flow', component: FlowComponent },
-  { path: 'flow-editor/:id', component: FlowEditorComponent },
   { path: 'timeline', component: TimelineComponent },
   { path: 'report', component: ReportComponent },
   { path: 'flight-recorder', component: FlightRecorderComponent },
@@ -77,13 +70,7 @@ export function mqttServiceFactory() {
     AppComponent,
     ZwaveManComponent,
     IkeaManComponent,
-    FlowComponent,
-    FlowEditorComponent,
     AddDeviceDialog,
-    FlowSourceDialog,
-    ServiceLookupDialog, 
-    FlowRunDialog,
-    ContextDialog,
     TimelineComponent,
     ThingViewComponent,
     ThingsTableComponent,
@@ -92,10 +79,6 @@ export function mqttServiceFactory() {
     FlightRecorderComponent,
     ThingIntfUiComponent,
     KeysPipe,
-    FlowNodesComponent,
-    ActionNodeComponent,
-    ReceiveNodeComponent,
-    SetVariableNodeComponent,
   ],
   imports: [
     BrowserModule,
@@ -108,11 +91,12 @@ export function mqttServiceFactory() {
       useFactory: mqttServiceFactory
     }),
     RouterModule.forRoot(appRoutes),
-    NgxDatatableModule
+    NgxDatatableModule,
+    FlowModule
     
   ],
   providers: [FimpService,ThingsDbService],
-  entryComponents:[AddDeviceDialog,FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog], 
+  entryComponents:[AddDeviceDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }
