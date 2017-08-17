@@ -4,6 +4,7 @@ import (
 	"github.com/alivinco/fimpui/model"
 	"github.com/alivinco/fimpgo"
 	log "github.com/Sirupsen/logrus"
+	"github.com/pkg/errors"
 )
 
 
@@ -41,7 +42,8 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 	if iotMsg.Type == "evt.thing.inclusion_report" {
 		mg.processInclusionReport(iotMsg)
 	}else if iotMsg.Type == "evt.thing.exclusion_report" {
-		mg.processExclusionReport(iotMsg)
+		tech :=  addr.ResourceName
+		mg.processExclusionReport(iotMsg,tech)
 	}
 }
 func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error {
@@ -51,25 +53,21 @@ func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error
 	log.Debugf("%+v\n",err)
 	log.Debugf("%+v\n",newThing)
 	if newThing.CommTechnology != "" && newThing.Address != "" 	{
-		thing , err := mg.registry.GetThingByAddress(newThing.CommTechnology,newThing.Address)
-		if err == nil {
-			if thing == nil {
-				err = mg.registry.UpsertThing(newThing)
+		_ , err := mg.registry.GetThingByAddress(newThing.CommTechnology,newThing.Address)
+		if err != nil {
+				_,err = mg.registry.UpsertThing(&newThing)
 				if err != nil {
-					log.Error("")
+					log.Error("<MqRegInt> Can't insert new Thing . Error: ",err)
 				}
-			} else {
+		} else {
 				// updating existing node
 				log.Info("<MqRegInt> Thing already in registry . Skipped.")
 				//if thing.ProductHash == "" {
-				//	newThing.Id = thing.Id
+				//	newThing.ID = thing.ID
 				//	err = mg.registry.UpsertThing(newThing)
 				//}
-			}
-		}else {
-			log.Error("<MqRegInt> Can't find the thing by its address . Error:",err)
-			return err
 		}
+
 	}else {
 		log.Error("<MqRegInt> Either address or commTech is empty ")
 	}
@@ -77,6 +75,19 @@ func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error
 
 }
 
-func (mg *MqttIntegration) processExclusionReport(inclusionReport *fimpgo.FimpMessage) error {
+func (mg *MqttIntegration) processExclusionReport(msg *fimpgo.FimpMessage,technology string) error {
+	valMap,err := msg.GetStrMapValue()
+	if err != nil {
+		return  err
+	}
+	address,ok := valMap["address"]
+	if ok {
+		thing ,err := mg.registry.GetThingByAddress(technology,address)
+		if err != nil {
+			return errors.New("Can't find the thing to be deleted")
+		}
+		mg.registry.DeleteThing(thing.ID)
+		log.Infof("Thing with address = %s , tech = %s was deleted.",address,technology)
+	}
 	return nil
 }

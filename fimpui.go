@@ -94,7 +94,7 @@ func main() {
 	//-------------------------------------
 	//---------THINGS REGISTRY-------------
 	log.Info("<main> Starting Things registry ")
-	thingRegistryStore := registry.NewThingRegistryStore("thingsStore.json")
+	thingRegistryStore := registry.NewThingRegistryStore(configs.RegistryDbFile)
 	log.Info("<main> Started ")
 	//-------------------------------------
 	//---------REGISTRY INTEGRATION--------
@@ -151,23 +151,42 @@ func main() {
 		return c.JSON(http.StatusOK, uploadStatus)
 	})
 	e.GET("/fimp/registry/things", func(c echo.Context) error {
-		things := thingRegistryStore.GetAllThings()
-		return c.JSON(http.StatusOK, things)
+		things , err := thingRegistryStore.GetAllThings()
+		if err == nil {
+			return c.JSON(http.StatusOK, things)
+		}else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 	})
 
 	e.GET("/fimp/registry/services", func(c echo.Context) error {
-		services := thingRegistryStore.GetAllServices()
-		return c.JSON(http.StatusOK, services)
+		services,err := thingRegistryStore.GetAllServices()
+		if err == nil {
+			return c.JSON(http.StatusOK, services)
+		}else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 	})
 
 	e.GET("/fimp/registry/interfaces", func(c echo.Context) error {
-		services := thingRegistryStore.GetFlatInterfaces()
-		return c.JSON(http.StatusOK, services)
+		services,err := thingRegistryStore.GetFlatInterfaces()
+		if err == nil {
+			return c.JSON(http.StatusOK, services)
+		}else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
 	})
 
 	e.GET("/fimp/registry/locations", func(c echo.Context) error {
-		locations := thingRegistryStore.GetAllLocations()
-		return c.JSON(http.StatusOK, locations)
+		locations,err := thingRegistryStore.GetAllLocations()
+		if err == nil {
+			return c.JSON(http.StatusOK, locations)
+		}else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 	})
 
 	e.GET("/fimp/registry/thing/:tech/:address", func(c echo.Context) error {
@@ -183,7 +202,7 @@ func main() {
 		thing := registry.Thing{}
 		err := c.Bind(&thing)
 		fmt.Println(err)
-		thingRegistryStore.UpsertThing(thing)
+		thingRegistryStore.UpsertThing(&thing)
 		return c.NoContent(http.StatusOK)
 	})
 

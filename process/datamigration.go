@@ -30,8 +30,8 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 
 	rooms := msg.Msg.Data.Param.Room
 	for i := range rooms {
-		location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(rooms[i].ID))
-		if location == nil {
+		location,err := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(rooms[i].ID))
+		if err != nil {
 			newLocation := registry.Location{}
 			newLocation.IntegrationId = strconv.Itoa(rooms[i].ID)
 			if rooms[i].Client.Name == "" {
@@ -40,14 +40,15 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 				newLocation.Alias = rooms[i].Client.Name
 			}
 			newLocation.Type = "room"
-			thingRegistryStore.UpsertLocation(newLocation)
+			thingRegistryStore.UpsertLocation(&newLocation)
+			log.Infof("<VincMigration> Location %s was added. New ID = %d ",newLocation.Alias,newLocation.ID)
 		} else {
 			if rooms[i].Client.Name == "" {
 				location.Alias = rooms[i].Type
 			}else {
 				location.Alias = rooms[i].Client.Name
 			}
-			thingRegistryStore.SaveThingRegistry()
+			thingRegistryStore.UpsertLocation(location)
 		}
 	}
 
@@ -55,8 +56,8 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 	for i := range devices {
 		if devices[i].Fimp.Address != "" {
 			tech := commTechMap[devices[i].Fimp.Adapter]
-			thing ,_ := thingRegistryStore.GetThingByAddress(tech,devices[i].Fimp.Address)
-			if thing == nil {
+			thing ,err := thingRegistryStore.GetThingByAddress(tech,devices[i].Fimp.Address)
+			if err != nil {
 				log.Infof("Device %s not found in registry. Generate inclusion report first",devices[i].Client.Name)
 				//newThing := registry.Thing{}
 				//newThing.Address = devices[i].Fimp.Address
@@ -73,17 +74,17 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 								if thing.Services[si].Name == vincToServiceNameMap[k] {
 									thing.Services[si].IntegrationId = strconv.Itoa(devices[i].ID)
 									thing.Services[si].Alias = devices[i].Client.Name
-									location := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
+									location,_ := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
 									if location != nil {
-										thing.Services[si].LocationId = location.Id
-										thing.LocationId = location.Id
+										thing.Services[si].LocationId = location.ID
+										thing.LocationId = location.ID
 									}
 								}
 							}
 						}
 					}
 				}
-				thingRegistryStore.SaveThingRegistry()
+				thingRegistryStore.UpsertThing(thing)
 
 			}
 

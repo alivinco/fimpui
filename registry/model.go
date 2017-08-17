@@ -8,13 +8,13 @@ type ThingRegistry struct {
 }
 
 type Thing struct {
-	Id             ID        `json:"id"`
-	IntegrationId  string    `json:"integr_id"`
-	Address        string    `json:"address"`
+	ID             ID        `json:"id" storm:"id,increment"`
+	IntegrationId  string    `json:"integr_id" storm:"index"`
+	Address        string    `json:"address" storm:"index"`
 	Type           string    `json:"type"`
 	ProductHash    string    `json:"product_hash"`
 	Alias          string    `json:"alias"`
-	CommTechnology string    `json:"comm_tech"`
+	CommTechnology string    `json:"comm_tech" storm:"index"`
 	ProductId      string    `json:"product_id"`
 	DeviceId       string    `json:"device_id"`
 	HwVersion      string    `json:"hw_ver"`
@@ -27,8 +27,8 @@ type Thing struct {
 }
 
 type Service struct {
-	Id            ID                     `json:"id"`
-	IntegrationId string                 `json:"integr_id"`
+	ID            ID                     `json:"id" , storm:"id,increment"`
+	IntegrationId string                 `json:"integr_id" storm:"index"`
 	Name          string                 `json:"name"`
 	Alias         string                 `json:"alias"`
 	Address       string                 `json:"address"`
@@ -48,7 +48,7 @@ type Interface struct {
 }
 
 type Location struct {
-	Id             ID         `json:"id"`
+	ID             ID         `json:"id" storm:"id,increment"`
 	IntegrationId  string     `json:"integr_id"`
 	Type           string     `json:"type"`
 	Alias          string     `json:"alias"`
@@ -59,7 +59,7 @@ type Location struct {
 }
 
 type ServiceResponse struct {
-	Id            ID                     `json:"id"`
+	ID            ID                     `json:"id"`
 	IntegrationId string                 `json:"integr_id"`
 	Name          string                 `json:"name"`
 	Alias         string                 `json:"alias"`
