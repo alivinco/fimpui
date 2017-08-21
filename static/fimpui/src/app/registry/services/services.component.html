@@ -1,0 +1,72 @@
+<nav md-tab-nav-bar>
+  <a md-tab-link active [routerLink]="['/registry/things']" >Things</a>
+  <a md-tab-link [routerLink]="['/registry/services']" >Services</a>
+  <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+</nav>
+
+<br/>
+<div class="table-container mat-elevation-z8">
+  <div class="example-header">
+    <md-input-container floatPlaceholder="never">
+      <input mdInput #filterThingAddr placeholder="Filter thing address">
+    </md-input-container>
+    <md-input-container floatPlaceholder="never">
+      <input mdInput #filterServiceName placeholder="Filter service name">
+    </md-input-container>
+    <md-input-container floatPlaceholder="never">
+      <input mdInput #filterInterfaceType placeholder="Interface type">
+    </md-input-container>
+  </div>
+
+  <md-table #table [dataSource]="dataSource">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+  
+    <!-- Progress Column -->
+    <ng-container cdkColumnDef="thingAddress">
+      <md-header-cell *cdkHeaderCellDef> Thing addr. </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.thingAddress}} </md-cell>
+    </ng-container>
+     <ng-container cdkColumnDef="thingTech">
+      <md-header-cell *cdkHeaderCellDef> Tech. </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.thingTech}} </md-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container cdkColumnDef="thingAlias">
+      <md-header-cell *cdkHeaderCellDef> Thing alias </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.thingAlias}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="serviceName">
+      <md-header-cell *cdkHeaderCellDef> Service name </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.serviceName}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="serviceAlias">
+      <md-header-cell *cdkHeaderCellDef> Service alias </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.serviceAlias}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="intfType">
+      <md-header-cell *cdkHeaderCellDef > Direction </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.intfType}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="intfMsgType">
+      <md-header-cell *cdkHeaderCellDef> Intf. type </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.intfMsgType}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="intfAddress">
+      <md-header-cell *cdkHeaderCellDef> Intf. address </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.intfAddress}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="locationAlias">
+      <md-header-cell *cdkHeaderCellDef> Loacation </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.locationAlias}} </md-cell>
+    </ng-container>
+     <ng-container cdkColumnDef="locationType">
+      <md-header-cell *cdkHeaderCellDef> Loacation type </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.locationType}} </md-cell>
+    </ng-container>
+    <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
+    <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>
+  </md-table>
+</div>

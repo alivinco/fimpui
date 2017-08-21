@@ -109,59 +109,77 @@ func (st *ThingRegistryStore) GetThingByAddress(technology string, address strin
 
 func (st *ThingRegistryStore) GetThingByIntegrationId(id string) (*Thing,error) {
 	var thing Thing
-	err := st.db.Select(q.Eq("IntegrationId",id)).Find(&thing)
+	err := st.db.Select(q.Eq("IntegrationId",id)).First(&thing)
 	return &thing,err
 }
 
 func (st *ThingRegistryStore) GetLocationByIntegrationId(id string) (*Location,error) {
 	var location Location
-	err := st.db.Select(q.Eq("IntegrationId",id)).Find(&location)
+	err := st.db.Select(q.Eq("IntegrationId",id)).First(&location)
 	return &location,err
 }
 
-func (st *ThingRegistryStore) GetFlatInterfaces() ([]InterfaceFlatView,error) {
+func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string ,thingTech string ,serviceName string ,intfMsgType string ,locationId ID) ([]InterfaceFlatView,error) {
 	var result []InterfaceFlatView
-	things, err  := st.GetAllThings()
+	//things, err  := st.GetAllThings()
+	var things []Thing
+	var matcher []q.Matcher
+	if thingAddr != ""{
+		match := q.Eq("Address",thingAddr)
+		matcher = append(matcher, match)
+	}
+	if thingTech != ""{
+		match := q.Eq("CommTechnology",thingTech)
+		matcher = append(matcher, match)
+	}
+	err := st.db.Select(matcher...).Find(&things)
 	if err != nil {
 		return nil,err
 	}
 	for thi := range things {
 		for si := range things[thi].Services {
 			for inti := range things[thi].Services[si].Interfaces{
-				flatIntf := InterfaceFlatView{}
-				flatIntf.ThingId = things[thi].ID
-				flatIntf.ThingAddress = things[thi].Address
-				flatIntf.ThingAlias = things[thi].Alias
-				flatIntf.ServiceId = things[thi].Services[si].ID
-				flatIntf.ServiceName = things[thi].Services[si].Name
-				flatIntf.ServiceAlias = things[thi].Services[si].Alias
-				flatIntf.ServiceAddress = things[thi].Services[si].Address
-				flatIntf.InterfaceType = things[thi].Services[si].Interfaces[inti].Type
-				flatIntf.InterfaceMsgType = things[thi].Services[si].Interfaces[inti].MsgType
-				//pt:j1/mt:evt/rt:dev/rn:zw/ad:1/sv:meter_elec/ad:21_0
-				prefix := "pt:j1/mt:evt"
-				if strings.Contains(prefix+things[thi].Services[si].Interfaces[inti].MsgType,"cmd"){
-					prefix = "pt:j1/mt:cmd"
-				}
-				flatIntf.InterfaceAddress = prefix+things[thi].Services[si].Address
-				location,_ := st.GetLocationById(things[thi].Services[si].LocationId)
-				if location != nil {
-					flatIntf.LocationId = location.ID
-					flatIntf.LocationAlias = location.Alias
-					flatIntf.LocationType = location.Type
+				if  (serviceName == "" || things[thi].Services[si].Name == serviceName) &&
+					(intfMsgType == "" || things[thi].Services[si].Interfaces[inti].MsgType == intfMsgType ) &&
+					(locationId  == 0  || things[thi].Services[si].LocationId == locationId ){
 
-				}
-				location,_ = st.GetLocationById(things[thi].LocationId)
-				if location != nil {
-					if location.Alias != flatIntf.LocationAlias{
-						flatIntf.LocationAlias = location.Alias +" "+flatIntf.LocationAlias
+					flatIntf := InterfaceFlatView{}
+					flatIntf.ThingId = things[thi].ID
+					flatIntf.ThingAddress = things[thi].Address
+					flatIntf.ThingTech = things[thi].CommTechnology
+					flatIntf.ThingAlias = things[thi].Alias
+					flatIntf.ServiceId = things[thi].Services[si].ID
+					flatIntf.ServiceName = things[thi].Services[si].Name
+					flatIntf.ServiceAlias = things[thi].Services[si].Alias
+					flatIntf.ServiceAddress = things[thi].Services[si].Address
+					flatIntf.InterfaceType = things[thi].Services[si].Interfaces[inti].Type
+					flatIntf.InterfaceMsgType = things[thi].Services[si].Interfaces[inti].MsgType
+					//pt:j1/mt:evt/rt:dev/rn:zw/ad:1/sv:meter_elec/ad:21_0
+					prefix := "pt:j1/mt:evt"
+					if strings.Contains(prefix+things[thi].Services[si].Interfaces[inti].MsgType,"cmd"){
+						prefix = "pt:j1/mt:cmd"
 					}
-					if flatIntf.LocationType == "" {
+					flatIntf.InterfaceAddress = prefix+things[thi].Services[si].Address
+					location,_ := st.GetLocationById(things[thi].Services[si].LocationId)
+					if location != nil {
+						flatIntf.LocationId = location.ID
+						flatIntf.LocationAlias = location.Alias
 						flatIntf.LocationType = location.Type
+
 					}
+					location,_ = st.GetLocationById(things[thi].LocationId)
+					if location != nil {
+						if location.Alias != flatIntf.LocationAlias{
+							flatIntf.LocationAlias = location.Alias +" "+flatIntf.LocationAlias
+						}
+						if flatIntf.LocationType == "" {
+							flatIntf.LocationType = location.Type
+						}
+					}
+
+					result = append(result,flatIntf)
 				}
 
-				result = append(result,flatIntf)
 			}
 		}
 	}
@@ -223,8 +241,21 @@ func (st *ThingRegistryStore) DeleteLocation(id ID) error {
 }
 
 func (st *ThingRegistryStore) ClearAll() error {
-	//st.thingRegistry.Things = st.thingRegistry.Things[:0]
-	//st.thingRegistry.Locations = st.thingRegistry.Locations[:0]
-	//return st.SaveThingRegistry()
+	thing := Thing{}
+	location := Location{}
+	st.db.Drop(thing)
+	st.db.Drop(location)
+
+	err := st.db.Init(&thing)
+	if err != nil {
+		log.Error("<Reg> Can't Init Things . Error : ",err)
+		return err
+	}
+
+	err = st.db.Init(&location)
+	if err != nil {
+		log.Error("<Reg> Can't Init Things . Error : ",err)
+		return err
+	}
 	return nil
 }

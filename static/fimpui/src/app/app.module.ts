@@ -26,6 +26,7 @@ import { ThingViewComponent } from './thing-view/thing-view.component';
 import { ThingsTableComponent } from './things-table/things-table.component';
 import { SettingsComponent } from './settings/settings.component';
 import { FlowModule} from './flow/flow.module'
+import { RegistryModule} from './registry/registry.module'
 
 
 const appRoutes: Routes = [
@@ -92,7 +93,8 @@ export function mqttServiceFactory() {
     }),
     RouterModule.forRoot(appRoutes),
     NgxDatatableModule,
-    FlowModule
+    FlowModule,
+    RegistryModule,
     
   ],
   providers: [FimpService,ThingsDbService],

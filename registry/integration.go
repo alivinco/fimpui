@@ -88,6 +88,8 @@ func (mg *MqttIntegration) processExclusionReport(msg *fimpgo.FimpMessage,techno
 		}
 		mg.registry.DeleteThing(thing.ID)
 		log.Infof("Thing with address = %s , tech = %s was deleted.",address,technology)
+	}else {
+		log.Error("<MqRegInt>Exclusion Message doesn't contain address. ")
 	}
 	return nil
 }

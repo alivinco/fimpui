@@ -74,10 +74,12 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 								if thing.Services[si].Name == vincToServiceNameMap[k] {
 									thing.Services[si].IntegrationId = strconv.Itoa(devices[i].ID)
 									thing.Services[si].Alias = devices[i].Client.Name
-									location,_ := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
-									if location != nil {
+									location,err := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
+									if err == nil {
 										thing.Services[si].LocationId = location.ID
 										thing.LocationId = location.ID
+									}else {
+										log.Debug("Can't find location with integration ID = ",devices[i].Room)
 									}
 								}
 							}

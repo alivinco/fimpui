@@ -1,0 +1,41 @@
+<nav md-tab-nav-bar>
+  <a md-tab-link active [routerLink]="['/registry/things']" >Things</a>
+  <a md-tab-link [routerLink]="['/registry/services']" >Services</a>
+  <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+</nav>
+
+<br/>
+<div class="table-container mat-elevation-z8">
+  <div class="example-header">
+    
+  </div>
+
+  <md-table #table [dataSource]="dataSource">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+  
+    <!-- Progress Column -->
+    <ng-container cdkColumnDef="id">
+      <md-header-cell *cdkHeaderCellDef> ID </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.id}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="type">
+      <md-header-cell *cdkHeaderCellDef> Type </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.type}} </md-cell>
+    </ng-container>
+     <ng-container cdkColumnDef="alias">
+      <md-header-cell *cdkHeaderCellDef> Alias </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.alias}} </md-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container cdkColumnDef="address">
+      <md-header-cell *cdkHeaderCellDef> Address </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.address}} </md-cell>
+    </ng-container>
+    
+    <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
+    <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>
+  </md-table>
+</div>

@@ -22,6 +22,7 @@ import (
 	//"time"
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"strings"
+	"strconv"
 )
 
 type SystemInfo struct {
@@ -150,7 +151,7 @@ func main() {
 		uploadStatus := objectStorage.UploadLogSnapshot(configs.ReportLogFiles, hostAlias, configs.ReportLogSizeLimit)
 		return c.JSON(http.StatusOK, uploadStatus)
 	})
-	e.GET("/fimp/registry/things", func(c echo.Context) error {
+	e.GET("/fimp/api/registry/things", func(c echo.Context) error {
 		things , err := thingRegistryStore.GetAllThings()
 		if err == nil {
 			return c.JSON(http.StatusOK, things)
@@ -160,7 +161,7 @@ func main() {
 
 	})
 
-	e.GET("/fimp/registry/services", func(c echo.Context) error {
+	e.GET("/fimp/api/registry/services", func(c echo.Context) error {
 		services,err := thingRegistryStore.GetAllServices()
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
@@ -170,8 +171,16 @@ func main() {
 
 	})
 
-	e.GET("/fimp/registry/interfaces", func(c echo.Context) error {
-		services,err := thingRegistryStore.GetFlatInterfaces()
+	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
+		thingAddr := c.QueryParam("thingAddr")
+		thingTech := c.QueryParam("thingTech")
+		serviceName := c.QueryParam("serviceName")
+		intfMsgType := c.QueryParam("intfMsgType")
+		locationIdStr := c.QueryParam("locationId")
+		var locationId int
+		locationId,_ = strconv.Atoi(locationIdStr)
+
+		services,err := thingRegistryStore.GetFlatInterfaces(thingAddr,thingTech,serviceName,intfMsgType,registry.ID(locationId))
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
 		}else {
@@ -180,7 +189,7 @@ func main() {
 
 	})
 
-	e.GET("/fimp/registry/locations", func(c echo.Context) error {
+	e.GET("/fimp/api/registry/locations", func(c echo.Context) error {
 		locations,err := thingRegistryStore.GetAllLocations()
 		if err == nil {
 			return c.JSON(http.StatusOK, locations)
@@ -189,16 +198,16 @@ func main() {
 		}
 	})
 
-	e.GET("/fimp/registry/thing/:tech/:address", func(c echo.Context) error {
+	e.GET("/fimp/api/registry/thing/:tech/:address", func(c echo.Context) error {
 		things, _ := thingRegistryStore.GetThingByAddress(c.Param("tech"), c.Param("address"))
 		return c.JSON(http.StatusOK, things)
 	})
-	e.GET("/fimp/registry/clear_all", func(c echo.Context) error {
+	e.GET("/fimp/api/registry/clear_all", func(c echo.Context) error {
 		thingRegistryStore.ClearAll()
 		return c.NoContent(http.StatusOK)
 	})
 
-	e.PUT("/fimp/registry/thing", func(c echo.Context) error {
+	e.PUT("/fimp/api/registry/thing", func(c echo.Context) error {
 		thing := registry.Thing{}
 		err := c.Bind(&thing)
 		fmt.Println(err)

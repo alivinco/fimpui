@@ -1,0 +1,54 @@
+<nav md-tab-nav-bar>
+  <a md-tab-link active [routerLink]="['/registry/things']" >Things</a>
+  <a md-tab-link [routerLink]="['/registry/services']" >Services</a>
+  <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+</nav>
+<br/>
+<div class="example-container mat-elevation-z8">
+  <div class="example-header">
+    <md-input-container floatPlaceholder="never">
+      <input mdInput #filterAddr placeholder="Filter address">
+    </md-input-container>
+    <md-input-container floatPlaceholder="never">
+      <input mdInput #filterTech placeholder="Filter technology">
+    </md-input-container>
+  </div>
+
+  <md-table #table [dataSource]="dataSource">
+
+    <!--- Note that these columns can be defined in any order.
+          The actual rendered columns are set as a property on the row definition" -->
+
+    <!-- ID Column -->
+    <ng-container cdkColumnDef="id">
+      <md-header-cell *cdkHeaderCellDef> ID </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.id}} </md-cell>
+    </ng-container>
+
+    <!-- Progress Column -->
+    <ng-container cdkColumnDef="alias">
+      <md-header-cell *cdkHeaderCellDef> Alias </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.alias}} </md-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container cdkColumnDef="address">
+      <md-header-cell *cdkHeaderCellDef> Address </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.address}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="manufacturerId">
+      <md-header-cell *cdkHeaderCellDef> Manufacturer Id </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.manufacturerId}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="productId">
+      <md-header-cell *cdkHeaderCellDef> Product Id </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.productId}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="productHash">
+      <md-header-cell *cdkHeaderCellDef> Product Hash </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.productHash}} </md-cell>
+    </ng-container>
+    <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
+    <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>
+  </md-table>
+</div>

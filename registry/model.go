@@ -16,6 +16,7 @@ type Thing struct {
 	Alias          string    `json:"alias"`
 	CommTechnology string    `json:"comm_tech" storm:"index"`
 	ProductId      string    `json:"product_id"`
+	ManufacturerId string    `json:"manufacturer_id"`
 	DeviceId       string    `json:"device_id"`
 	HwVersion      string    `json:"hw_ver"`
 	SwVersion      string    `json:"sw_ver"`
@@ -53,6 +54,8 @@ type Location struct {
 	Type           string     `json:"type"`
 	Alias          string     `json:"alias"`
 	Address        string     `json:"address"`
+	Longitude	   float64    `json:"long"`
+	Latitude	   float64    `json:"lat"`
 	Image          string     `json:"image"`
 	ChildLocations []Location `json:"child_locations"`
 	State          string     `json:"state"`
@@ -75,6 +78,7 @@ type ServiceResponse struct {
 type InterfaceFlatView struct {
 	ThingId          ID       `json:"thing_id"`
 	ThingAddress     string   `json:"thing_address"`
+	ThingTech        string   `json:"thing_tech"`
 	ThingAlias       string   `json:"thing_alias"`
 	ServiceId        ID       `json:"service_id"`
 	ServiceName      string   `json:"service_name"`
