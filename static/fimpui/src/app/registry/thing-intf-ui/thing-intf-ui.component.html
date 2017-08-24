@@ -1,7 +1,7 @@
 
 <div style = "width:250px">
    <div *ngIf= "intf.lastValue">
-      <div [ngSwitch]="intf.msgType">
+      <div [ngSwitch]="msgType">
         <div *ngSwitchCase="'evt.sensor.report'">{{intf.lastValue.val}} {{intf.lastValue.props.unit}} </div>
         <div *ngSwitchCase="'evt.binary.report'"> <md-chip-list> 
           <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
@@ -41,7 +41,7 @@
         <div *ngSwitchDefault> {{intf.lastValue.val}}</div>
       </div>
     </div>
-  <div [ngSwitch]="intf.msgType">
+  <div [ngSwitch]="msgType">
       <div *ngSwitchCase="'cmd.binary.set'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">

@@ -1,7 +1,9 @@
 <nav md-tab-nav-bar>
-  <a md-tab-link active [routerLink]="['/registry/things']" >Things</a>
-  <a md-tab-link [routerLink]="['/registry/services']" >Services</a>
   <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+  <a md-tab-link active [routerLink]="['/registry/things/*/*']" >Things</a>
+  <a md-tab-link [routerLink]="['/registry/services/*/*']" >Services</a>
+  <a md-tab-link [routerLink]="['/registry/admin']" >Admin</a>
+  
 </nav>
 <br/>
 <div class="example-container mat-elevation-z8">
@@ -34,7 +36,7 @@
     <!-- Name Column -->
     <ng-container cdkColumnDef="address">
       <md-header-cell *cdkHeaderCellDef> Address </md-header-cell>
-      <md-cell *cdkCellDef="let row"> {{row.address}} </md-cell>
+      <md-cell *cdkCellDef="let row"> {{ row.commTech }}:{{row.address}} </md-cell>
     </ng-container>
     <ng-container cdkColumnDef="manufacturerId">
       <md-header-cell *cdkHeaderCellDef> Manufacturer Id </md-header-cell>
@@ -47,6 +49,14 @@
     <ng-container cdkColumnDef="productHash">
       <md-header-cell *cdkHeaderCellDef> Product Hash </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.productHash}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="action">
+      <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
+      <md-cell *cdkCellDef="let row"><md-chip-list> 
+        <md-chip  > Edit </md-chip>
+        <md-chip [routerLink]="['/registry/services','thingId',row.id]"> Services </md-chip> 
+        <md-chip [routerLink]="['/fimp/thing-view',row.commTech,row.address]"> Explore </md-chip> 
+      </md-chip-list> </md-cell>
     </ng-container>
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
     <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>

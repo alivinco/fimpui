@@ -1,7 +1,8 @@
 <nav md-tab-nav-bar>
-  <a md-tab-link active [routerLink]="['/registry/things']" >Things</a>
-  <a md-tab-link [routerLink]="['/registry/services']" >Services</a>
   <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+  <a md-tab-link active [routerLink]="['/registry/things/*/*']" >Things</a>
+  <a md-tab-link [routerLink]="['/registry/services/*/*']" >Services</a>
+  <a md-tab-link [routerLink]="['/registry/admin']" >Admin</a>
 </nav>
 
 <br/>
@@ -17,8 +18,8 @@
   
     <!-- Progress Column -->
     <ng-container cdkColumnDef="id">
-      <md-header-cell *cdkHeaderCellDef> ID </md-header-cell>
-      <md-cell *cdkCellDef="let row"> {{row.id}} </md-cell>
+      <md-header-cell  *cdkHeaderCellDef> ID </md-header-cell>
+      <md-cell  *cdkCellDef="let row"> {{row.id}} </md-cell>
     </ng-container>
     <ng-container cdkColumnDef="type">
       <md-header-cell *cdkHeaderCellDef> Type </md-header-cell>
@@ -26,13 +27,25 @@
     </ng-container>
      <ng-container cdkColumnDef="alias">
       <md-header-cell *cdkHeaderCellDef> Alias </md-header-cell>
-      <md-cell *cdkCellDef="let row"> {{row.alias}} </md-cell>
+      <md-cell *cdkCellDef="let row">{{row.alias}} </md-cell>
     </ng-container>
 
     <!-- Name Column -->
     <ng-container cdkColumnDef="address">
       <md-header-cell *cdkHeaderCellDef> Address </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.address}} </md-cell>
+    </ng-container>
+    <ng-container cdkColumnDef="geo">
+      <md-header-cell *cdkHeaderCellDef> Geo position </md-header-cell>
+      <md-cell *cdkCellDef="let row">Long:{{row.long}} Lat:{{row.lat}} </md-cell>
+    </ng-container>
+
+    <ng-container cdkColumnDef="action">
+      <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
+      <md-cell *cdkCellDef="let row"><md-chip-list> 
+        <md-chip  > Edit </md-chip>
+        <md-chip [routerLink]="['/registry/things','locationId',row.id]"> Things </md-chip> 
+      </md-chip-list> </md-cell>
     </ng-container>
     
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>

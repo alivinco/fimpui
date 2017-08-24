@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FimpService } from "app/fimp.service";
+import { FimpService } from "app/fimp/fimp.service";
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
 import { Subscription } from "rxjs/Subscription";
 

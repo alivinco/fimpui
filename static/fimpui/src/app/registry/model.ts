@@ -11,6 +11,7 @@ export class Thing {
     swVersion :string ;
     powerSource : string;
     wakeupInterval : string;
+    locationId:number;
     services:Service[]=[];
     category:string;
     propertySets : Map<string,Map<string,any>>;

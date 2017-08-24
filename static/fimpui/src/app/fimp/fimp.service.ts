@@ -21,6 +21,7 @@ export class FimpService{
      this.subscribeToAll("pt:j1/#");
   }
   public subscribeToAll(topic: string):Observable<MqttMessage>{
+    console.log("Subscribing to all messages ")
     this.observable = this.mqtt.observe(topic);
     this.observable.subscribe((msg) => {
       console.log("New message from topic :"+msg.topic+" message :"+msg.payload)

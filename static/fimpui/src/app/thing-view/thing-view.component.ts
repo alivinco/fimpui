@@ -1,11 +1,12 @@
 import { Component, OnInit , OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { FimpService} from '../fimp.service';
-import { MapFimpInclusionReportToThing } from '../things-db/integrations';
+import { FimpService} from 'app/fimp/fimp.service';
+import { MapFimpInclusionReportToThing ,MapJsonToThingObject } from '../things-db/integrations';
 import { Thing } from '../things-db/thing-model';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message';
 import { Subscription } from 'rxjs/Subscription';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
+import { BACKEND_ROOT } from "app/globals";
 
 @Component({
   selector: 'app-thing-view',
@@ -30,12 +31,19 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
 
   ngOnInit() {
     let techAdapterName  = this.route.snapshot.params['ad'];
-    let id  = this.route.snapshot.params['id'];
-    let serviceName = "zwave-ad";
-    if (techAdapterName == "ikea"){
-      serviceName = "ikea-ad";
-    }
-    this.getReport(techAdapterName,serviceName,id);
+    let address  = this.route.snapshot.params['id'];
+    //this.getReport(techAdapterName,serviceName,id);
+    this.loadThingFromRegistry(techAdapterName,address);
+ }
+
+
+  ngOnDestroy() {
+    if (this.globalSub!=undefined)
+       this.globalSub.unsubscribe();
+  }
+
+  subscribeForFimpMsg(techAdapterName:string,address:string) {
+    let serviceName = this.getServiceName(techAdapterName);
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
@@ -46,7 +54,6 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
           console.log("New thing")
           this.thing = MapFimpInclusionReportToThing(fimpMsg);
           this.rows = this.thing.services;
-          this.loadThingFromRegistry(this.thing.commTech,this.thing.address)
         } 
 
       }else {
@@ -66,10 +73,17 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
       }
     });
   }
-  ngOnDestroy() {
-    this.globalSub.unsubscribe();
+
+  getServiceName(techAdapterName:string):string{
+    let serviceName = "zwave-ad";
+    if (techAdapterName == "ikea"){
+      serviceName = "ikea-ad";
+    }
+    return serviceName;
   }
-  getReport(techAdapterName:string,serviceName:string, nodeId:string){
+
+  getReport(techAdapterName:string, nodeId:string){
+    let serviceName = this.getServiceName(techAdapterName);
     let msg  = new FimpMessage(serviceName,"cmd.thing.get_inclusion_report","string",nodeId,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:"+techAdapterName+"/ad:1",msg.toString());
   }
@@ -80,21 +94,27 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
     let options = new RequestOptions({headers:headers});
     console.log(this.thing.alias);
      this.http
-      .put('/fimp/registry/thing',JSON.stringify(this.thing),  options )
+      .put(BACKEND_ROOT+'/fimp/api/registry/thing',JSON.stringify(this.thing),  options )
       .subscribe ((result) => {
          console.log("Thing was saved");
       });
   }
 
-  loadThingFromRegistry(tech:string,address:string) {
+  loadThingFromRegistry(techAdapterName:string,address:string) {
      this.http
-      .get('/fimp/registry/thing/'+tech+"/"+address)
+      .get(BACKEND_ROOT+'/fimp/api/registry/thing/'+techAdapterName+"/"+address)
       .map(function(res: Response){
         let body = res.json();
         return body;
       }).subscribe ((result) => {
-          this.thing.alias = result.alias                 
-      });
+          this.thing = MapJsonToThingObject(result);
+          this.rows = this.thing.services;
+          this.subscribeForFimpMsg(techAdapterName,address);                
+      },err=> {
+        console.log("Registry failed , requesting from adapter instead.")
+        this.subscribeForFimpMsg(techAdapterName,address);
+        this.getReport(techAdapterName,address);
+      } );
   }
 
 }

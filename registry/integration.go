@@ -29,6 +29,7 @@ func (mg *MqttIntegration) InitMessagingTransport() {
 	}
 	mg.msgTransport.SetMessageHandler(mg.onMqttMessage)
 	mg.msgTransport.Subscribe("pt:j1/mt:evt/rt:ad/+/+")
+	mg.msgTransport.Subscribe("pt:j1/mt:cmd/rt:app/rn:registry/ad:1")
 
 }
 

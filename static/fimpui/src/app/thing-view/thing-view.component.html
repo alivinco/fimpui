@@ -76,7 +76,7 @@
                    <td>{{ intf.type }}</td>
                    <td>{{ intf.msgType }}</td>
                    <td>{{ intf.valueType }}</td>
-                   <td><thing-intf-ui [intf]="intf" [addr]="row.address" [service]="row.name" > </thing-intf-ui></td>
+                   <td><thing-intf-ui [intf]="intf" [msgType]="intf.msgType" [addr]="row.address" [service]="row.name" > </thing-intf-ui></td>
                  </tr>
                </table>
           </ng-template>

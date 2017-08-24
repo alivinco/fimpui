@@ -12,10 +12,10 @@ import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
 import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
-import { FimpService} from './fimp.service';
+import { FimpService} from './fimp/fimp.service';
 import { ThingsDbService} from './things-db.service';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { ThingIntfUiComponent , KeysPipe }from './thing-intf-ui/thing-intf-ui.component'
+// import { ThingIntfUiComponent , KeysPipe }from './thing-intf-ui/thing-intf-ui.component'
 import 'hammerjs';
 import {
   MqttMessage,
@@ -78,8 +78,8 @@ export function mqttServiceFactory() {
     SettingsComponent,
     ReportComponent,
     FlightRecorderComponent,
-    ThingIntfUiComponent,
-    KeysPipe,
+    // ThingIntfUiComponent,
+    // KeysPipe,
   ],
   imports: [
     BrowserModule,

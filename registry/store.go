@@ -106,6 +106,12 @@ func (st *ThingRegistryStore) GetThingByAddress(technology string, address strin
 	err := st.db.Select(q.And(q.Eq("Address",address),q.Eq("CommTechnology",technology))).First(&thing)
 	return &thing,err
 }
+func (st *ThingRegistryStore) GetThingsByLocationId(locationId ID) ([]Thing, error) {
+	var things []Thing
+	err := st.db.Select(q.Eq("LocationId",locationId)).Find(&things)
+	return things,err
+}
+
 
 func (st *ThingRegistryStore) GetThingByIntegrationId(id string) (*Thing,error) {
 	var thing Thing
@@ -119,7 +125,7 @@ func (st *ThingRegistryStore) GetLocationByIntegrationId(id string) (*Location,e
 	return &location,err
 }
 
-func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string ,thingTech string ,serviceName string ,intfMsgType string ,locationId ID) ([]InterfaceFlatView,error) {
+func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string ,thingTech string ,serviceName string ,intfMsgType string ,locationId ID,thingId ID) ([]InterfaceFlatView,error) {
 	var result []InterfaceFlatView
 	//things, err  := st.GetAllThings()
 	var things []Thing
@@ -130,6 +136,10 @@ func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string ,thingTech stri
 	}
 	if thingTech != ""{
 		match := q.Eq("CommTechnology",thingTech)
+		matcher = append(matcher, match)
+	}
+	if thingId != 0{
+		match := q.Eq("ID",thingId)
 		matcher = append(matcher, match)
 	}
 	err := st.db.Select(matcher...).Find(&things)

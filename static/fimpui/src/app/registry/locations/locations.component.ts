@@ -18,7 +18,7 @@ import { BACKEND_ROOT } from "app/globals";
   styleUrls: ['./locations.component.css']
 })
 export class LocationsComponent implements OnInit {
-displayedColumns = ['id','type','alias','address'];
+displayedColumns = ['id','type','alias','address','geo','action'];
 
 // displayedColumns = ['thingAddress', 'thingAlias',
 // 'serviceName','serviceAlias','intfMsgType'];

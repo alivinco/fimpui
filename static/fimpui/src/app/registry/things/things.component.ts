@@ -9,7 +9,8 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
-import {Thing} from '../model';
+import { Thing } from '../model';
+import { ActivatedRoute } from '@angular/router';
 import { BACKEND_ROOT } from "app/globals";
 
 @Component({
@@ -18,17 +19,23 @@ import { BACKEND_ROOT } from "app/globals";
   styleUrls: ['./things.component.css']
 })
 export class ThingsComponent implements OnInit {
-  displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productHash'];
+  displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productHash','action'];
   dataSource: ThingsDataSource | null;
 
   @ViewChild('filterAddr') filter: ElementRef;
 
-  constructor(private http : Http) { 
+  constructor(private http : Http,private route: ActivatedRoute) { 
     
   }
 
   ngOnInit() {
+    let locationId = this.route.snapshot.params['filterValue'];
     this.dataSource = new ThingsDataSource(this.http);
+    if (locationId=="*"){
+      locationId = "";
+    }
+    
+    this.dataSource.getData(locationId);
     Observable.fromEvent(this.filter.nativeElement, 'keyup')
         .debounceTime(150)
         .distinctUntilChanged()
@@ -51,16 +58,18 @@ export class ThingsDataSource extends DataSource<any> {
   things : Thing[] = [];
   thingsObs = new BehaviorSubject<Thing[]>([]);
   get filter(): string { return this._filterChange.value; }
-  set filter(filter: string) { this.getData() }
+  set filter(filter: string) { this.getData("") }
 
   constructor(private http : Http) {
     super();
-    this.getData();
+    // this.getData("");
   }
 
-  getData() {
+  getData(locationId:string) {
+    let params: URLSearchParams = new URLSearchParams();
+    params.set('locationId', locationId);
     this.http
-        .get(BACKEND_ROOT+'/fimp/api/registry/things')
+        .get(BACKEND_ROOT+'/fimp/api/registry/things',{search:params})
         .map((res: Response)=>{
           let result = res.json();
           return this.mapThings(result);
@@ -81,10 +90,12 @@ export class ThingsDataSource extends DataSource<any> {
             let thing = new Thing();
             thing.id = result[key].id;
             thing.address = result[key].address;
+            thing.commTech = result[key].comm_tech;
             thing.alias = result[key].alias;
             thing.productId = result[key].product_id;
             thing.productHash = result[key].product_hash;
             thing.manufacturerId = result[key].manufacturer_id;
+            thing.locationId = result[key].location_id;
             things.push(thing)
      }
      return things;     

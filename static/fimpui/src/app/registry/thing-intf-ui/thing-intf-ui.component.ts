@@ -1,15 +1,16 @@
 import { Component, OnInit ,Input ,Pipe, PipeTransform } from '@angular/core';
-import { Interface } from "../things-db/thing-model";
-import { FimpService } from '../fimp.service';
-import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message';
+import { Interface } from "../model";
+import { FimpService } from 'app/fimp/fimp.service';
+import { FimpMessage ,NewFimpMessageFromString } from 'app/fimp/Message';
 
 @Component({
   selector: 'thing-intf-ui',
   templateUrl: './thing-intf-ui.component.html',
-  styleUrls: ['./thing-intf-ui.component.css']
+  styleUrls: ['./thing-intf-ui.component.css'],
 })
 export class ThingIntfUiComponent implements OnInit {
   @Input() intf: Interface;
+  @Input() msgType : string;
   @Input() addr: string;
   @Input() service :string;
   

@@ -2,10 +2,15 @@ import { FimpMessage } from '../fimp/Message';
 import { Thing , Service , Interface } from '../things-db/thing-model';
 
 export function MapFimpInclusionReportToThing(fimpMsg : FimpMessage ):Thing{
-    
     let val = fimpMsg.val;
+    return MapJsonToThingObject(val);
+}
+
+
+export function MapJsonToThingObject(val:any):Thing {
     let thing = new Thing();
     thing.address = val.address;
+    thing.alias = val.alias;
     thing.commTech = val.comm_tech;
     thing.deviceId = val.device_id;
     thing.hwVersion = val.hw_ver;

@@ -43,7 +43,7 @@ type Service struct {
 type Interface struct {
 	Type      string      `json:"intf_t"`
 	MsgType   string      `json:"msg_t"`
-	valueType string      `json:"val_t"`
+	ValueType string      `json:"val_t"`
 	lastValue interface{} `json:"last_val"`
 	version   string      `json:"ver"`
 }

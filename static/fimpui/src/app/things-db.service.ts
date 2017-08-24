@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { FimpService} from './fimp.service'
-import { FimpMessage,NewFimpMessageFromString } from './fimp/Message'; 
+import { FimpService} from 'app/fimp/fimp.service'
+import { FimpMessage,NewFimpMessageFromString } from 'app/fimp/Message'; 
 import { Thing} from './things-db/thing-model';
 
 @Injectable()

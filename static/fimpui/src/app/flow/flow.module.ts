@@ -8,6 +8,8 @@ import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { MaterialModule } from '@angular/material';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { RegistryModule} from 'app/registry/registry.module'
+
 
 @NgModule({
   imports: [
@@ -15,7 +17,8 @@ import { HttpModule } from '@angular/http';
     FlowRoutingModule,
     MaterialModule,
     FormsModule,
-    HttpModule
+    HttpModule,
+    RegistryModule
   ],
   declarations: [
      FlowOverviewComponent,

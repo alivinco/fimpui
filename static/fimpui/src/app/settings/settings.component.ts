@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FimpService} from '../fimp.service'
+import { FimpService} from 'app/fimp/fimp.service'
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',

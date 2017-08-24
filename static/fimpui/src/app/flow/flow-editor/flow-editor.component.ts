@@ -3,10 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
 import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 import {MD_DIALOG_DATA} from '@angular/material';
-import { FimpService } from "app/fimp.service";
+import { FimpService } from "app/fimp/fimp.service";
 import { FimpMessage } from "app/fimp/Message";
 import { msgTypeToValueTypeMap } from "app/things-db/mapping";
 import { BACKEND_ROOT } from "app/globals";
+import { RegistryModule} from 'app/registry/registry.module'
+import { ServiceInterface } from "app/registry/model";
+
 
 @Component({
   selector: 'app-flow-editor',
@@ -38,8 +41,8 @@ export class FlowEditorComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
          this.flow = result;
-         console.dir(this.flow)
-         console.log(this.flow.Name)
+        //  console.dir(this.flow)
+        //  console.log(this.flow.Name)
          this.loadContext();
       });
   }
@@ -51,7 +54,6 @@ export class FlowEditorComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
          this.localVars = [];
-         
          for (var key in result){
             this.localVars.push(result[key].Name);
          }
@@ -212,9 +214,9 @@ export class FlowEditorComponent implements OnInit {
       if (result)
         this.flow.Nodes.forEach(element => {
             if (element.Id==nodeId) {
-              element.Service = result.service_name
-              element.ServiceInterface = result.intf_msg_type
-              element.Address = result.intf_address
+              element.Service = result.serviceName
+              element.ServiceInterface = result.intfMsgType
+              element.Address = result.intfAddress
               element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
             }
         });
@@ -332,25 +334,26 @@ export class FlowRunDialog {
 export class ServiceLookupDialog {
   interfaces :any;
   constructor(public dialogRef: MdDialogRef<ServiceLookupDialog>,private http : Http) {
-    this.http
-      .get(BACKEND_ROOT+'/fimp/registry/interfaces')
-      .map(function(res: Response){
-        let body = res.json();
-        let filteredBody = [];
-        body.forEach(element => {
-          if (element.service_name!="dev_sys"){
-            filteredBody.push(element);
-          }
-        });
-        return filteredBody;
-      }).subscribe ((result) => {
-         this.interfaces = result;
-      });
+    // this.http
+    //   .get(BACKEND_ROOT+'/fimp/registry/interfaces')
+    //   .map(function(res: Response){
+    //     let body = res.json();
+    //     let filteredBody = [];
+    //     body.forEach(element => {
+    //       if (element.service_name!="dev_sys"){
+    //         filteredBody.push(element);
+    //       }
+    //     });
+    //     return filteredBody;
+    //   }).subscribe ((result) => {
+    //      this.interfaces = result;
+    //   });
     
     // console.dir(data)
   }
   
-  select(intf :any){
+  onSelected(intf :ServiceInterface){
+    console.dir(intf);
     this.dialogRef.close(intf);
 
   }

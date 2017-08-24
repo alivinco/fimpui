@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild,OnInit} from '@angular/core';
+import {Component, ElementRef, ViewChild,OnInit,Output,EventEmitter} from '@angular/core';
 import {DataSource} from '@angular/cdk';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -9,55 +9,74 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
+import { ActivatedRoute } from '@angular/router';
 import {ServiceInterface} from '../model';
 import { BACKEND_ROOT } from "app/globals";
+import {ThingIntfUiComponent} from 'app/registry/thing-intf-ui/thing-intf-ui.component'
+
+ 
+@Component({
+  selector: 'reg-services-main',
+  templateUrl: './services-main.component.html',
+  styleUrls: ['./services.component.css']
+})
+export class ServicesMainComponent {
+  constructor() { 
+    
+  }
+
+}
 
 @Component({
-  selector: 'app-services',
+  selector: 'reg-services',
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.css']
 })
 export class ServicesComponent implements OnInit {
-displayedColumns = ['thingTech','thingAddress', 'thingAlias','serviceName','serviceAlias',
-                    'intfType','intfMsgType','locationAlias'];
+  displayedColumns = ['thingTech','thingAddress', 'thingAlias','serviceName','serviceAlias',
+                    'intfType','intfMsgType','locationAlias','action'];
 
-// displayedColumns = ['thingAddress', 'thingAlias',
-// 'serviceName','serviceAlias','intfMsgType'];
-  dataSource: ServicesDataSource | null;
-
+  dataSource: ServicesDataSource | null; 
+  // usage (onSelect)="onSelected($event)">
+  @Output() onSelect = new EventEmitter<ServiceInterface>();
   @ViewChild('filterThingAddr') filterThingAddr: ElementRef;
   @ViewChild('filterServiceName') filterServiceName: ElementRef;
   @ViewChild('filterInterfaceType') filterInterfaceType: ElementRef;
 
-
-
-  constructor(private http : Http) { 
+  constructor(private http : Http,private route: ActivatedRoute) { 
     
   }
 
   ngOnInit() {
+    let thingId = this.route.snapshot.params['filterValue'];
+    console.log("Thing id  = ",thingId);
     this.dataSource = new ServicesDataSource(this.http);
+    this.dataSource.getData("","","",thingId);
     Observable.fromEvent(this.filterThingAddr.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
         .subscribe(() => {
           if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value)
+          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
         });
     Observable.fromEvent(this.filterServiceName.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
         .subscribe(() => {
           if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value)
+          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
         }); 
     Observable.fromEvent(this.filterInterfaceType.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
         .subscribe(() => {
           if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value)
+          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
         });        
+  }
+
+  selectInterface(intf:ServiceInterface) {
+    this.onSelect.emit(intf);
   }
 }
 
@@ -68,14 +87,17 @@ export class ServicesDataSource extends DataSource<any> {
   
   constructor(private http : Http) {
     super();
-    this.getData("","","");
+    
   }
 
-  getData(thingAddr:string ,serviceName:string,interfaceType:string) {
+  getData(thingAddr:string ,serviceName:string,interfaceType:string,thingId:string) {
     let params: URLSearchParams = new URLSearchParams();
     params.set('serviceName', serviceName);
     params.set('thingAddr', thingAddr);
     params.set('intfMsgType', interfaceType);
+    if (thingId!="*") {
+      params.set('thingId', thingId);
+    }
     this.http
         .get(BACKEND_ROOT+'/fimp/api/registry/interfaces',{search:params})
         .map((res: Response)=>{

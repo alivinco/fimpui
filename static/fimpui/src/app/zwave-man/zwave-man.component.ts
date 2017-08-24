@@ -1,6 +1,6 @@
 import { Component, OnInit , OnDestroy ,Input ,ChangeDetectorRef,Inject} from '@angular/core';
 import { MdDialog, MdDialogRef,MD_DIALOG_DATA} from '@angular/material';
-import { FimpService} from '../fimp.service';
+import { FimpService} from 'app/fimp/fimp.service';
 import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import {Router} from '@angular/router';
@@ -17,8 +17,7 @@ import {
 @Component({
   selector: 'app-zwave-man',
   templateUrl: './zwave-man.component.html',
-  styleUrls: ['./zwave-man.component.css'],
-  providers:[]
+  styleUrls: ['./zwave-man.component.css']
 })
 export class ZwaveManComponent implements OnInit ,OnDestroy {
   selectedOption: string; 
@@ -104,14 +103,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
          localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));         
       });
   }
-  vinculumSync(){
-    this.http
-      .get(BACKEND_ROOT+'/fimp/vinculum/import_to_registry')
-      .subscribe ((result) => {
-         console.log("Synced");
-         this.reloadNodes();
-      });
-  }
+ 
   reloadNodes(){
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
     this.showProgress(true);

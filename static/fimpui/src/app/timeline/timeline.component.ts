@@ -1,5 +1,5 @@
 import { Component, OnInit , ViewChild } from '@angular/core';
-import { FimpService} from '../fimp.service'
+import { FimpService} from 'app/fimp/fimp.service'
 import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message'; 
 
 @Component({
