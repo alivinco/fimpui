@@ -223,11 +223,12 @@ func (fl *Flow) InStreamMsgRouter() {
 				default:
 					log.Debug("<Flow> Router: Message is dropped (no listeners).")
 			}
+			// Wait while node is ready to accept new command .
+			<- fl.opContext.NodeIsReady
 		}else {
 			log.Debug("<Flow> Router : No routing target")
 		}
-		// Wait while node is ready to accept new command .
-		<- fl.opContext.NodeIsReady
+
 		log.Debug("<Flow> Router : Is ready for next message.")
 
 	}

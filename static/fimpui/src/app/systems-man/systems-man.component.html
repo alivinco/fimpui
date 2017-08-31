@@ -1,0 +1,30 @@
+
+
+<nav md-tab-nav-bar>
+    <a md-tab-link [routerLink]="['/zwave-man']" >Z-Wave</a>
+    <a md-tab-link [routerLink]="['/ikea-man']" >Ikea Tradfri</a>
+    <a md-tab-link [routerLink]="['/systems-man']" >Systems</a>
+</nav>
+<div class="systems-man">
+<md-card class="example-card">
+    <md-card-header>
+  <md-card-title> <h3> System adapter managment </h3> </md-card-title>
+  <md-card-subtitle> Connect or disconnect a system adapter to FH </md-card-subtitle>
+    </md-card-header>
+  <md-card-content>
+    <md-input-container class="example-full-width">
+            <input #service mdInput placeholder="service">
+    </md-input-container>
+    <md-input-container class="example-full-width">
+            <input #securityKey mdInput placeholder="securityKey">
+    </md-input-container>
+    <md-input-container class="example-full-width">
+      <input #address mdInput placeholder="address">
+    </md-input-container>
+  </md-card-content>
+    <md-card-actions>
+    <button md-raised-button (click)="connect(service.value,securityKey.value,address.value)" >Connect</button>
+    <button md-raised-button (click)="disconnect(service.value,securityKey.value,address.value)" >Disconnect</button>
+    </md-card-actions>
+</md-card>
+</div>

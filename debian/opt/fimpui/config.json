@@ -7,7 +7,10 @@
   "report_log_size_limit":500000,
   "vinculum_address":"localhost:1989",
   "mqtt_server_uri":"tcp://localhost:1883",
+  "mqtt_client_id_prefix":"fimpui",
   "flow_storage_dir":"./flow_storage",
+  "registry_db_file":"./registry.db",
+  "context_storage_dir":"./flow_storage/context.db",
   "log_file":"./fimpui.log",
   "log_level":"debug"
 }

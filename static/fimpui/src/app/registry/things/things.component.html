@@ -55,7 +55,7 @@
       <md-cell *cdkCellDef="let row"><md-chip-list> 
         <md-chip  > Edit </md-chip>
         <md-chip [routerLink]="['/registry/services','thingId',row.id]"> Services </md-chip> 
-        <md-chip [routerLink]="['/fimp/thing-view',row.commTech,row.address]"> Explore </md-chip> 
+        <md-chip [routerLink]="['/thing-view',row.commTech,row.address]"> Explore </md-chip> 
       </md-chip-list> </md-cell>
     </ng-container>
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
