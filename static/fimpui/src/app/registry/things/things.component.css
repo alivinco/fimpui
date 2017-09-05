@@ -2,8 +2,8 @@
 .example-container {
   display: flex;
   flex-direction: column;
-  max-height: 500px;
-  min-width: 300px;
+  max-height: 100%;
+  min-width: 700px;
 }
 
 .example-header {
@@ -39,4 +39,7 @@ md-chip {
 
 .mat-cell:nth-child(1), .mat-header-cell:nth-child(1) {
     flex: 0 0 70px;
+}
+.mat-cell:nth-child(7), .mat-header-cell:nth-child(7) {
+  flex: 0 0 270px;
 }

@@ -12,7 +12,7 @@
         </md-input-container>
         <button md-raised-button (click)="serviceLookupDialog(node.Id)" >Lookup</button>
     </p>
-    <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueType">
+    <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueFilter.ValueType">
         <md-option value="">The same as input </md-option>
         <md-option value="string">string</md-option>
         <md-option value="bool">bool</md-option>
@@ -29,27 +29,27 @@
         <md-option value="bool_map">map of booleans</md-option>
         <md-option value="object">object</md-option>
     </md-select>
-    <div [ngSwitch]="node.Config.ValueType">
+    <div [ngSwitch]="node.Config.ValueFilter.ValueType">
         <div *ngSwitchCase="'string'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'int'">
             <md-input-container class="node-transition-field">
-                <input mdInput type="number" [(ngModel)]="node.Config.Value" placeholder="Default value">
+                <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'float'">
             <md-input-container class="node-transition-field">
-                <input mdInput type="number" [(ngModel)]="node.Config.Value" placeholder="Default value">
+                <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
             </md-input-container>
         </div>
         <div *ngSwitchCase="''">
 
         </div>
         <div *ngSwitchCase="'bool'">
-            <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.Value">
+            <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.ValueFilter.Value">
                 <md-radio-button class="example-radio-button" [value]="true">
                     true (On)
                 </md-radio-button>
@@ -60,50 +60,53 @@
         </div>
          <div *ngSwitchCase="'str_array'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : ['abc','cde']">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : ['abc','cde']">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'int_array'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [1,2] ">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1,2] ">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'float_array'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [1.2,0.5] ">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1.2,0.5] ">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'bool_array'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : [true,false]">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [true,false]">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'str_map'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'int_map'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':1,'b':2}">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':1,'b':2}">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'float_map'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'bool_map'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':true,'b':false}">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':true,'b':false}">
             </md-input-container>
         </div>
         <div *ngSwitchCase="'object'">
             <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.Value" placeholder="Default value : {'a':'b','b':3}">
+                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'b','b':3}">
             </md-input-container>
         </div>
     </div>
+     <md-input-container class="node-transition-field">
+        <input mdInput type="number" [(ngModel)]="node.Config.Timeout" placeholder="Timeout">
+     </md-input-container>
     </div>
     <p>
         <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >

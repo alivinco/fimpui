@@ -10,6 +10,23 @@ import { BACKEND_ROOT } from "app/globals";
 import { RegistryModule} from 'app/registry/registry.module'
 import { ServiceInterface } from "app/registry/model";
 
+export class MetaNode {
+  Id               :string;
+	Type             :string;
+	Label            :string;
+	SuccessTransition :string;
+	TimeoutTransition :string;
+	ErrorTransition   :string;
+	Address           :string;
+	Service           :string;
+	ServiceInterface  :string;
+	Config            :any;
+}
+
+export class Variable {
+  Value :any;
+  ValueType :string;
+}
 
 @Component({
   selector: 'app-flow-editor',
@@ -237,18 +254,7 @@ export class FlowEditorComponent implements OnInit {
   }
 }
 
-export class MetaNode {
-  Id               :string;
-	Type             :string;
-	Label            :string;
-	SuccessTransition :string;
-	TimeoutTransition :string;
-	ErrorTransition   :string;
-	Address           :string;
-	Service           :string;
-	ServiceInterface  :string;
-	Config            :any;
-}
+
 
 export class Flow {
     Id :string ;

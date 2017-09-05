@@ -9,6 +9,7 @@ import { MaterialModule } from '@angular/material';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RegistryModule} from 'app/registry/registry.module'
+import { VariableElementComponent} from 'app/flow/flow-nodes/ui-elements/ui-elements.component'
 
 
 @NgModule({
@@ -31,6 +32,7 @@ import { RegistryModule} from 'app/registry/registry.module'
      SetVariableNodeComponent,
      ServiceLookupDialog, 
      ContextDialog,
+     VariableElementComponent,
   ],
   entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog]  
 })

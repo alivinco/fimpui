@@ -1,10 +1,16 @@
 package main
 
 import (
-	"net/http"
-	"fmt"
 	"encoding/json"
 	"flag"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/alivinco/fimpui/flow"
+	flowmodel "github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/integr/fhcore"
 	"github.com/alivinco/fimpui/integr/logexport"
 	"github.com/alivinco/fimpui/integr/mqtt"
@@ -14,15 +20,11 @@ import (
 	"github.com/koding/websocketproxy"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"io/ioutil"
-	"net/url"
-	"github.com/alivinco/fimpui/flow"
-	flowmodel "github.com/alivinco/fimpui/flow/model"
-	log "github.com/Sirupsen/logrus"
 	//"time"
-	lumberjack "gopkg.in/natefinch/lumberjack.v2"
-	"strings"
 	"strconv"
+	"strings"
+
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 type SystemInfo struct {
@@ -31,12 +33,12 @@ type SystemInfo struct {
 
 // SetupLog configures default logger
 // Supported levels : info , degug , warn , error
-func SetupLog(logfile string,level string) {
+func SetupLog(logfile string, level string) {
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: true})
-	logLevel , err := log.ParseLevel(level)
+	logLevel, err := log.ParseLevel(level)
 	if err == nil {
 		log.SetLevel(logLevel)
-	}else {
+	} else {
 		log.SetLevel(log.DebugLevel)
 	}
 
@@ -50,7 +52,6 @@ func SetupLog(logfile string,level string) {
 	}
 
 }
-
 
 func startWsCoreProxy(backendUrl string) {
 	u, _ := url.Parse(backendUrl)
@@ -78,18 +79,18 @@ func main() {
 		panic("Can't load config file.")
 	}
 
-	SetupLog(configs.LogFile,configs.LogLevel)
+	SetupLog(configs.LogFile, configs.LogLevel)
 	log.Info("--------------Starting FIMPUI----------------")
 	//---------FLOW------------------------
 	log.Info("<main> Starting Flow manager")
-	flowManager,err := flow.NewManager(configs)
+	flowManager, err := flow.NewManager(configs)
 	if err != nil {
-		log.Error("Can't Init Flow manager . Error :",err)
+		log.Error("Can't Init Flow manager . Error :", err)
 	}
 	flowManager.InitMessagingTransport()
 	err = flowManager.LoadAllFlowsFromStorage()
 	if err != nil {
-		log.Error("Can't load Flows from storage . Error :",err)
+		log.Error("Can't load Flows from storage . Error :", err)
 	}
 	log.Info("<main> Started")
 	//-------------------------------------
@@ -100,7 +101,7 @@ func main() {
 	//-------------------------------------
 	//---------REGISTRY INTEGRATION--------
 	log.Info("<main> Starting MqttIntegration ")
-	mqttRegInt := registry.NewMqttIntegration(configs,thingRegistryStore)
+	mqttRegInt := registry.NewMqttIntegration(configs, thingRegistryStore)
 	mqttRegInt.InitMessagingTransport()
 	log.Info("<main> Started ")
 	//-------------------------------------
@@ -109,7 +110,7 @@ func main() {
 	err = vinculumClient.Connect()
 	if err != nil {
 		log.Error("<main> Can't connect to Vinculum")
-	}else {
+	} else {
 		log.Info("<main> Started ")
 	}
 
@@ -128,7 +129,7 @@ func main() {
 	go startWsCoreProxy(coreUrl)
 	//--------------------------------------
 
-	wsUpgrader := mqtt.WsUpgrader{strings.Replace(configs.MqttServerURI,"tcp://","",-1)}
+	wsUpgrader := mqtt.WsUpgrader{strings.Replace(configs.MqttServerURI, "tcp://", "", -1)}
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -156,26 +157,26 @@ func main() {
 		var things []registry.Thing
 		var locationId int
 		locationIdStr := c.QueryParam("locationId")
-		locationId,_ = strconv.Atoi(locationIdStr)
+		locationId, _ = strconv.Atoi(locationIdStr)
 
 		if locationId != 0 {
-			things , err = thingRegistryStore.GetThingsByLocationId(registry.ID(locationId))
-		}else {
-			things , err = thingRegistryStore.GetAllThings()
+			things, err = thingRegistryStore.GetThingsByLocationId(registry.ID(locationId))
+		} else {
+			things, err = thingRegistryStore.GetAllThings()
 		}
 		if err == nil {
 			return c.JSON(http.StatusOK, things)
-		}else {
+		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
 	})
 
 	e.GET("/fimp/api/registry/services", func(c echo.Context) error {
-		services,err := thingRegistryStore.GetAllServices()
+		services, err := thingRegistryStore.GetAllServices()
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
-		}else {
+		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
@@ -188,24 +189,24 @@ func main() {
 		intfMsgType := c.QueryParam("intfMsgType")
 		locationIdStr := c.QueryParam("locationId")
 		var locationId int
-		locationId,_ = strconv.Atoi(locationIdStr)
+		locationId, _ = strconv.Atoi(locationIdStr)
 		var thingId int
 		thingIdStr := c.QueryParam("thingId")
-		thingId,_ = strconv.Atoi(thingIdStr)
-		services,err := thingRegistryStore.GetFlatInterfaces(thingAddr,thingTech,serviceName,intfMsgType,registry.ID(locationId),registry.ID(thingId))
+		thingId, _ = strconv.Atoi(thingIdStr)
+		services, err := thingRegistryStore.GetFlatInterfaces(thingAddr, thingTech, serviceName, intfMsgType, registry.ID(locationId), registry.ID(thingId))
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
-		}else {
+		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
 	})
 
 	e.GET("/fimp/api/registry/locations", func(c echo.Context) error {
-		locations,err := thingRegistryStore.GetAllLocations()
+		locations, err := thingRegistryStore.GetAllLocations()
 		if err == nil {
 			return c.JSON(http.StatusOK, locations)
-		}else {
+		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 	})
@@ -214,7 +215,7 @@ func main() {
 		things, err := thingRegistryStore.GetThingByAddress(c.Param("tech"), c.Param("address"))
 		if err == nil {
 			return c.JSON(http.StatusOK, things)
-		}else {
+		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
 
@@ -230,6 +231,16 @@ func main() {
 		fmt.Println(err)
 		thingRegistryStore.UpsertThing(&thing)
 		return c.NoContent(http.StatusOK)
+	})
+
+	e.DELETE("/fimp/api/registry/thing/:id", func(c echo.Context) error {
+		idStr := c.Param("id")
+		thingId, _ := strconv.Atoi(idStr)
+		err := thingRegistryStore.DeleteThing(registry.ID(thingId))
+		if err == nil {
+			return c.NoContent(http.StatusOK)
+		}
+		return c.JSON(http.StatusInternalServerError, err)
 	})
 
 	e.GET("/fimp/vinculum/devices", func(c echo.Context) error {
@@ -251,8 +262,8 @@ func main() {
 		var resp *flowmodel.FlowMeta
 		if id == "-" {
 			flow := flowManager.GenerateNewFlow()
-			resp = &flow;
-		}else {
+			resp = &flow
+		} else {
 			resp = flowManager.GetFlowById(id).FlowMeta
 		}
 
@@ -267,11 +278,11 @@ func main() {
 
 	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {
 		id := c.Param("id")
-		body ,err := ioutil.ReadAll(c.Request().Body)
+		body, err := ioutil.ReadAll(c.Request().Body)
 		if err != nil {
 			return err
 		}
-		flowManager.UpdateFlowFromJsonAndSaveToStorage(id,body)
+		flowManager.UpdateFlowFromJsonAndSaveToStorage(id, body)
 		return c.NoContent(http.StatusOK)
 	})
 	e.DELETE("/fimp/flow/definition/:id", func(c echo.Context) error {

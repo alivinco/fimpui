@@ -44,6 +44,14 @@ export class ThingsComponent implements OnInit {
           this.dataSource.filter = this.filter.nativeElement.value;
         });
   }
+
+  deleteThing(id:string) {
+    this.http
+     .delete(BACKEND_ROOT+'/fimp/api/registry/thing/'+id)
+     .subscribe ((result) => {
+        this.dataSource.getData("");
+     });
+ } 
   }
 
   /**

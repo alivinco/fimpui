@@ -80,15 +80,63 @@ export class ReceiveNodeComponent implements OnInit {
             width: '95%'
           });
     dialogRef.afterClosed().subscribe(result => {
+      console.dir(result)
       if (result)
         this.nodes.forEach(element => {
             if (element.Id==nodeId) {
-              element.Service = result.service_name
-              element.ServiceInterface = result.intf_msg_type
-              element.Address = result.intf_address
-              element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
+              element.Service = result.serviceName
+              element.ServiceInterface = result.intfMsgType
+              element.Address = result.intfAddress
+              //element.Config.ValueFilter.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
             }
         });
     });      
   }
+}
+
+
+/*type TimeTriggerConfig struct {
+	DefaultMsg model.Variable
+	Expressions []TimeExpression
+	GenerateAstroTimeEvents bool
+	Latitude float64
+	Longitude float64
+}
+
+type TimeExpression struct {
+	Name string
+	Expression string   //https://godoc.org/github.com/robfig/cron#Job
+	Comment string
+}
+ */
+
+@Component({
+  selector: 'time-trigger-node',
+  templateUrl: './time-trigger-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class TimeTriggerNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MdDialog) { }
+
+  ngOnInit() { 
+  }
+  
+}
+
+@Component({
+  selector: 'counter-node',
+  templateUrl: './counter-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class CounterNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MdDialog) { }
+
+  ngOnInit() { 
+    
+  }
+  
 }
