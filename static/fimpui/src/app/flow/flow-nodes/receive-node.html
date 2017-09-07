@@ -116,6 +116,9 @@
         <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
             <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
         </md-select>
+        <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Timeout node"[(ngModel)]="node.TimeoutTransition" >
+            <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
+        </md-select>
     </p>
     <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
  

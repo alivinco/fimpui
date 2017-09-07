@@ -12,6 +12,7 @@ import (
 	//"github.com/mitchellh/mapstructure"
 	"path/filepath"
 	"os"
+	"strings"
 )
 
 type Manager struct {
@@ -94,7 +95,9 @@ func (mg *Manager) LoadAllFlowsFromStorage () error {
 		return err
 	}
 	for _, file := range files {
-		mg.LoadFlowFromFile(filepath.Join(mg.config.FlowStorageDir,file.Name()))
+		if strings.Contains(file.Name(),".json"){
+			mg.LoadFlowFromFile(filepath.Join(mg.config.FlowStorageDir,file.Name()))
+		}
 	}
 	return nil
 }

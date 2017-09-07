@@ -46,6 +46,10 @@
       <md-header-cell *cdkHeaderCellDef> Product Id </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.productId}} </md-cell>
     </ng-container>
+    <ng-container cdkColumnDef="productName">
+      <md-header-cell *cdkHeaderCellDef> Product Name </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.productName}} </md-cell>
+    </ng-container>
     <ng-container cdkColumnDef="productHash">
       <md-header-cell *cdkHeaderCellDef> Product Hash </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.productHash}} </md-cell>

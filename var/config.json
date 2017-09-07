@@ -6,7 +6,7 @@
   ],
   "report_log_size_limit":500000,
   "vinculum_address":"cube.local:8082",
-  "mqtt_server_uri":"tcp://cube.local:1883",
+  "mqtt_server_uri":"tcp://localhost:1883",
   "mqtt_client_id_prefix":"macbook",
   "flow_storage_dir":"./var/flow_storage",
   "registry_db_file":"./var/registry.db",

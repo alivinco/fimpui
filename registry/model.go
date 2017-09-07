@@ -16,6 +16,7 @@ type Thing struct {
 	Alias          string    `json:"alias"`
 	CommTechnology string    `json:"comm_tech" storm:"index"`
 	ProductId      string    `json:"product_id"`
+	ProductName    string    `json:"product_name"`
 	ManufacturerId string    `json:"manufacturer_id"`
 	DeviceId       string    `json:"device_id"`
 	HwVersion      string    `json:"hw_ver"`
@@ -54,8 +55,8 @@ type Location struct {
 	Type           string     `json:"type"`
 	Alias          string     `json:"alias"`
 	Address        string     `json:"address"`
-	Longitude	   float64    `json:"long"`
-	Latitude	   float64    `json:"lat"`
+	Longitude      float64    `json:"long"`
+	Latitude       float64    `json:"lat"`
 	Image          string     `json:"image"`
 	ChildLocations []Location `json:"child_locations"`
 	State          string     `json:"state"`

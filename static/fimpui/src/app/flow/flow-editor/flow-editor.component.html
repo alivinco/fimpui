@@ -97,7 +97,10 @@
             </div> 
              <div *ngSwitchCase="'receive'">  
                  <receive-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </receive-node>
-            </div>        
+            </div>
+            <div *ngSwitchCase="'time_trigger'">  
+                <time-trigger-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </time-trigger-node>
+           </div>                
             <div *ngSwitchCase="'if'">  
                <div #nodebody hidden>
                   <div *ngFor="let exp of flow.Nodes[index].Config.Expression;let index2 = index;trackBy:trackByIndex;">

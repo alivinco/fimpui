@@ -198,6 +198,16 @@ export class FlowEditorComponent implements OnInit {
         variable["ValueType"] = "int";
         node.Config["DefaultValue"] = variable
         break; 
+      case "time_trigger":
+        node.Config = {};
+        node.Config["DefaultMsg"] = {"Value":"","ValueType":""};
+        let expressions = [];
+        expressions.push({"Name":"","Expression":"","Comments":""});
+        node.Config["Expressions"] = expressions;
+        node.Config["GenerateAstroTimeEvents"] = false;
+        node.Config["Latitude"] = 0.0;
+        node.Config["Longitude"] = 0.0;
+        break;
     }
     this.flow.Nodes.push(node) 
   }

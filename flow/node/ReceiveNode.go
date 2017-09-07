@@ -92,4 +92,3 @@ func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
 }
-

@@ -206,11 +206,11 @@ func (fl *Flow) Run() {
 func (fl *Flow) InStreamMsgRouter() {
 	// fetching all messages from upstream
 	for inMsg := range fl.msgInStream {
-		log.Debug("<Flow> Router : New message from msgInStream")
+		//log.Debug("<Flow> Router : New message from msgInStream")
 		if !fl.opContext.IsFlowRunning {
 			break
 		}
-		log.Debug("<Flow> Router: Current Node Id = ", fl.currentNodeId)
+		//log.Debug("<Flow> Router: Current Node Id = ", fl.currentNodeId)
 		currNode := fl.currentNode.GetMetaNode()
 		// doing filtering
 		if (inMsg.AddressStr == currNode.Address || currNode.Address == "*") &&
@@ -219,17 +219,18 @@ func (fl *Flow) InStreamMsgRouter() {
 			// sending message to each channel
 			select {
 				case fl.localMsgInStream[currNode.Id] <- inMsg:
-					log.Debug("<Flow> Router: Message was sent to Node Id = ", fl.currentNodeId)
+					log.Debugf("<Flow> Router(%s): Message was sent to Node Id = %s",fl.Id, fl.currentNodeId)
 				default:
-					log.Debug("<Flow> Router: Message is dropped (no listeners).")
+					log.Debugf("<Flow> Router(%s): Message is dropped (no listeners).",fl.Id)
 			}
 			// Wait while node is ready to accept new command .
 			<- fl.opContext.NodeIsReady
+			log.Debugf("<Flow> Router(%s) : Is ready for next message.",fl.Id)
 		}else {
-			log.Debug("<Flow> Router : No routing target")
+			//log.Debug("<Flow> Router : No routing target")
 		}
 
-		log.Debug("<Flow> Router : Is ready for next message.")
+
 
 	}
 	log.Infof("<Flow> InStreamMsgRouter for flow %s was stopped.", fl.Name)
@@ -268,6 +269,13 @@ func (fl *Flow) Start() error {
 // Terminates flow loop , stops goroutine .
 func (fl *Flow) Stop() error {
 	log.Info("<Flow> Stopping flow  ", fl.Name)
+
+	// is invoked when node flow is stopped
+	for _,topic := range fl.activeSubscriptions {
+		log.Info("<Flow> Unsubscribing from topic : ",topic)
+		fl.msgTransport.Unsubscribe(topic)
+	}
+
 	fl.opContext.IsFlowRunning = false
 	select {
 	case fl.opContext.NodeControlSignalChannel <- model.SIGNAL_STOP:

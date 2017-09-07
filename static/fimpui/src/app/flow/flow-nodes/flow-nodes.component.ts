@@ -37,9 +37,9 @@ export class ActionNodeComponent implements OnInit {
       if (result)
         this.nodes.forEach(element => {
             if (element.Id==nodeId) {
-              element.Service = result.service_name
-              element.ServiceInterface = result.intf_msg_type
-              element.Address = result.intf_address
+              element.Service = result.serviceName
+              element.ServiceInterface = result.intfMsgType
+              element.Address = result.intfAddress
               element.Config.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
             }
         });

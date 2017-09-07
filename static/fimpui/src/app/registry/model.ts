@@ -6,6 +6,7 @@ export class Thing {
     productHash : string;
     manufacturerId : string;
     productId : string ; 
+    productName : string;
     deviceId :string ;
     hwVersion :string ;
     swVersion :string ;

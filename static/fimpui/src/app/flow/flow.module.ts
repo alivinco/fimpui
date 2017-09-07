@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog } from './flow-editor/flow-editor.component';
-import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent } from './flow-nodes/flow-nodes.component';
+import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { MaterialModule } from '@angular/material';
@@ -33,6 +33,7 @@ import { VariableElementComponent} from 'app/flow/flow-nodes/ui-elements/ui-elem
      ServiceLookupDialog, 
      ContextDialog,
      VariableElementComponent,
+     TimeTriggerNodeComponent,
   ],
   entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog]  
 })

@@ -19,7 +19,7 @@ import { BACKEND_ROOT } from "app/globals";
   styleUrls: ['./things.component.css']
 })
 export class ThingsComponent implements OnInit {
-  displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productHash','action'];
+  displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productName','productHash','action'];
   dataSource: ThingsDataSource | null;
 
   @ViewChild('filterAddr') filter: ElementRef;
@@ -101,6 +101,7 @@ export class ThingsDataSource extends DataSource<any> {
             thing.commTech = result[key].comm_tech;
             thing.alias = result[key].alias;
             thing.productId = result[key].product_id;
+            thing.productName = result[key].product_name;
             thing.productHash = result[key].product_hash;
             thing.manufacturerId = result[key].manufacturer_id;
             thing.locationId = result[key].location_id;

@@ -39,7 +39,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
         { 
           this.nodes = fimpMsg.val;
-          this.loadThingsFromRegistry()
+          //this.loadThingsFromRegistry()
+
           // for(var key in fimpMsg.val){
           //   this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
           // }
@@ -85,7 +86,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 
   loadThingsFromRegistry() {
      this.http
-      .get(BACKEND_ROOT+'/fimp/registry/interfaces')
+      .get(BACKEND_ROOT+'/fimp/api/registry/interfaces')
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);
@@ -199,6 +200,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
         { 
           this.messages.push("Node added :"+fimpMsg.val.address);
+          this.messages.push("Product name :"+fimpMsg.val.product_name);
         } else if (fimpMsg.mtype == "evt.thing.exclusion_report" ){
           this.messages.push("Node removed :"+fimpMsg.val.address);
         }

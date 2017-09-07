@@ -19,7 +19,7 @@ func NewMqttIntegration(config *model.FimpUiConfigs, registry *ThingRegistryStor
 }
 func (mg *MqttIntegration) InitMessagingTransport() {
 	clientId := mg.config.MqttClientIdPrefix + "things_registry"
-	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, clientId, "", "", true, 1, 1)
+	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, clientId, "", "", false, 1, 1)
 	err := mg.msgTransport.Start()
 	log.Info("<MqRegInt> Mqtt transport connected")
 	if err != nil {
