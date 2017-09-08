@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"github.com/alivinco/fimpui/integr/zwave"
 )
 
 type SystemInfo struct {
@@ -152,6 +153,53 @@ func main() {
 		uploadStatus := objectStorage.UploadLogSnapshot(configs.ReportLogFiles, hostAlias, configs.ReportLogSizeLimit)
 		return c.JSON(http.StatusOK, uploadStatus)
 	})
+	e.POST("/fimp/api/products/upload-to-cloud", func(c echo.Context) error {
+		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		err = cloud.UploadProductCacheToCloud()
+		if err == nil {
+			return c.NoContent(http.StatusOK)
+		} else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
+	e.GET("/fimp/api/products/list-local-templates", func(c echo.Context) error {
+		templateType := c.QueryParam("type")
+		returnStable := true
+		if templateType == "cache" {
+			returnStable = false
+		}
+
+		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		templates,err := cloud.ListTemplates(returnStable)
+		if err == nil {
+			return c.JSON(http.StatusOK,templates)
+		} else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
+	e.POST("/fimp/api/products/download-from-cloud", func(c echo.Context) error {
+		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+		prodNames,err := cloud.DownloadProductsFromCloud()
+		if err == nil {
+			return c.JSON(http.StatusOK,prodNames)
+		} else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
+
 	e.GET("/fimp/api/registry/things", func(c echo.Context) error {
 
 		var things []registry.Thing

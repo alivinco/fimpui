@@ -9,7 +9,7 @@ import (
 	//"google.golang.org/api/iterator"
 	"time"
 	//"github.com/shirou/gopsutil/host"
-
+	log "github.com/Sirupsen/logrus"
 	"io"
 	"io/ioutil"
 	"os"
@@ -50,16 +50,69 @@ func (ost *GcpObjectStorage) UploadLogSnapshot(files []string, username string, 
 		metadata := map[string]string{
 			"fimpui-username": username,
 		}
-		err := ost.UploadTextFile(snapshotName, files[i], metadata, sizeLimit)
-		uploadStatus := "OK"
+
+		fi, err := os.Stat(files[i])
 		if err != nil {
-			uploadStatus = err.Error()
-			fmt.Println("Error while uploading file :", err)
+			log.Error("<gcp> Can't stat file . Error:",err)
+			return statusReport
+		}
+		switch mode := fi.Mode(); {
+		case mode.IsDir():
+			// do directory stuff
+			dirFiles, err := ioutil.ReadDir(files[i])
+			if err != nil {
+				log.Error(err)
+				return statusReport
+			}
+			for _, dirFile := range dirFiles {
+				err := ost.UploadTextFile(snapshotName, dirFile.Name(), metadata, sizeLimit)
+				uploadStatus := "OK"
+				if err != nil {
+					uploadStatus = err.Error()
+					log.Error("Error while uploading file :", err)
+				}
+
+				statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", files[i], uploadStatus))
+			}
+		case mode.IsRegular():
+			// do file stuff
+			err := ost.UploadTextFile(snapshotName, files[i], metadata, sizeLimit)
+			uploadStatus := "OK"
+			if err != nil {
+				uploadStatus = err.Error()
+				log.Error("Error while uploading file :", err)
+			}
+
+			statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", files[i], uploadStatus))
 		}
 
-		statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", files[i], uploadStatus))
+
 	}
 	return statusReport
+}
+
+func (ost *GcpObjectStorage) GetBucket() *storage.BucketHandle {
+	return ost.bucket
+}
+
+func (ost *GcpObjectStorage) UploadTextFileToObject(objectPath string,objectName string,filePath string,metadata map[string]string) error {
+	fileBody, err := ioutil.ReadFile(filePath)
+	name := objectPath +"/"+ objectName
+	wc := ost.bucket.Object(name).NewWriter(ost.ctx)
+	wc.ContentType = "text/plain"
+	if metadata != nil {
+		wc.Metadata = metadata
+	}
+	if _, err := wc.Write(fileBody); err != nil {
+		fmt.Printf("createFile: unable to write data to bucket %q, file %q: %v", ost.bucket, "test", err)
+		return err
+	}
+	err = wc.Close()
+	if err != nil {
+		fmt.Println("Failed to create object: %v", err)
+	}
+
+	return nil
 }
 
 func (ost *GcpObjectStorage) UploadTextFile(objectPrefix string, filePath string, metadata map[string]string, sizeLimit int64) error {

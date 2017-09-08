@@ -5,8 +5,9 @@ import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import {Router} from '@angular/router';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
-import { Http, Response,URLSearchParams }  from '@angular/http';
+import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
+import {MdSnackBar} from '@angular/material';
 import {
   MqttMessage,
   MqttModule,
@@ -26,11 +27,14 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   errorMsg : string;
   globalSub : Subscription;
   progressBarMode : string ;
+  localTemplates : string[];
+  localTemplatesCache : string[];
   constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router,private http : Http) {
   }
 
   ngOnInit() {
     this.showProgress(false);
+    this.loadLocalTemplates();
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       console.log(msg.payload.toString());
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
@@ -173,6 +177,42 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     });
     dialogRef.afterClosed().subscribe(result => {
       this.selectedOption = result;
+    });
+  }
+
+  loadLocalTemplates () {
+    ///fimp/api/products/list-local-templates?type=cache
+    this.http.get(BACKEND_ROOT+'/fimp/api/products/list-local-templates')
+    .map(function(res: Response){
+      let body = res.json();
+      return body;
+    }).subscribe ((result) => {
+         this.localTemplates = result     
+    });
+    this.http.get(BACKEND_ROOT+'/fimp/api/products/list-local-templates?type=cache')
+    .map(function(res: Response){
+      let body = res.json();
+      return body;
+    }).subscribe ((result) => {
+         this.localTemplatesCache = result     
+    });
+  }
+  downloadTemplatesFromCloud(){
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    this.http
+    .post(BACKEND_ROOT+'/fimp/api/products/download-from-cloud',  options )
+    .subscribe ((result) => {
+       console.log("Flow was saved");
+    });
+  }
+  uploadCacheToCloud() {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    this.http
+    .post(BACKEND_ROOT+'/fimp/api/products/upload-to-cloud',  options )
+    .subscribe ((result) => {
+       console.log("Flow was saved");
     });
   }
  

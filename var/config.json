@@ -1,9 +1,10 @@
 {
   "report_log_files":[
-    "/var/log/futurehome/zwave-ad/zwave-ad.log",
+    "/var/log/futurehome/zwave-ad",
     "/var/log/futurehome/zipgateway/current",
     "/etc/service/vinculum/log/main/current"
   ],
+  "zwave_product_templates":"/Users/alivinco/DevProjects/APPS/Futurehome/zwave-ad/products",
   "report_log_size_limit":500000,
   "vinculum_address":"cube.local:8082",
   "mqtt_server_uri":"tcp://localhost:1883",

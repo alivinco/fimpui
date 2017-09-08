@@ -4,6 +4,7 @@
     "/var/log/futurehome/zipgateway/current",
     "/etc/service/vinculum/log/main/current"
   ],
+  "zwave_product_templates":"/var/lib/futurehome/zwave-ad/products",
   "report_log_size_limit":500000,
   "vinculum_address":"localhost:1989",
   "mqtt_server_uri":"tcp://localhost:1883",
