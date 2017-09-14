@@ -6,6 +6,7 @@ import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/flow/node"
+	"time"
 )
 
 type Flow struct {
@@ -26,6 +27,9 @@ type Flow struct {
 	localMsgInStream    map[model.NodeID]model.MsgPipeline
 	TriggerCounter      int64
 	ErrorCounter        int64
+	StartedAt           time.Time
+	WaitingSince 		time.Time
+	LastExecutionTime   time.Duration
 }
 
 func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
@@ -62,7 +66,7 @@ func (fl *Flow) InitAllNodes() {
 		if ok {
 			newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
 			if newNode.IsMsgReactorNode() {
-				log.Debug("<Flow> Creatin a chnannel for node id = ",metaNode.Id)
+				log.Debug("<Flow> Creating a channel for node id = ",metaNode.Id)
 				// Creating channel for each message reactor
 				nodeChannel := make(model.MsgPipeline)
 				fl.localMsgInStream[metaNode.Id] = nodeChannel
@@ -96,9 +100,18 @@ func (fl *Flow) ReloadNodes(nodes []model.Node) {
 	fl.Start()
 }
 
-func (fl *Flow)GetCurrentNode()model.Node {
-	return fl.currentNode
+
+func (fl *Flow)GetFlowStats() (*model.FlowStatsReport) {
+	stats := model.FlowStatsReport{}
+	stats.CurrentNodeId = fl.currentNode.GetMetaNode().Id
+	stats.CurrentNodeLabel = fl.currentNode.GetMetaNode().Label
+	stats.IsAtStartingPoint = fl.currentNode.IsStartNode()
+	stats.StartedAt = fl.StartedAt
+	stats.WaitingSince = fl.WaitingSince
+	stats.LastExecutionTime = int64(fl.LastExecutionTime/time.Millisecond)
+	return &stats
 }
+
 
 func (fl *Flow) AddNode(node model.Node) {
 	fl.Nodes = append(fl.Nodes, node)
@@ -110,7 +123,7 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 	}
 
 	if currentNodeId == transitionNodeId {
-		log.Error("Transition node can't be the same as current")
+		log.Error(fl.Id+"<Flow> Transition node can't be the same as current")
 		return false
 	}
 	for i := range fl.Nodes {
@@ -118,7 +131,7 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 			return true
 		}
 	}
-	log.Error("<Flow> Transition node doesn't exist")
+	log.Error(fl.Id+"<Flow> Transition node doesn't exist")
 	return false
 }
 
@@ -133,8 +146,8 @@ func (fl *Flow) Run() {
 	var transitionNodeId model.NodeID
 	defer func() {
 		if r := recover(); r != nil {
-			log.Error("<Flow> Flow process CRASHED with error : ",r)
-			log.Errorf("<Flow> Crashed while processing message from Current Node = %d Next Node = %d ",fl.currentNodeId, transitionNodeId)
+			log.Error(fl.Id+"<Flow> Flow process CRASHED with error : ",r)
+			log.Errorf(fl.Id+"<Flow> Crashed while processing message from Current Node = %d Next Node = %d ",fl.currentNodeId, transitionNodeId)
 			transitionNodeId = ""
 		}
 	}()
@@ -149,15 +162,18 @@ func (fl *Flow) Run() {
 			}
 			if fl.currentNodeId == "" && fl.Nodes[i].IsStartNode() {
 				var err error
-				log.Infof("<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
+				log.Infof(fl.Id+"<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = fl.Nodes[i]
 				fl.SignalNodeIsReady()
 				newMsg := model.Message{}
+				fl.WaitingSince = time.Now()
+				fl.LastExecutionTime = time.Since(fl.StartedAt)
 				nextNodes, err := fl.Nodes[i].OnInput (&newMsg)
+				fl.StartedAt = time.Now()
 				fl.currentMsg = &newMsg
 				if err != nil {
-					log.Error("<Flow> TriggerNode failed with error :", err)
+					log.Error(fl.Id+"<Flow> TriggerNode failed with error :", err)
 					fl.currentNodeId = ""
 				}
 				if !fl.opContext.IsFlowRunning {
@@ -167,7 +183,7 @@ func (fl *Flow) Run() {
 				//fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				transitionNodeId = nextNodes[0]
 				if !fl.IsNodeIdValid(fl.currentNodeId, transitionNodeId) {
-					log.Errorf("Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					log.Errorf(fl.Id+"<Flow> Unknown transition mode %s.Switching back to first node", transitionNodeId)
 					transitionNodeId = ""
 				}
 				log.Debug("<Flow> Transition from Trigger to node = ", transitionNodeId)
@@ -179,7 +195,7 @@ func (fl *Flow) Run() {
 				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
 				if err != nil {
 					fl.ErrorCounter++
-					log.Errorf("<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNodeId,err)
+					log.Errorf(fl.Id+"<Flow> Node executed with error . Doing error transition to %s. Error : %s", transitionNodeId,err)
 				}
 				if len(nextNodes)>0 {
 					transitionNodeId = nextNodes[0]
@@ -187,7 +203,7 @@ func (fl *Flow) Run() {
 					transitionNodeId = ""
 				}
 				if !fl.IsNodeIdValid(fl.currentNodeId, transitionNodeId) {
-					log.Errorf("Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					log.Errorf(fl.Id+"<FLow> Unknown transition mode %s.Switching back to first node", transitionNodeId)
 					transitionNodeId = ""
 				}
 
@@ -199,7 +215,7 @@ func (fl *Flow) Run() {
 
 	}
 	fl.opContext.State = "STOPPED"
-	log.Infof("<Flow> Runner for flow %s stopped.", fl.Name)
+	log.Infof(fl.Id+"<Flow> Runner for flow %s stopped.", fl.Name)
 
 }
 
@@ -219,13 +235,13 @@ func (fl *Flow) InStreamMsgRouter() {
 			// sending message to each channel
 			select {
 				case fl.localMsgInStream[currNode.Id] <- inMsg:
-					log.Debugf("<Flow> Router(%s): Message was sent to Node Id = %s",fl.Id, fl.currentNodeId)
+					log.Debugf(fl.Id+"<Flow> Router(%s): Message was sent to Node Id = %s",fl.Id, fl.currentNodeId)
 				default:
-					log.Debugf("<Flow> Router(%s): Message is dropped (no listeners).",fl.Id)
+					log.Debugf(fl.Id+"<Flow> Router(%s): Message is dropped (no listeners).",fl.Id)
 			}
 			// Wait while node is ready to accept new command .
 			<- fl.opContext.NodeIsReady
-			log.Debugf("<Flow> Router(%s) : Is ready for next message.",fl.Id)
+			log.Debugf(fl.Id+"<Flow> Router(%s) : Is ready for next message.",fl.Id)
 		}else {
 			//log.Debug("<Flow> Router : No routing target")
 		}
@@ -233,13 +249,13 @@ func (fl *Flow) InStreamMsgRouter() {
 
 
 	}
-	log.Infof("<Flow> InStreamMsgRouter for flow %s was stopped.", fl.Name)
+	log.Infof(fl.Id+"<Flow> InStreamMsgRouter for flow %s was stopped.", fl.Name)
 
 }
 
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
 func (fl *Flow) Start() error {
-	log.Info("<Flow> Starting flow : ", fl.Name)
+	log.Info(fl.Id+"<Flow> Starting flow : ", fl.Name)
 	fl.opContext.State = "STARTING"
 	fl.opContext.IsFlowRunning = true
 	isFlowValid := false
@@ -256,23 +272,23 @@ func (fl *Flow) Start() error {
 			go fl.InStreamMsgRouter()
 			isFlowValid = true
 			fl.opContext.State = "RUNNING"
-			log.Infof("<Flow> Flow %s is running", fl.Name)
+			log.Infof(fl.Id+"<Flow> Flow %s is running", fl.Name)
 		}
 	}
 	if !isFlowValid{
 		fl.opContext.State = "STOPPED"
-		log.Errorf("<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
+		log.Errorf(fl.Id+"<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
 		return errors.New("Flow should have at least one trigger or wait node")
 	}
 	return nil
 }
 // Terminates flow loop , stops goroutine .
 func (fl *Flow) Stop() error {
-	log.Info("<Flow> Stopping flow  ", fl.Name)
+	log.Info(fl.Id+"<Flow> Stopping flow  ", fl.Name)
 
 	// is invoked when node flow is stopped
 	for _,topic := range fl.activeSubscriptions {
-		log.Info("<Flow> Unsubscribing from topic : ",topic)
+		log.Info(fl.Id+"<Flow> Unsubscribing from topic : ",topic)
 		fl.msgTransport.Unsubscribe(topic)
 	}
 
@@ -280,13 +296,13 @@ func (fl *Flow) Stop() error {
 	select {
 	case fl.opContext.NodeControlSignalChannel <- model.SIGNAL_STOP:
 	default:
-		log.Debug("<Flow> No signal listener.")
+		log.Debug(fl.Id+"<Flow> No signal listener.")
 	}
 	fl.msgInStream <- model.Message{}
 	for i := range fl.Nodes{
 		fl.Nodes[i].Cleanup()
 	}
-	log.Info("<Flow> Stopped .  ", fl.Name)
+	log.Info(fl.Id+"<Flow> Stopped .  ", fl.Name)
 	return nil
 }
 

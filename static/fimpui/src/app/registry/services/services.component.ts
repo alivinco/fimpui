@@ -34,7 +34,7 @@ export class ServicesMainComponent {
 })
 export class ServicesComponent implements OnInit {
   displayedColumns = ['thingTech','thingAddress', 'thingAlias','serviceName','serviceAlias',
-                    'intfType','intfMsgType','locationAlias','action'];
+                    'intfType','intfMsgType','locationAlias','intfValueType','action'];
 
   dataSource: ServicesDataSource | null; 
   // usage (onSelect)="onSelected($event)">
@@ -76,6 +76,7 @@ export class ServicesComponent implements OnInit {
   }
 
   selectInterface(intf:ServiceInterface) {
+    console.dir(intf);
     this.onSelect.emit(intf);
   }
 }
@@ -128,6 +129,7 @@ export class ServicesDataSource extends DataSource<any> {
             thing.serviceAddress = result[key].service_address;
             thing.intfType = result[key].intf_type;
             thing.intfMsgType = result[key].intf_msg_type;
+            thing.intfValueType = result[key].intf_val_type;
             thing.intfAddress = result[key].intf_address;
             thing.locationId = result[key].location_id;
             thing.locationAlias = result[key].location_alias;

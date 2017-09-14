@@ -25,7 +25,7 @@ func (node *WaitNode) LoadNodeConfig() error {
 	if ok {
 		node.meta.Config = int(delay)
 	}else {
-		log.Error("<FlMan> Can't cast Wait node delay value")
+		log.Error(node.flowOpCtx.FlowId+"<FlMan> Can't cast Wait node delay value")
 	}
 
 	return nil
@@ -34,10 +34,10 @@ func (node *WaitNode) LoadNodeConfig() error {
 func (node *WaitNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	delayMilisec, ok := node.meta.Config.(int)
 	if ok {
-		log.Info("<Node> Waiting  for = ", delayMilisec)
+		log.Info(node.flowOpCtx.FlowId+"<Node> Waiting  for = ", delayMilisec)
 		time.Sleep(time.Millisecond * time.Duration(delayMilisec))
 	} else {
-		log.Error("<Node> Wrong time format")
+		log.Error(node.flowOpCtx.FlowId+"<Node> Wrong time format")
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }

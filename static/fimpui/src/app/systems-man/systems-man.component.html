@@ -15,16 +15,22 @@
     <md-input-container class="example-full-width">
             <input #service mdInput placeholder="service">
     </md-input-container>
+    <p>
     <md-input-container class="example-full-width">
-            <input #securityKey mdInput placeholder="securityKey">
+        <input #systemIdInput mdInput placeholder="id" [(ngModel)]= "systemId" >
     </md-input-container>
     <md-input-container class="example-full-width">
-      <input #address mdInput placeholder="address">
+        <input #addressInput mdInput placeholder="address" [(ngModel)]="address" >
+      </md-input-container>
+    <md-input-container class="example-full-width">
+            <input #securityKeyInput mdInput placeholder="securityKey" [(ngModel)]="securityKey">
     </md-input-container>
+    </p>
   </md-card-content>
     <md-card-actions>
-    <button md-raised-button (click)="connect(service.value,securityKey.value,address.value)" >Connect</button>
-    <button md-raised-button (click)="disconnect(service.value,securityKey.value,address.value)" >Disconnect</button>
+    <button md-raised-button (click)="getConnParams(service.value)" >Get connection parameters</button>
+    <button md-raised-button (click)="connect(service.value,systemIdInput.value,securityKeyInput.value,addressInput.value)" >Connect</button>
+    <button md-raised-button (click)="disconnect(service.value,securityKeyInput.value,addressInput.value)" >Disconnect</button>
     </md-card-actions>
 </md-card>
 </div>

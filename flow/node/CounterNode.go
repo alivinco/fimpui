@@ -20,6 +20,7 @@ type CounterNodeConfig struct {
 	StartValue int64
 	EndValue int64
 	EndValueTransition model.NodeID
+	Step int64
 	SaveToVariable bool
 
 }
@@ -35,24 +36,34 @@ func (node *CounterNode) LoadNodeConfig() error {
 	defValue := CounterNodeConfig{}
 	err := mapstructure.Decode(node.meta.Config,&defValue)
 	if err != nil{
-		log.Error("<CounterNode> Can't decode configuration",err)
+		log.Error(node.flowOpCtx.FlowId+"<CounterNode> Can't decode configuration",err)
 	}else {
 		node.config = defValue
+		if node.config.Step == 0 {
+			node.config.Step = 1
+		}
 		if defValue.EndValue > defValue.StartValue {
 			node.countUp = true
+			if node.config.Step > defValue.EndValue {
+				node.config.Step = defValue.EndValue
+			}
+		}else {
+			if node.config.Step < defValue.EndValue {
+				node.config.Step = defValue.EndValue
+			}
 		}
 	}
 	return nil
 }
 
 func (node *CounterNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Debug("<CounterNode> Executing CounterNode . Name = ", node.meta.Label)
+	log.Debug(node.flowOpCtx.FlowId+"<CounterNode> Executing CounterNode . Name = ", node.meta.Label)
 	if node.countUp{
-		node.counter++
+		node.counter = node.counter+node.config.Step
 	} else {
-		node.counter--
+		node.counter = node.counter-node.config.Step
 	}
-	log.Debug("<CounterNode> value = ",node.counter )
+	log.Debug(node.flowOpCtx.FlowId+"<CounterNode> value = ",node.counter )
 	if (node.countUp && node.counter >= node.config.EndValue) || (!node.countUp && node.counter <= node.config.EndValue) {
 		node.counter = node.config.StartValue
 		return []model.NodeID{node.config.EndValueTransition},nil

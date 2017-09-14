@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Http, Response,URLSearchParams }  from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'flow-overview',

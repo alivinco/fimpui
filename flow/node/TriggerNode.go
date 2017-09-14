@@ -4,6 +4,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
+	"github.com/mitchellh/mapstructure"
+	"time"
 )
 
 type TriggerNode struct {
@@ -16,7 +18,9 @@ type TriggerNode struct {
 }
 
 type TriggerConfig struct {
+	Timeout int64 // in seconds
 	ValueFilter model.Variable
+	IsValueFilterEnabled bool
 }
 
 func NewTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode, ctx *model.Context, transport *fimpgo.MqttTransport) model.Node {
@@ -30,7 +34,7 @@ func NewTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode
 }
 
 func (node *TriggerNode) ConfigureInStream(activeSubscriptions *[]string, msgInStream model.MsgPipeline) {
-	log.Info("<TrigNode>Configuring Stream")
+	log.Info(node.flowOpCtx.FlowId+"<TrigNode>Configuring Stream")
 	node.activeSubscriptions = activeSubscriptions
 	node.msgInStream = msgInStream
 	node.initSubscriptions()
@@ -38,7 +42,7 @@ func (node *TriggerNode) ConfigureInStream(activeSubscriptions *[]string, msgInS
 
 func (node *TriggerNode) initSubscriptions() {
 	if node.meta.Type == "trigger" {
-		log.Info("<TrigNode> TriggerNode is listening for events . Name = ", node.meta.Label)
+		log.Info(node.flowOpCtx.FlowId+"<TrigNode> TriggerNode is listening for events . Name = ", node.meta.Label)
 		needToSubscribe := true
 		for i := range *node.activeSubscriptions {
 			if (*node.activeSubscriptions)[i] == node.meta.Address {
@@ -47,7 +51,7 @@ func (node *TriggerNode) initSubscriptions() {
 			}
 		}
 		if needToSubscribe {
-			log.Info("<TrigNode> Subscribing for service by address :", node.meta.Address)
+			log.Info(node.flowOpCtx.FlowId+"<TrigNode> Subscribing for service by address :", node.meta.Address)
 			node.transport.Subscribe(node.meta.Address)
 			*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
 		}
@@ -55,23 +59,40 @@ func (node *TriggerNode) initSubscriptions() {
 }
 
 func (node *TriggerNode) LoadNodeConfig() error {
-	return nil
+	err := mapstructure.Decode(node.meta.Config,&node.config)
+	if err != nil{
+		log.Error(err)
+	}
+	return err
 }
 
 func (node *TriggerNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
-	log.Debug("<TrigNode> Waiting for event ")
+	log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Waiting for event ")
+	start := time.Now()
+	timeout := node.config.Timeout
+	if timeout == 0 {
+		timeout = 86400 // 24 hours
+	}
 	for {
 		select {
 		case newMsg := <-node.msgInStream:
-			log.Debug("<TrigNode> New message from InStream ")
+			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> New message from InStream ")
 			*msg = newMsg
-			if node.config.ValueFilter.ValueType == "" {
+			if !node.config.IsValueFilterEnabled {
 				return []model.NodeID{node.meta.SuccessTransition}, nil
-			} else if newMsg.Payload.Value == node.config.ValueFilter.Value {
+			}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
 				return []model.NodeID{node.meta.SuccessTransition}, nil
+			}else {
+				if node.config.Timeout > 0 {
+					elapsed := time.Since(start)
+					timeout =  timeout - int64(elapsed.Seconds())
+				}
 			}
+		case <-time.After(time.Second * time.Duration(timeout)):
+			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Timeout ")
+			return []model.NodeID{node.meta.TimeoutTransition}, nil
 		case signal := <-node.flowOpCtx.NodeControlSignalChannel:
-			log.Debug("<TrigNode> Control signal ")
+			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Control signal ")
 			if signal == model.SIGNAL_STOP {
 				return nil, nil
 			}

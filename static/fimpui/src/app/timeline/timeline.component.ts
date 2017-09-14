@@ -15,27 +15,14 @@ export class TimelineComponent implements OnInit {
    this.messages = fimp.getMessagLog();
    };
   
+  sendMessage(topic:string,payload:string) {
+    this.fimp.publish(topic,payload);
+  } 
 
   ngOnInit() {
-    // this.fimp.mqtt.onConnect.subscribe((message: any) => {
-    //       console.log("timeline onConnect");
-           
-    //  });
-    //  this.subscribe();
-     
+   
   }
-  // subscribe(){
-  //   this.fimp.getGlobalObservable().subscribe((msg) => {
-  //     console.log("New message in timeline")
-  //     let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
-  //     fimpMsg.topic = msg.topic;
-  //     fimpMsg.raw = msg.payload.toString();
-  //     fimpMsg.localTs =  Date.now();
-  //     this.messages.push(fimpMsg);
-  //     console.log(this.messages.length);
-  //   });
-  // }
-
+  
   toggleExpandRow(row) {
     console.log('Toggled Expand Row!', row);
     this.table.rowDetail.toggleExpandRow(row);

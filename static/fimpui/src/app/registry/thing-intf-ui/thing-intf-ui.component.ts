@@ -51,6 +51,12 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+  cmdModeLvlSet(mode:string,lvl:number){
+    let val = {};
+    val[mode] = lvl*1;
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
   cmdSetpointReportGet(name:string){
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,name,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
@@ -82,6 +88,10 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,group,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+  cmdModeLvlReportGet(mode:string){
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,mode,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
   cmdConfigReportGet(name:string){
     let val = [name];
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,null,null)
@@ -97,6 +107,11 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,unit,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+  cmdSensorReportGet(unit:string){
+    let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,unit,null,null)
+    this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
+  }
+
 }
 @Pipe({name: 'keys'})
 export class KeysPipe implements PipeTransform {

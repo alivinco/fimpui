@@ -12,6 +12,9 @@
         </md-input-container>
         <button md-raised-button (click)="serviceLookupDialog(node.Id)" >Lookup</button>
     </p>
+    <div style="margin-bottom: 30px" >
+            <md-checkbox [(ngModel)]="node.Config.IsValueFilterEnabled" > Enable value filter </md-checkbox>
+    </div> 
     <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueFilter.ValueType">
         <md-option value="">The same as input </md-option>
         <md-option value="string">string</md-option>

@@ -11,49 +11,58 @@ type ActionNode struct {
 	BaseNode
 	ctx *model.Context
 	transport *fimpgo.MqttTransport
+	config ActionNodeConfig
+}
+
+type ActionNodeConfig struct {
+	DefaultValue model.Variable
+	VariableName string
+	IsVariableGlobal bool
 }
 
 func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
 	node := ActionNode{ctx:ctx,transport:transport}
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
+	node.config = ActionNodeConfig{DefaultValue:model.Variable{}}
 	return &node
 }
 
 func (node *ActionNode) LoadNodeConfig() error {
-	defValue := model.Variable{}
-	err := mapstructure.Decode(node.meta.Config,&defValue)
+	err := mapstructure.Decode(node.meta.Config,&node.config)
 	if err != nil{
-		log.Error(err)
-	}else {
-		node.meta.Config = defValue
+		log.Error(node.flowOpCtx.FlowId+"<ActionNode> err")
+
 	}
-	return nil
+	return err
 }
 
 func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info("<Node> Executing ActionNode . Name = ", node.meta.Label)
+	log.Info(node.flowOpCtx.FlowId+"<ActionNode> Executing ActionNode . Name = ", node.meta.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.meta.ServiceInterface, Service: node.meta.Service}
-	defaultValue, ok := node.meta.Config.(model.Variable)
-	if ok {
-
-		if defaultValue.Value == "" || defaultValue.ValueType == ""{
+	if node.config.VariableName != "" {
+		variable,err := node.ctx.GetVariable(node.config.VariableName,node.flowOpCtx.FlowId)
+		if err != nil {
+			log.Error(node.flowOpCtx.FlowId+"<ActionNode> Can't get variable . Error:",err)
+			return nil , err
+		}
+		fimpMsg.ValueType = variable.ValueType
+		fimpMsg.Value = variable.Value
+	}else {
+		if node.config.DefaultValue.Value == "" || node.config.DefaultValue.ValueType == ""{
 			fimpMsg.Value = msg.Payload.Value
 			fimpMsg.ValueType = msg.Payload.ValueType
 		}else {
-			fimpMsg.Value = defaultValue.Value
-			fimpMsg.ValueType = defaultValue.ValueType
+			fimpMsg.Value = node.config.DefaultValue.Value
+			fimpMsg.ValueType = node.config.DefaultValue.ValueType
 		}
-	} else {
-		fimpMsg.Value = msg.Payload.Value
-		fimpMsg.ValueType = msg.Payload.ValueType
 	}
 
 	msgBa, err := fimpMsg.SerializeToJson()
 	if err != nil {
 		return nil,err
 	}
-	log.Debug("<Node> Action message :", fimpMsg)
+	log.Debug(node.flowOpCtx.FlowId+"<ActionNode> Action message :", fimpMsg)
 	node.transport.PublishRaw(node.meta.Address, msgBa)
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }

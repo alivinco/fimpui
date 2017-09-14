@@ -92,11 +92,11 @@ func TestIfFlow(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "2", Label: "Bulb 1.Room light intensity is > 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "4",
-		Config: model.Variable{ValueType: "bool", Value: true}}
+		Config: flownode.ActionNodeConfig{DefaultValue:model.Variable{ValueType: "bool", Value: true}}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "3", Label: "Bulb 2.Room light intensity is < 100 lux", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "5",
-		Config: model.Variable{ValueType: "bool", Value: true}}
+		Config: flownode.ActionNodeConfig{DefaultValue:model.Variable{ValueType: "bool", Value: true}}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
@@ -162,11 +162,11 @@ func TestNewFlow3(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "2", Label: "Lights ON", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: model.Variable{ValueType: "bool", Value: true}}
+		Config: flownode.ActionNodeConfig{DefaultValue:model.Variable{ValueType: "bool", Value: true}}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "3", Label: "Lights OFF", Type: "action", Address: "pt:j1/mt:cmd/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:200_0", Service: "out_bin_switch", ServiceInterface: "cmd.binary.set", SuccessTransition: "",
-		Config: model.Variable{ValueType: "bool", Value: false}}
+		Config: flownode.ActionNodeConfig{DefaultValue:model.Variable{ValueType: "bool", Value: true}}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	flow := NewFlow(flowMeta, ctx, mqtt)

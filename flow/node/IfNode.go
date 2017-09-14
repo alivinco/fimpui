@@ -60,7 +60,7 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		for i := range conf.Expression {
 
 			if conf.Expression[i].RightVariable.ValueType == "" {
-				return nil,errors.New("Right variable is not defined. IfNode is skipped.")
+				return nil,errors.New(node.flowOpCtx.FlowId+"Right variable is not defined. IfNode is skipped.")
 			}
 			if conf.Expression[i].LeftVariableName == ""{
 				conf.Expression[i].LeftVariable = model.Variable{ValueType:msg.Payload.ValueType,Value:msg.Payload.Value}
@@ -71,13 +71,13 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				}
 				conf.Expression[i].LeftVariable ,err = node.ctx.GetVariable(conf.Expression[i].LeftVariableName,flowId)
 				if err != nil {
-					log.Error("<IfNode> Can't get variable from context.Error : ",err)
+					log.Error(node.flowOpCtx.FlowId+"<IfNode> Can't get variable from context.Error : ",err)
 					return nil,err
 				}
 				log.Debug(conf.Expression[i].LeftVariable)
 			}
 			if conf.Expression[i].LeftVariable.ValueType != conf.Expression[i].RightVariable.ValueType {
-				return nil,errors.New(" Right and left of expression have different types ")
+				return nil,errors.New(node.flowOpCtx.FlowId+"<IfNode> Right and left of expression have different types ")
 			}
 
 
@@ -88,12 +88,12 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				if conf.Expression[i].LeftVariable.ValueType == "int" || conf.Expression[i].LeftVariable.ValueType  == "float" {
 					leftNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].LeftVariable.ValueType,conf.Expression[i].LeftVariable.Value)
 					if err != nil {
-						log.Error("<IfNode> Error while converting left variable to number.Error : ",err)
+						log.Error(node.flowOpCtx.FlowId+"<IfNode> Error while converting left variable to number.Error : ",err)
 						return nil,err
 					}
 					rightNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].RightVariable.ValueType,conf.Expression[i].RightVariable.Value)
 					if err != nil {
-						log.Error("<IfNode> Error while converting right variable to number.Error : ",err)
+						log.Error(node.flowOpCtx.FlowId+"<IfNode> Error while converting right variable to number.Error : ",err)
 						return nil,err
 					}
 
@@ -101,8 +101,8 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					return nil,errors.New("Incompatible value type . gt and lt can be used only with numeric types")
 				}
 			}
-			log.Debug("<IfNode> Left numeric value = ", leftNumericValue)
-			log.Debug("<IfNode> Right numeric value = ", rightNumericValue)
+			log.Debug(node.flowOpCtx.FlowId+"<IfNode> Left numeric value = ", leftNumericValue)
+			log.Debug(node.flowOpCtx.FlowId+"<IfNode> Right numeric value = ", rightNumericValue)
 			switch conf.Expression[i].Operand {
 			case "eq":
 				result = conf.Expression[i].LeftVariable.Value == conf.Expression[i].RightVariable.Value
@@ -143,7 +143,7 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		return nil,nil
 	} else {
 		log.Error(node.meta.Config)
-		return nil, errors.New("Incompatible node configuration format")
+		return nil, errors.New(node.flowOpCtx.FlowId+"Incompatible node configuration format")
 	}
 
 	return []model.NodeID{node.meta.SuccessTransition},nil

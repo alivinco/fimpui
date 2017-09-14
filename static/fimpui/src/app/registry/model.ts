@@ -49,6 +49,7 @@ export class ServiceInterface {
     serviceAddress: string; // "/rt:dev/rn:zw/ad:1/sv:battery/ad:33_0"
     intfType: string; // "out"
     intfMsgType: string; // "evt.alarm.report"
+    intfValueType :string;//
     intfAddress: string; //"pt:j1/mt:evt/rt:dev/rn:zw/ad:1/sv:sensor_temp/ad:33_0",
     locationId: number;
     locationAlias:string;

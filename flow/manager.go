@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"os"
 	"strings"
+	"github.com/alivinco/fimpui/flow/node"
 )
 
 type Manager struct {
@@ -30,6 +31,7 @@ type FlowListItem struct {
 	State string
 	TriggerCounter int64
 	ErrorCounter int64
+	Stats *model.FlowStatsReport
 }
 
 func NewManager(config *fimpuimodel.FimpUiConfigs) (*Manager,error) {
@@ -69,7 +71,7 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 
 func (mg *Manager) GenerateNewFlow() model.FlowMeta {
 	fl := model.FlowMeta{}
-	fl.Nodes = []model.MetaNode{{Id:"1",Type:"trigger",Label:"no label"}}
+	fl.Nodes = []model.MetaNode{{Id:"1",Type:"trigger",Label:"no label",Config:node.TriggerConfig{Timeout:0,ValueFilter:model.Variable{},IsValueFilterEnabled:false}}}
 	fl.Id = utils.GenerateId(10)
 	return fl
 }
@@ -166,9 +168,15 @@ func (mg *Manager) GetFlowById(id string) *Flow{
 func (mg *Manager) GetFlowList() []FlowListItem{
 	response := make ([]FlowListItem,len(mg.flowRegistry))
 	var c int
-	for _,flow := range mg.flowRegistry {
-		log.Info("Adding flow with id = ",flow.Id)
-		response[c] = FlowListItem{Id:flow.Id,Name:flow.Name,Description:flow.Description,TriggerCounter:flow.TriggerCounter,ErrorCounter:flow.ErrorCounter,State:flow.opContext.State}
+	for i := range mg.flowRegistry {
+		response[c] = FlowListItem{
+			Id:mg.flowRegistry[i].Id,
+			Name:mg.flowRegistry[i].Name,
+			Description:mg.flowRegistry[i].Description,
+			TriggerCounter:mg.flowRegistry[i].TriggerCounter,
+			ErrorCounter:mg.flowRegistry[i].ErrorCounter,
+			State:mg.flowRegistry[i].opContext.State,
+			Stats:mg.flowRegistry[i].GetFlowStats()}
 		c++
 	}
 	return response

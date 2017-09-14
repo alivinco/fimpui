@@ -162,6 +162,8 @@ func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string, thingTech stri
 					flatIntf.ServiceAddress = things[thi].Services[si].Address
 					flatIntf.InterfaceType = things[thi].Services[si].Interfaces[inti].Type
 					flatIntf.InterfaceMsgType = things[thi].Services[si].Interfaces[inti].MsgType
+					flatIntf.InterfaceValueType = things[thi].Services[si].Interfaces[inti].ValueType
+
 					//pt:j1/mt:evt/rt:dev/rn:zw/ad:1/sv:meter_elec/ad:21_0
 					prefix := "pt:j1/mt:evt"
 					if strings.Contains(prefix+things[thi].Services[si].Interfaces[inti].MsgType, "cmd") {

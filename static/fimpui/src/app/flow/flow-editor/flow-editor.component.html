@@ -1,6 +1,4 @@
-
  
-
 <div class="flow-editor">
   
   <button  style = "margin-bottom: 20px;" md-raised-button [routerLink]="['/flow/overview']">  <md-icon>chevron_left</md-icon>  <md-icon>network_check</md-icon> Flows </button>
@@ -20,7 +18,6 @@
     <md-list-item> <button md-raised-button (click)="addNode('set_variable')" >Set variable</button> </md-list-item>
     </md-list>
   </md-sidenav>
-
 
   <md-card class="example-card">
     <md-card-header>
@@ -50,30 +47,7 @@
                   <input mdInput [(ngModel)]="flow.Nodes[index].Label" placeholder="Label" >
             </md-input-container>
             <div *ngSwitchCase="'trigger'">  
-                 <div #nodebody hidden> 
-                 <p>
-                  <md-input-container style="width: 130px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Service" placeholder="Service" >
-                  </md-input-container>
-                  <md-input-container style="width: 200px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].ServiceInterface" placeholder="Interface" >
-                  </md-input-container>
-                  <md-input-container style="width: 450px">
-                      <input mdInput [(ngModel)]="flow.Nodes[index].Address" placeholder="Address" >
-                  </md-input-container>
-                    <button md-raised-button (click)="serviceLookupDialog(flow.Nodes[index].Id)" >Lookup</button>
-                  </p>
-                   </div>
-                  <p>
-                    <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="flow.Nodes[index].SuccessTransition" >
-                        <md-option value = "" > End! </md-option>
-                        <md-option *ngFor="let nod of flow.Nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-                    </md-select>
-                  </p>
-                  <p>
-                    <button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> 
-                    <button md-raised-button (click)="runFlow(node)" >Run</button>
-                   </p>
+                <trigger-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" ></trigger-node>
             </div>
             <div *ngSwitchCase="'wait'"> 
               <div #nodebody hidden> 
@@ -95,8 +69,11 @@
             <div *ngSwitchCase="'set_variable'">  
                  <set-variable-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </set-variable-node>
             </div> 
-             <div *ngSwitchCase="'receive'">  
+            <div *ngSwitchCase="'receive'">  
                  <receive-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </receive-node>
+            </div>
+            <div *ngSwitchCase="'counter'">  
+                <counter-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </counter-node>
             </div>
             <div *ngSwitchCase="'time_trigger'">  
                 <time-trigger-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" > </time-trigger-node>

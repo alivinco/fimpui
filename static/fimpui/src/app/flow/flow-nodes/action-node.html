@@ -12,7 +12,7 @@
         </md-input-container>
         <button md-raised-button (click)="serviceLookupDialog(node.Id)" >Lookup</button>
     </p>
-    <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueType">
+    <md-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.DefaultValue.ValueType">
         <md-option value="">The same as input </md-option>
         <md-option value="string">string</md-option>
         <md-option value="bool">bool</md-option>
@@ -104,6 +104,13 @@
             </md-input-container>
         </div>
     </div>
+
+    <md-select  class="value-selector" (change)="variableSelected($event,node.Config.VariableName)" placeholder="Use variable as input" [(ngModel)]="node.Config.VariableName" >
+            <md-option value = "">Default Input</md-option>
+            <md-option *ngFor="let vari of localVars" [value]="vari" >{{vari}}</md-option>
+            <md-option *ngFor="let vari of globalVars" value="__global__{{vari}}">Shared:{{vari}}</md-option>
+    </md-select>
+
     </div>
     <p>
         <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >

@@ -34,7 +34,7 @@ func (node *SetVariableNode) LoadNodeConfig() error {
 	defValue := SetVariableNodeConfig{}
 	err := mapstructure.Decode(node.meta.Config,&defValue)
 	if err != nil{
-		log.Error("<SetVarNode> Can't decode configuration",err)
+		log.Error(node.flowOpCtx.FlowId+"<SetVarNode> Can't decode configuration",err)
 	}else {
 		node.nodeConfig = defValue
 		node.meta.Config = defValue
@@ -43,7 +43,7 @@ func (node *SetVariableNode) LoadNodeConfig() error {
 }
 
 func (node *SetVariableNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info("<Node> Executing SetVariableNode . Name = ", node.meta.Label)
+	log.Info(node.flowOpCtx.FlowId+"<Node> Executing SetVariableNode . Name = ", node.meta.Label)
 	// set input message value to variable value
 	if node.nodeConfig.DefaultValue.ValueType == "" {
 		if node.nodeConfig.UpdateInputMsg {

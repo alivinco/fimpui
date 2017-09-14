@@ -1,0 +1,52 @@
+<nav md-tab-nav-bar>
+    <a md-tab-link [routerLink]="['/flow/overview']" >Flows</a>
+    <a md-tab-link [routerLink]="['/flow/context']" >Context</a>
+</nav>
+  <br/>
+  <div class="table-container mat-elevation-z8">
+    <div class="example-header">
+      
+    </div>
+  
+    <md-table #table [dataSource]="dataSource">
+  
+      <!--- Note that these columns can be defined in any order.
+            The actual rendered columns are set as a property on the row definition" -->
+    
+      <!-- Progress Column -->
+      <ng-container cdkColumnDef="flowId">
+        <md-header-cell  *cdkHeaderCellDef> Flow id  </md-header-cell>
+        <md-cell  *cdkCellDef="let row"> {{row.FlowId}} </md-cell>
+      </ng-container>
+      <ng-container cdkColumnDef="name">
+        <md-header-cell *cdkHeaderCellDef> Name </md-header-cell>
+        <md-cell *cdkCellDef="let row"> {{row.Name}} </md-cell>
+      </ng-container>
+       <ng-container cdkColumnDef="description">
+        <md-header-cell *cdkHeaderCellDef> Description </md-header-cell>
+        <md-cell *cdkCellDef="let row">{{row.Description}} </md-cell>
+      </ng-container>
+      <ng-container cdkColumnDef="valueType">
+        <md-header-cell *cdkHeaderCellDef> Value type </md-header-cell>
+        <md-cell *cdkCellDef="let row"> {{row.ValueType}} </md-cell>
+      </ng-container>
+      <ng-container cdkColumnDef="value">
+        <md-header-cell *cdkHeaderCellDef> Value </md-header-cell>
+        <md-cell *cdkCellDef="let row">{{row.Value}}  </md-cell>
+      </ng-container>
+      <ng-container cdkColumnDef="updatedAt">
+          <md-header-cell *cdkHeaderCellDef> Updated At </md-header-cell>
+          <md-cell *cdkCellDef="let row">{{row.UpdatedAt| date:'yMMMdjms'}}  </md-cell>
+        </ng-container>
+      <ng-container cdkColumnDef="action">
+        <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
+        <md-cell *cdkCellDef="let row"><md-chip-list> 
+          <md-chip  > Edit </md-chip>
+        </md-chip-list> </md-cell>
+      </ng-container>
+      
+      <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
+      <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>
+    </md-table>
+  </div>
+  

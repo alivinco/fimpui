@@ -14,6 +14,11 @@
             {{item.key}} = {{item.value}} 
           </div>   
         </div>
+        <div *ngSwitchCase="'evt.modelvl.report'">
+          <div *ngFor="let item of intf.lastValue.val|keys" >
+            {{item.key}} = {{item.value}} 
+          </div>   
+        </div>
         <div *ngSwitchCase="'evt.group.members_report'">
           <p>Group :{{ intf.lastValue.val.group }} </p>
           <p> Members :
@@ -26,6 +31,7 @@
           <p>Event  = {{ intf.lastValue.val.event }} </p>
           <p>Status = {{ intf.lastValue.val.status }} </p>
         </div>
+        <div *ngSwitchCase="'evt.state.report'"> <h3> {{ intf.lastValue.val }} </h3> </div>
         <div *ngSwitchCase="'evt.meter.report'">
           {{ intf.lastValue.val }} {{ intf.lastValue.props.unit }}
         </div>
@@ -114,6 +120,15 @@
           </table>
         </form>
       </div>
+      <div *ngSwitchCase="'cmd.state.get_report'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+          </tr>
+          </table>
+        </form>
+      </div>
       <div *ngSwitchCase="'cmd.lock.set'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
@@ -144,6 +159,21 @@
               <input #tempValue mdInput placeholder="temp">
             </md-input-container></td>
             <td><button md-raised-button (click)="cmdSetpointSet(setpointType.value,tempValue.value)" >Set</button></td>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.modelvl.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+            <td><md-input-container class="example-full-width">
+              <input #modeName mdInput placeholder="Mode name">
+            </md-input-container></td>
+            <td><md-input-container class="example-full-width">
+              <input type="number" #modeLevel mdInput placeholder="level">
+            </md-input-container></td>
+            <td><button md-raised-button (click)="cmdModeLvlSet(modeName.value,modeLevel.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -247,7 +277,18 @@
           </table>
         </form>
       </div> 
-
+      <div *ngSwitchCase="'cmd.modelvl.get_report'"> 
+          <form class="intf-form">
+          <table class="table-full-width" cellspacing="0"><tr>
+              <td><md-input-container class="example-full-width">
+                <input #modeName mdInput placeholder="Mode name">
+              </md-input-container></td>
+              <td><button md-raised-button (click)="cmdModeLvlReportGet(modeName.value)" >Get</button></td>
+            </tr>
+            </table>
+          </form>
+        </div> 
+  
       <div *ngSwitchCase="'cmd.meter.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
@@ -263,7 +304,7 @@
       <div *ngSwitchCase="'cmd.sensor.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><button md-raised-button (click)="cmdGetReportNull()" >Get</button></td>
+            <td><button md-raised-button (click)="cmdSensorReportGet('')" >Get</button></td>
           </tr>
           </table>
         </form>

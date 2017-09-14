@@ -157,17 +157,29 @@ export class FlowEditorComponent implements OnInit {
 
     switch (node.Type){
       case "trigger":
-        // nothing to add yet
+        node.Config = {}; 
+        node.Config["Timeout"] = 0;
+        node.Config["ValueFilter"] = {"Value":"","ValueType":""};
+        node.Config["IsValueFilterEnabled"] = false;
         break;
       case "action":
-        node.Config = {}; 
-        node.Config["Value"] = true;
-        node.Config["ValueType"] = "bool";
+        node.Config = {"VariableName":"","IsVariableGlobal":false}; 
+        node.Config["DefaultValue"] = {"Value":"","ValueType":""};
         break;
+      case "counter":
+        node.Config = {}; 
+        node.Config["StartValue"] = 0;
+        node.Config["EndValue"] = 5;
+        node.Config["Step"] = 1;
+        node.Config["EndValueTransition"] = "";
+        node.Config["SaveToVariable"] = false;
+
+        break;  
       case "receive":
         node.Config = {}; 
         node.Config["Timeout"] = 120;
-         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
+        node.Config["ValueFilter"] = {"Value":"","ValueType":""};
+        node.Config["IsValueFilterEnabled"] = false;
         break;  
       case "if":
         node.Config = {}; 
@@ -251,20 +263,8 @@ export class FlowEditorComponent implements OnInit {
 
     });      
   }
-  runFlow(node:MetaNode) {
-    let dialogRef = this.dialog.open(FlowRunDialog,{
-            // height: '95%',
-            width: '95%',
-            data:node
-          });
-    dialogRef.afterClosed().subscribe(result => {
-      // this.flow = result;
-      this.loadContext();
-    });      
-  }
+  
 }
-
-
 
 export class Flow {
     Id :string ;
@@ -329,14 +329,26 @@ export class ContextDialog {
   templateUrl: 'flow-run-dialog.html',
 })
 export class FlowRunDialog {
+  value : any;
+  valueType : string ;
+  actionData : MetaNode;
+  
   constructor(public dialogRef: MdDialogRef<FlowRunDialog>,@Inject(MD_DIALOG_DATA) public data: MetaNode,private fimp:FimpService,public snackBar: MdSnackBar) {
-
-    data.Config = {"Value":true,"ValueType":msgTypeToValueTypeMap[data.ServiceInterface]}
-    // console.dir(data)
+    // data.Config. = {"Value":true,"ValueType":msgTypeToValueTypeMap[data.ServiceInterface]}
+    // this.valueType = msgTypeToValueTypeMap[data.ServiceInterface];
+    // this.actionData = new MetaNode();
+    // this.actionData.Address = data.Address;
+    // this.actionData.Id = data.Id;
+    // this.actionData.Service = data.Service;
+    // this.actionData.ServiceInterface = data.ServiceInterface;
+    // this.actionData.Type = data.Type;
+    // this.actionData.Config = {"Value":true,"ValueType":data.Config.ValueFilter.ValueType}
+    this.valueType = data.Config.ValueFilter.ValueType
+  
   }
   
   run(){
-    let msg  = new FimpMessage(this.data.Service,this.data.ServiceInterface,this.data.Config.ValueType,this.data.Config.Value,null,null)
+    let msg  = new FimpMessage(this.data.Service,this.data.ServiceInterface,this.valueType,this.value,null,null)
     this.fimp.publish(this.data.Address,msg.toString());
     let snackBarRef = this.snackBar.open('Message was sent',"",{duration:1000});
   }

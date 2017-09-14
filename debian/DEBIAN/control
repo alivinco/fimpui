@@ -1,6 +1,6 @@
 Package: fimpui
-Version: 0.1.3
+Version: 0.1.8
 Replaces: fimpui
-Architecture: amd64
+Architecture: armhf
 Maintainer: Aleksandrs Livincovs <aleksandrs.livincovs@gmail.com>
 Description: FimpUI is support GUI for FIMP protocol .

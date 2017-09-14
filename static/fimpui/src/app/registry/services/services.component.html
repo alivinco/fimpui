@@ -59,10 +59,13 @@
       <md-header-cell *cdkHeaderCellDef> Loacation type </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.locationType}} </md-cell>
     </ng-container>
-   
+    <ng-container cdkColumnDef="intfValueType">
+        <md-header-cell *cdkHeaderCellDef> Intf. value type </md-header-cell>
+        <md-cell *cdkCellDef="let row"> {{row.intfValueType}} </md-cell>
+    </ng-container>
    
     <ng-container cdkColumnDef="action">
-      <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
+      <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>  
       <md-cell *cdkCellDef="let row"><md-chip-list> <md-chip (click)="selectInterface(row)" >Select</md-chip> <md-chip>Open</md-chip>  </md-chip-list> </md-cell>
     </ng-container>
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>

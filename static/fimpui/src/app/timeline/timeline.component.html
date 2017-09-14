@@ -79,4 +79,19 @@
 
  </md-card-content>
  </md-card>
+
+ <button md-raised-button (click)="settings.hidden = !settings.hidden" >Mqtt client</button>
+ <br/>
+  <div #settings hidden > 
+      <md-input-container class="node-transition-field">
+          <input mdInput #topic placeholder="Topic">
+      </md-input-container>
+      <md-input-container   style="width: 100%">
+      <textarea class="sourceEditor" md-autosize  minRows="6" mdInput #payload placeholder="Payload" > </textarea> 
+      </md-input-container>
+      <br/>
+      <button md-raised-button (click)="sendMessage(topic.value,payload.value)" >Send</button>
+  </div>
+ 
+  
  </div>

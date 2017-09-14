@@ -60,7 +60,7 @@ func (node *TimeTriggerNode) Init() error {
 	}else {
 		for i := range node.config.Expressions {
 			node.cron.AddFunc(node.config.Expressions[i].Expression,func() {
-				log.Debug("<TimeTrigNode> New time event")
+				log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> New time event")
 				msg := model.Message{Payload:fimpgo.FimpMessage{Value:node.config.DefaultMsg.Value,ValueType:node.config.DefaultMsg.ValueType},
 					Header:map[string]string{"name":node.config.Expressions[i].Name}}
 				node.cronMessageCh <- msg

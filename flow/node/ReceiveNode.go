@@ -21,6 +21,7 @@ type ReceiveNode struct {
 type ReceiveConfig struct {
 	Timeout int64 // in seconds
 	ValueFilter model.Variable
+	IsValueFilterEnabled bool
 }
 
 func NewReceiveNode(flowOpCtx *model.FlowOperationalContext ,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
@@ -40,7 +41,7 @@ func (node *ReceiveNode) ConfigureInStream(activeSubscriptions *[]string,msgInSt
 }
 
 func (node *ReceiveNode) initSubscriptions() {
-	log.Info("<Node> ReceiveNode is listening for events . Name = ", node.meta.Label)
+	log.Info(node.flowOpCtx.FlowId+"<Node> ReceiveNode is listening for events . Name = ", node.meta.Label)
 	needToSubscribe := true
 	for i := range *node.activeSubscriptions {
 			if (*node.activeSubscriptions)[i] == node.meta.Address {
@@ -49,7 +50,7 @@ func (node *ReceiveNode) initSubscriptions() {
 			}
 	}
 	if needToSubscribe {
-			log.Info("<ReceiveNode> Subscribing for service by address :", node.meta.Address)
+			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> Subscribing for service by address :", node.meta.Address)
 			node.transport.Subscribe(node.meta.Address)
 			*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
 	}
@@ -65,26 +66,32 @@ func (node *ReceiveNode) LoadNodeConfig() error {
 }
 
 func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Debug("<ReceiveNode> Waiting for event ")
+	log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Waiting for event ")
 	start := time.Now()
 	timeout := node.config.Timeout
+	if timeout == 0 {
+		timeout = 86400 // 24 hours
+	}
 	for {
 		select {
 		case newMsg := <-node.msgInStream:
-			log.Info("<ReceiveNode> New message :")
-			if node.config.ValueFilter.ValueType == "" {
+			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> New message :")
+			*msg = newMsg
+			if !node.config.IsValueFilterEnabled {
 				return []model.NodeID{node.meta.SuccessTransition}, nil
 			}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
 				return []model.NodeID{node.meta.SuccessTransition}, nil
 			}else {
-				elapsed := time.Since(start)
-				timeout =  timeout - int64(elapsed.Seconds())
+				if node.config.Timeout > 0 {
+					elapsed := time.Since(start)
+					timeout = timeout - int64(elapsed.Seconds())
+				}
 			}
 		case <-time.After(time.Second * time.Duration(timeout)):
-			log.Debug("<ReceiveNode> Timeout ")
+			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Timeout ")
 			return []model.NodeID{node.meta.TimeoutTransition}, nil
 		case signal := <-node.flowOpCtx.NodeControlSignalChannel:
-			log.Debug("<ReceiveNode> Control signal ")
+			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Control signal ")
 			if signal == model.SIGNAL_STOP {
 				return nil,nil
 			}

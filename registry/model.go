@@ -7,6 +7,11 @@ type ThingRegistry struct {
 	Locations []Location
 }
 
+type ValueType struct {
+	Value     interface{}
+	ValueType string
+}
+
 type Thing struct {
 	ID             ID        `json:"id" storm:"id,increment"`
 	IntegrationId  string    `json:"integr_id" storm:"index"`
@@ -39,14 +44,14 @@ type Service struct {
 	Props         map[string]interface{} `json:"props"`
 	Tags          []string               `json:"tags"`
 	Interfaces    []Interface            `json:"interfaces"`
+	Attributes    map[string]ValueType   `json:"attributes"`
 }
 
 type Interface struct {
-	Type      string      `json:"intf_t"`
-	MsgType   string      `json:"msg_t"`
-	ValueType string      `json:"val_t"`
-	lastValue interface{} `json:"last_val"`
-	version   string      `json:"ver"`
+	Type      string `json:"intf_t"`
+	MsgType   string `json:"msg_t"`
+	ValueType string `json:"val_t"`
+	Version   string `json:"ver"`
 }
 
 type Location struct {
@@ -77,19 +82,20 @@ type ServiceResponse struct {
 }
 
 type InterfaceFlatView struct {
-	ThingId          ID       `json:"thing_id"`
-	ThingAddress     string   `json:"thing_address"`
-	ThingTech        string   `json:"thing_tech"`
-	ThingAlias       string   `json:"thing_alias"`
-	ServiceId        ID       `json:"service_id"`
-	ServiceName      string   `json:"service_name"`
-	ServiceAlias     string   `json:"service_alias"`
-	ServiceAddress   string   `json:"service_address"`
-	InterfaceType    string   `json:"intf_type"`
-	InterfaceMsgType string   `json:"intf_msg_type"`
-	InterfaceAddress string   `json:"intf_address"`
-	LocationId       ID       `json:"location_id"`
-	LocationAlias    string   `json:"location_alias"`
-	LocationType     string   `json:"location_type"`
-	Groups           []string `json:"groups"`
+	ThingId            ID       `json:"thing_id"`
+	ThingAddress       string   `json:"thing_address"`
+	ThingTech          string   `json:"thing_tech"`
+	ThingAlias         string   `json:"thing_alias"`
+	ServiceId          ID       `json:"service_id"`
+	ServiceName        string   `json:"service_name"`
+	ServiceAlias       string   `json:"service_alias"`
+	ServiceAddress     string   `json:"service_address"`
+	InterfaceType      string   `json:"intf_type"`
+	InterfaceMsgType   string   `json:"intf_msg_type"`
+	InterfaceAddress   string   `json:"intf_address"`
+	InterfaceValueType string   `json:"intf_val_type"`
+	LocationId         ID       `json:"location_id"`
+	LocationAlias      string   `json:"location_alias"`
+	LocationType       string   `json:"location_type"`
+	Groups             []string `json:"groups"`
 }

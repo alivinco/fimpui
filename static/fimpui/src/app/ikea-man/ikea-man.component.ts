@@ -43,7 +43,7 @@ export class IkeaManComponent implements OnInit {
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       console.log(msg.payload.toString());
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
-      if (fimpMsg.service == "ikea-ad" )
+      if (fimpMsg.service == "ikea" )
         {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
         { 
