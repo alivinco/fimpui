@@ -41,5 +41,8 @@
       flex: 0 0 70px;
   }
   .mat-cell:nth-child(2), .mat-header-cell:nth-child(2) {
-    flex: 0 0 90px;
+    flex: 0 0 150px;
+  }
+  .mat-cell:nth-child(2), .mat-header-cell:nth-child(2) {
+    flex: 0 0 250px;
   }

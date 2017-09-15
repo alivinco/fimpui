@@ -66,8 +66,9 @@ func (node *TriggerNode) LoadNodeConfig() error {
 	return err
 }
 
+
 func (node *TriggerNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
-	log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Waiting for event ")
+	log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Waiting for event . chan size = ",len(node.msgInStream))
 	start := time.Now()
 	timeout := node.config.Timeout
 	if timeout == 0 {
@@ -77,17 +78,23 @@ func (node *TriggerNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
 		select {
 		case newMsg := <-node.msgInStream:
 			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> New message from InStream ")
-			*msg = newMsg
-			if !node.config.IsValueFilterEnabled {
-				return []model.NodeID{node.meta.SuccessTransition}, nil
-			}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
-				return []model.NodeID{node.meta.SuccessTransition}, nil
-			}else {
-				if node.config.Timeout > 0 {
-					elapsed := time.Since(start)
-					timeout =  timeout - int64(elapsed.Seconds())
+			if (newMsg.AddressStr == node.meta.Address || node.meta.Address == "*") &&
+								(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
+								(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
+
+				*msg = newMsg
+				if !node.config.IsValueFilterEnabled {
+					return []model.NodeID{node.meta.SuccessTransition}, nil
+				}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
+					return []model.NodeID{node.meta.SuccessTransition}, nil
 				}
 			}
+			if node.config.Timeout > 0 {
+				elapsed := time.Since(start)
+				timeout =  timeout - int64(elapsed.Seconds())
+			}
+			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Not interested .")
+
 		case <-time.After(time.Second * time.Duration(timeout)):
 			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> Timeout ")
 			return []model.NodeID{node.meta.TimeoutTransition}, nil

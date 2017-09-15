@@ -24,7 +24,6 @@ type Flow struct {
 	msgTransport        *fimpgo.MqttTransport
 	activeSubscriptions []string
 	msgInStream         model.MsgPipeline
-	localMsgInStream    map[model.NodeID]model.MsgPipeline
 	TriggerCounter      int64
 	ErrorCounter        int64
 	StartedAt           time.Time
@@ -53,7 +52,7 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 	fl.Description = meta.Description
 	fl.FlowMeta = meta
 	fl.opContext.FlowId = meta.Id
-	fl.localMsgInStream = make(map[model.NodeID]model.MsgPipeline)
+	//fl.localMsgInStream = make(map[model.NodeID]model.MsgPipeline,10)
 	fl.globalContext.RegisterFlow(fl.Id)
 }
 
@@ -67,11 +66,7 @@ func (fl *Flow) InitAllNodes() {
 			newNode = constructor(&fl.opContext,metaNode,fl.globalContext,fl.msgTransport)
 			if newNode.IsMsgReactorNode() {
 				log.Debug("<Flow> Creating a channel for node id = ",metaNode.Id)
-				// Creating channel for each message reactor
-				nodeChannel := make(model.MsgPipeline)
-				fl.localMsgInStream[metaNode.Id] = nodeChannel
-				// Configuring input message stream for nodes like trigger , receive , etc.
-				newNode.ConfigureInStream(&fl.activeSubscriptions,nodeChannel)
+				newNode.ConfigureInStream(&fl.activeSubscriptions,fl.msgInStream)
 			}
 		}else {
 			log.Errorf("<Flow> Node type = %s isn't supported",metaNode.Type)
@@ -135,12 +130,6 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 	return false
 }
 
-func (fl *Flow) SignalNodeIsReady(){
-	select {
-	case fl.opContext.NodeIsReady <- true:
-	default:
-	}
-}
 
 func (fl *Flow) Run() {
 	var transitionNodeId model.NodeID
@@ -165,7 +154,6 @@ func (fl *Flow) Run() {
 				log.Infof(fl.Id+"<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = fl.Nodes[i]
-				fl.SignalNodeIsReady()
 				newMsg := model.Message{}
 				fl.WaitingSince = time.Now()
 				fl.LastExecutionTime = time.Since(fl.StartedAt)
@@ -191,7 +179,6 @@ func (fl *Flow) Run() {
 				var err error
 				fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				fl.currentNode = fl.Nodes[i]
-				fl.SignalNodeIsReady()
 				nextNodes, err := fl.Nodes[i].OnInput(fl.currentMsg)
 				if err != nil {
 					fl.ErrorCounter++
@@ -206,6 +193,7 @@ func (fl *Flow) Run() {
 					log.Errorf(fl.Id+"<FLow> Unknown transition mode %s.Switching back to first node", transitionNodeId)
 					transitionNodeId = ""
 				}
+				log.Debug(fl.Id+"<FLow> Transition to node = ",transitionNodeId)
 
 			} else if transitionNodeId == "" {
 				// Flow is finished . Returning to first step.
@@ -219,38 +207,13 @@ func (fl *Flow) Run() {
 
 }
 
-func (fl *Flow) InStreamMsgRouter() {
-	// fetching all messages from upstream
-	for inMsg := range fl.msgInStream {
-		//log.Debug("<Flow> Router : New message from msgInStream")
-		if !fl.opContext.IsFlowRunning {
-			break
+func (fl *Flow) IsFlowInterestedInMessage(topic string ) bool {
+	for i :=range fl.activeSubscriptions {
+		if fl.activeSubscriptions[i] == topic {
+			return true
 		}
-		//log.Debug("<Flow> Router: Current Node Id = ", fl.currentNodeId)
-		currNode := fl.currentNode.GetMetaNode()
-		// doing filtering
-		if (inMsg.AddressStr == currNode.Address || currNode.Address == "*") &&
-			(inMsg.Payload.Service == currNode.Service || currNode.Service == "*") &&
-			(inMsg.Payload.Type == currNode.ServiceInterface || currNode.ServiceInterface == "*") {
-			// sending message to each channel
-			select {
-				case fl.localMsgInStream[currNode.Id] <- inMsg:
-					log.Debugf(fl.Id+"<Flow> Router(%s): Message was sent to Node Id = %s",fl.Id, fl.currentNodeId)
-				default:
-					log.Debugf(fl.Id+"<Flow> Router(%s): Message is dropped (no listeners).",fl.Id)
-			}
-			// Wait while node is ready to accept new command .
-			<- fl.opContext.NodeIsReady
-			log.Debugf(fl.Id+"<Flow> Router(%s) : Is ready for next message.",fl.Id)
-		}else {
-			//log.Debug("<Flow> Router : No routing target")
-		}
-
-
-
 	}
-	log.Infof(fl.Id+"<Flow> InStreamMsgRouter for flow %s was stopped.", fl.Name)
-
+	return false
 }
 
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
@@ -264,18 +227,18 @@ func (fl *Flow) Start() error {
 		fl.Nodes[i].Init()
 	}
 
-	// Starting flow loop for every trigger.
+	// Validating flow is it has at least one start node .
 	for i := range fl.Nodes {
 		if fl.Nodes[i].IsStartNode() {
-
-			go fl.Run()
-			go fl.InStreamMsgRouter()
 			isFlowValid = true
 			fl.opContext.State = "RUNNING"
 			log.Infof(fl.Id+"<Flow> Flow %s is running", fl.Name)
 		}
 	}
-	if !isFlowValid{
+
+	if isFlowValid{
+		go fl.Run()
+	}else {
 		fl.opContext.State = "STOPPED"
 		log.Errorf(fl.Id+"<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
 		return errors.New("Flow should have at least one trigger or wait node")

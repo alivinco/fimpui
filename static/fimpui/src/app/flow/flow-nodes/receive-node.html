@@ -32,84 +32,60 @@
         <md-option value="bool_map">map of booleans</md-option>
         <md-option value="object">object</md-option>
     </md-select>
-    <div [ngSwitch]="node.Config.ValueFilter.ValueType">
-        <div *ngSwitchCase="'string'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'int'">
-            <md-input-container class="node-transition-field">
-                <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'float'">
-            <md-input-container class="node-transition-field">
-                <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="''">
+    <span [ngSwitch]="node.Config.ValueFilter.ValueType">
+        <md-input-container *ngSwitchCase="'string'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
+        </md-input-container>
+        <md-input-container *ngSwitchCase="'int'" class="node-transition-field">
+            <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
+        </md-input-container>
+        <md-input-container *ngSwitchCase="'float'"  class="node-transition-field">
+            <input mdInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
+        </md-input-container>
+    <span *ngSwitchCase="''">
 
-        </div>
-        <div *ngSwitchCase="'bool'">
-            <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.ValueFilter.Value">
-                <md-radio-button class="example-radio-button" [value]="true">
-                    true (On)
-                </md-radio-button>
-                <md-radio-button class="example-radio-button" [value]="false">
-                    false (Off)
-                </md-radio-button>
-            </md-radio-group>
-        </div>
-         <div *ngSwitchCase="'str_array'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : ['abc','cde']">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'int_array'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1,2] ">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'float_array'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1.2,0.5] ">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'bool_array'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [true,false]">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'str_map'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'int_map'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':1,'b':2}">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'float_map'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'bool_map'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':true,'b':false}">
-            </md-input-container>
-        </div>
-        <div *ngSwitchCase="'object'">
-            <md-input-container class="node-transition-field">
-                <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'b','b':3}">
-            </md-input-container>
-        </div>
-    </div>
-     <md-input-container class="node-transition-field">
-        <input mdInput type="number" [(ngModel)]="node.Config.Timeout" placeholder="Timeout">
-     </md-input-container>
+    </span>
+    <md-radio-group *ngSwitchCase="'bool'" class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.ValueFilter.Value">
+            <md-radio-button class="example-radio-button" [value]="true">
+                true (On)
+            </md-radio-button>
+            <md-radio-button class="example-radio-button" [value]="false">
+                false (Off)
+            </md-radio-button>
+    </md-radio-group>
+    <md-input-container *ngSwitchCase="'str_array'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : ['abc','cde']">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'int_array'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1,2] ">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'float_array'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [1.2,0.5] ">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'bool_array'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : [true,false]">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'str_map'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'int_map'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':1,'b':2}">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'float_map'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'bool_map'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':true,'b':false}">
+    </md-input-container>
+    <md-input-container *ngSwitchCase="'object'" class="node-transition-field">
+            <input mdInput [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value : {'a':'b','b':3}">
+    </md-input-container>
+ </span>
+ <p>
+ <md-input-container class="node-transition-field">
+    <input mdInput type="number" [(ngModel)]="node.Config.Timeout" placeholder="Timeout">
+ </md-input-container>
+ </p>
     </div>
     <p>
         <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >

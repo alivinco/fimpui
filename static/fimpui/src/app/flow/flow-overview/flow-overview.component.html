@@ -12,12 +12,11 @@
     <md-card-content>
          
    <table>
-      <thead><tr><th style="width: 150px">Name</th><th style="width: 70px">Executed</th><th style="width: 70px">Errors</th>
-        <th style="width: 200px">Current Node</th>
-        <th style="width: 200px">At start </th>
-        <th style="width: 200px">Started at </th>
-        <th style="width: 200px">Waiting since </th>
-        <th style="width: 200px">Last exec time (milisec) </th>
+      <thead><tr><th style="width: 300px">Name</th><th style="width: 50px">Ok</th><th style="width: 50px">Err</th>
+        <th style="width: 250px">Current Node</th>
+        <th style="width: 70px">At start </th>
+        <th style="width: 330px">Last start  </th>
+        <th style="width: 150px">Last exec time (milisec) </th>
         <th style="width: 350px">Description</th><th style="width: 250px">Actions</th></tr> </thead>
       <tbody>
       <tr *ngFor="let flow of flows">
@@ -25,7 +24,6 @@
           <td> {{flow.Stats.CurrentNodeLabel}} ({{flow.Stats.CurrentNodeId}}) </td>
           <td> {{flow.Stats.IsAtStartingPoint}} </td>
           <td> {{flow.Stats.StartedAt | date:'yMMMdjms'}} </td>
-          <td> {{flow.Stats.WaitingSince | date:'yMMMdjms' }} </td>
           <td> {{flow.Stats.LastExecutionTime }} </td>
           <td> {{flow.Description}}</td> <td>
              

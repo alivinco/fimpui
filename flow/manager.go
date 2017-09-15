@@ -60,12 +60,15 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 	msg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
 	// Message broadcast to all flows
 	for id, stream := range mg.msgStreams {
-		select {
-		case stream <- msg:
-			log.Debug("<FlMan> Message was sent to flow with id = ", id)
-		default:
-			log.Debug("<FlMan> Message is dropped (no listeners) for flow with id = ", id)
+		if mg.GetFlowById(id).IsFlowInterestedInMessage(topic) {
+			select {
+			case stream <- msg:
+				log.Debug("<FlMan> Message was sent to flow with id = ", id)
+			default:
+				log.Debug("<FlMan> Message is dropped (no listeners) for flow with id = ", id)
+			}
 		}
+
 	}
 }
 
