@@ -6,6 +6,7 @@ import (
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
 	"time"
+	"github.com/alivinco/fimpui/flow/utils"
 )
 
 type TriggerNode struct {
@@ -78,9 +79,9 @@ func (node *TriggerNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
 		select {
 		case newMsg := <-node.msgInStream:
 			log.Debug(node.flowOpCtx.FlowId+"<TrigNode> New message from InStream ")
-			if (newMsg.AddressStr == node.meta.Address || node.meta.Address == "*") &&
-								(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
-								(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
+			if utils.RouteIncludesTopic(node.meta.Address,newMsg.AddressStr) &&
+			   (newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
+			   (newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
 
 				*msg = newMsg
 				if !node.config.IsValueFilterEnabled {

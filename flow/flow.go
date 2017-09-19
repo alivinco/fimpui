@@ -7,6 +7,7 @@ import (
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/flow/node"
 	"time"
+	"github.com/alivinco/fimpui/flow/utils"
 )
 
 type Flow struct {
@@ -209,7 +210,7 @@ func (fl *Flow) Run() {
 
 func (fl *Flow) IsFlowInterestedInMessage(topic string ) bool {
 	for i :=range fl.activeSubscriptions {
-		if fl.activeSubscriptions[i] == topic {
+		if utils.RouteIncludesTopic(fl.activeSubscriptions[i],topic) {
 			return true
 		}
 	}

@@ -51,14 +51,16 @@
        </p> 
          <h4>FH templates</h4>
          <md-list>
-           <md-list-item *ngFor="let temp of localTemplates" > {{temp}}</md-list-item>
+           <md-list-item *ngFor="let temp of localTemplates" (click)="openTemplateEditor(temp.file_name,'stable')" > {{temp.alias}} ( {{temp.file_name}} ) </md-list-item>
          </md-list>
 
          <h4>Discovered templates (cache)</h4>
          <md-list>
-           <md-list-item *ngFor="let temp of localTemplatesCache" > {{temp}}</md-list-item>
+           <md-list-item *ngFor="let temp of localTemplatesCache" (click)="openTemplateEditor(temp.file_name,'cache')" >  {{temp.alias}} ( {{temp.file_name}} ) </md-list-item>
          </md-list>
-
+         <p>
+            <button md-raised-button  (click)="loadLocalTemplates()">Reload</button>
+         </p>
       </div>
     </md-card-actions>
   </md-card>

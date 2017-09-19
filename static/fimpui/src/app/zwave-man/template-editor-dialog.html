@@ -1,0 +1,78 @@
+<h1 md-dialog-title> Template </h1>
+<md-dialog-content>
+<h3>Product name</h3>
+<md-input-container class="node-label-field" style="width: 400px">
+        <input mdInput [(ngModel)]="template.alias" placeholder="Name" >
+</md-input-container> 
+<p><md-input-container class="node-label-field" style="width: 400px">
+        <input mdInput [(ngModel)]="template.comment" placeholder="Comment" >
+    </md-input-container>
+</p>
+<p><md-input-container class="node-label-field" style="width: 400px">
+        <input mdInput [(ngModel)]="template.docs_ref" placeholder="Documentation reference" >
+    </md-input-container>
+</p>
+<p> 
+<md-input-container class="node-label-field" style="width: 200px">
+        <input mdInput type="number" [(ngModel)]="template.wakeup_interval" placeholder="Wakeup interval(sec)" >
+</md-input-container>
+</p> 
+<h3>Device auto configuration</h3>
+    <md-list>
+        <md-list-item ><h4>Auto associations </h4></md-list-item>
+        <md-list-item *ngFor="let assoc of template.auto_configs.assoc"> 
+            <md-input-container class="node-label-field">
+                        <input mdInput type="number" [(ngModel)]="assoc.group" placeholder="group" >
+            </md-input-container>
+            <button md-raised-button color="primary" (click)="deleteAssoc(assoc)">Delete</button>  
+       </md-list-item>
+    </md-list>
+    <button md-raised-button color="primary" (click)="addNewAssoc()">Add new group</button>
+    <md-list>
+            <md-list-item ><h4>Auto configurations </h4></md-list-item>
+            <md-list-item *ngFor="let config of template.auto_configs.configs"> 
+                <md-input-container class="node-label-field">
+                            <input mdInput type="number" [(ngModel)]="config.key" placeholder="Param id" >
+                </md-input-container>
+                <md-input-container class="node-label-field">             
+                            <input mdInput type="number" [(ngModel)]="config.value" placeholder="Value" >
+                </md-input-container>
+                <md-input-container class="node-label-field"> 
+                            <input mdInput type="number" [(ngModel)]="config.size" placeholder="Size (1,2,4) " >
+                </md-input-container> 
+                <md-input-container class="node-label-field"> 
+                        <input mdInput type="text" [(ngModel)]="config.comment" placeholder="Comment " >
+                </md-input-container> 
+                <button md-raised-button color="primary" (click)="deleteConfig(config)">Delete</button>
+           </md-list-item>
+     </md-list>
+     <button md-raised-button color="primary" (click)="addNewConfig()">Add new config</button>
+
+<h3>Basic CC mapping</h3>
+<h3>Service grouping</h3>
+<md-list>
+        <md-list-item *ngFor="let serv of template.service_grouping"> 
+            <md-input-container class="node-label-field">
+                        <input mdInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
+            </md-input-container>
+            <md-input-container class="node-label-field">             
+                        <input mdInput type="text" [(ngModel)]="serv.service" placeholder="Service name" >
+            </md-input-container>
+            <md-input-container class="node-label-field"> 
+                        <input mdInput type="text" [(ngModel)]="group" placeholder="Group (ch_0)" >
+            </md-input-container> 
+            <md-input-container class="node-label-field"> 
+                    <input mdInput type="text" [(ngModel)]="serv.comment" placeholder="Comment " >
+            </md-input-container>
+            <button md-raised-button color="primary" (click)="deleteServiceGrouping(serv)">Delete</button> 
+       </md-list-item>
+ </md-list>
+ <button md-raised-button color="primary" (click)="addNewServiceGrouping()">Add new config</button>
+</md-dialog-content>
+<md-dialog-actions >
+<button md-raised-button  (click)="saveTemplate()" >Save</button>
+<button md-raised-button  (click)="templateOperation('move')" >Move to stable</button>
+<button md-raised-button  (click)="templateOperation('upload')" >Upload to cloud</button>
+<button md-raised-button color="warn" (click)="deleteTemplate()" >Delete</button>
+<button md-raised-button md-dialog-close>Close</button>
+</md-dialog-actions>

@@ -153,7 +153,7 @@ func main() {
 		uploadStatus := objectStorage.UploadLogSnapshot(configs.ReportLogFiles, hostAlias, configs.ReportLogSizeLimit)
 		return c.JSON(http.StatusOK, uploadStatus)
 	})
-	e.POST("/fimp/api/products/upload-to-cloud", func(c echo.Context) error {
+	e.POST("/fimp/api/zwave/products/upload-to-cloud", func(c echo.Context) error {
 		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
@@ -166,7 +166,7 @@ func main() {
 		}
 	})
 
-	e.GET("/fimp/api/products/list-local-templates", func(c echo.Context) error {
+	e.GET("/fimp/api/zwave/products/list-local-templates", func(c echo.Context) error {
 		templateType := c.QueryParam("type")
 		returnStable := true
 		if templateType == "cache" {
@@ -186,7 +186,91 @@ func main() {
 		}
 	})
 
-	e.POST("/fimp/api/products/download-from-cloud", func(c echo.Context) error {
+	e.GET("/fimp/api/zwave/products/template", func(c echo.Context) error {
+		templateType := c.QueryParam("type")
+		fileName := c.QueryParam("name")
+		returnStable := true
+		if templateType == "cache" {
+			returnStable = false
+		}
+
+		store,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		template , err :=store.GetTemplate(returnStable,fileName)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		if err == nil {
+			return c.Blob(http.StatusOK,"application/json",template)
+		} else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
+	e.POST("/fimp/api/zwave/products/template-op/:operation/:name", func(c echo.Context) error {
+		operation := c.Param("operation")
+		name := c.Param("name")
+		store,_  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		var err error
+		switch operation {
+		case "move":
+			err = store.MoveToStable(name)
+		case "upload":
+			err = store.UploadSingleProductToStageCloud(name)
+		}
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError,err)
+		}
+		return c.NoContent(http.StatusOK)
+	})
+
+	e.DELETE("/fimp/api/zwave/products/template/:type/:name", func(c echo.Context) error {
+		templateType := c.Param("type")
+		templateName := c.Param("name")
+		var isStable bool
+		switch templateType {
+		case "cache":
+			isStable = false
+		case "stable":
+			isStable = true
+		default:
+			return c.NoContent(http.StatusInternalServerError)
+
+		}
+		store,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		err = store.DeleteTemplate(isStable,templateName)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError,err)
+		}
+		return c.NoContent(http.StatusOK)
+	})
+
+	e.POST("/fimp/api/zwave/products/template/:type/:name", func(c echo.Context) error {
+		templateType := c.Param("type")
+		templateName := c.Param("name")
+		var isStable bool
+		switch templateType {
+		case "cache":
+			isStable = false
+		case "stable":
+			isStable = true
+		default:
+			return c.NoContent(http.StatusInternalServerError)
+
+		}
+		body, err := ioutil.ReadAll(c.Request().Body)
+		if err != nil {
+			return err
+		}
+		store,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
+		err = store.UpdateTemplate(isStable,templateName,body)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError,err)
+		}
+		return c.NoContent(http.StatusOK)
+	})
+
+	e.POST("/fimp/api/zwave/products/download-from-cloud", func(c echo.Context) error {
 		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err)
@@ -352,7 +436,8 @@ func main() {
 	e.File("/fimp/timeline", index)
 	e.File("/fimp/ikea-man", index)
 	e.File("/fimp/systems-man", index)
-	e.File("/fimp/flow", index)
+	e.File("/fimp/flow/context", index)
+	e.File("/fimp/flow/overview", index)
 	e.File("/fimp/flow/flow-editor/*", index)
 	e.File("/fimp/flight-recorder", index)
 	e.File("/fimp/thing-view/*", index)

@@ -6,6 +6,7 @@ import (
 log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/mapstructure"
 	"time"
+	"github.com/alivinco/fimpui/flow/utils"
 )
 
 type ReceiveNode struct {
@@ -83,7 +84,7 @@ func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		select {
 		case newMsg := <-node.msgInStream:
 			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> New message :")
-			if (newMsg.AddressStr == node.meta.Address || node.meta.Address == "*") &&
+			if utils.RouteIncludesTopic(node.meta.Address,newMsg.AddressStr) &&
 				(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
 				(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
 				*msg = newMsg

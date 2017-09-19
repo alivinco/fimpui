@@ -8,6 +8,7 @@ import { AppComponent } from './app.component';
 
 import { MaterialModule } from '@angular/material';
 import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
+import { TemplateEditorDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { SystemsManComponent } from './systems-man/systems-man.component';
 import { TimelineComponent } from './timeline/timeline.component';
@@ -81,6 +82,7 @@ export function mqttServiceFactory() {
     SettingsComponent,
     ReportComponent,
     FlightRecorderComponent,
+    TemplateEditorDialog,
     // ThingIntfUiComponent,
     // KeysPipe,
   ],
@@ -101,7 +103,7 @@ export function mqttServiceFactory() {
     
   ],
   providers: [FimpService,ThingsDbService],
-  entryComponents:[AddDeviceDialog], 
+  entryComponents:[AddDeviceDialog,TemplateEditorDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

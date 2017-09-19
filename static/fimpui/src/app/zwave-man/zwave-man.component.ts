@@ -182,14 +182,14 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 
   loadLocalTemplates () {
     ///fimp/api/products/list-local-templates?type=cache
-    this.http.get(BACKEND_ROOT+'/fimp/api/products/list-local-templates')
+    this.http.get(BACKEND_ROOT+'/fimp/api/zwave/products/list-local-templates')
     .map(function(res: Response){
       let body = res.json();
       return body;
     }).subscribe ((result) => {
          this.localTemplates = result     
     });
-    this.http.get(BACKEND_ROOT+'/fimp/api/products/list-local-templates?type=cache')
+    this.http.get(BACKEND_ROOT+'/fimp/api/zwave/products/list-local-templates?type=cache')
     .map(function(res: Response){
       let body = res.json();
       return body;
@@ -201,7 +201,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
     this.http
-    .post(BACKEND_ROOT+'/fimp/api/products/download-from-cloud',  options )
+    .post(BACKEND_ROOT+'/fimp/api/zwave/products/download-from-cloud',  options )
     .subscribe ((result) => {
        console.log("Flow was saved");
     });
@@ -210,12 +210,22 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
     this.http
-    .post(BACKEND_ROOT+'/fimp/api/products/upload-to-cloud',  options )
+    .post(BACKEND_ROOT+'/fimp/api/zwave/products/upload-to-cloud',  options )
     .subscribe ((result) => {
        console.log("Flow was saved");
     });
   }
- 
+  
+  openTemplateEditor(templateName:string,templateType :string ) {
+    let dialogRef = this.dialog.open(TemplateEditorDialog,{
+            // height: '95%',
+            width: '95%',
+            data:{"name":templateName,"type":templateType} 
+          });
+    dialogRef.afterClosed().subscribe(result => {
+              this.loadLocalTemplates();
+          });       
+  }
 
 }
 
@@ -262,6 +272,124 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
     this.dialogRef.close();
   }
+
+}
+
+@Component({
+  selector: 'template-editor-dialog',
+  templateUrl: './template-editor-dialog.html',
+})
+export class TemplateEditorDialog implements OnInit, OnDestroy  {
+  template : any;
+  templateStr : string;
+  templateName :string;
+  templateType :string;
+  constructor(public dialogRef: MdDialogRef<TemplateEditorDialog>,@Inject(MD_DIALOG_DATA) public data: any,private http : Http) {
+    this.templateName = data["name"];
+    this.templateType = data["type"]
+    this.template = {};
+    this.template["auto_configs"] = {"assoc":[],"configs":[]};
+    this.template["service_grouping"] = [];
+    this.template["docs_ref"] = ""
+    console.log("Dialog constructor Opened");
+  }
+
+  ngOnInit(){
+    this.loadTemplate();
+  }
+
+  loadTemplate(){
+    this.http.get(BACKEND_ROOT+'/fimp/api/zwave/products/template?name='+this.templateName+'&type='+this.templateType)
+    .map(function(res: Response){
+      let body = res.json();
+      return body;
+    }).subscribe ((result) => {
+         this.template = result;     
+         if(this.template.auto_configs == undefined) {
+           this.template["auto_configs"] = {"assoc":[],"configs":[]}
+         }
+         if(this.template.service_grouping == undefined) {
+           this.template["service_grouping"] = []
+         }
+         if(this.template.comment == undefined){
+           this.template["comment"]=""
+         }
+         if(this.template.wakeup_interval == undefined){
+           this.template.wakeup_interval = this.template.wkup_intv;
+         } 
+         if( this.template["docs_ref"] == undefined){
+          this.template["docs_ref"] = "";
+         }
+      
+        //  this.templateStr = JSON.stringify(result, null, 2);
+    });
+  }
+  addNewAssoc() {
+      this.template.auto_configs.assoc.push({"group":1,"node":1,"comment":""})
+  }
+  deleteAssoc(assoc:any) {
+    var i = this.template.auto_configs.assoc.indexOf(assoc);
+    if(i != -1) {
+      this.template.auto_configs.assoc.splice(i, 1);
+    }
+  }
+  addNewConfig() {
+    this.template.auto_configs.configs.push({"key":1,"value":1,"size":1,"comment":""})
+  }
+  deleteConfig(configObj:any) {
+    var i = this.template.auto_configs.configs.indexOf(configObj);
+    if(i != -1) {
+      this.template.auto_configs.configs.splice(i, 1);
+    }
+  }
+  addNewServiceGrouping() {
+    this.template.service_grouping.push({"endp":1,"service":"sensor_temp","group":"ch_0","comment":""})
+  }
+
+  deleteServiceGrouping(serviceGrp:any) {
+    var i = this.template.service_grouping.indexOf(serviceGrp);
+    if(i != -1) {
+      this.template.service_grouping.splice(i, 1);
+    }
+  }
+
+  templateOperation(opName:string) {
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    this.http
+      .post(BACKEND_ROOT+'/fimp/api/zwave/products/template-op/'+opName+'/'+this.templateName,null,  options )
+      .subscribe ((result) => {
+         console.log("Operation executed");
+         this.dialogRef.close();
+         
+      });
+  }
+
+  deleteTemplate() {
+    this.http
+    .delete(BACKEND_ROOT+'/fimp/api/zwave/products/template/'+this.templateType+'/'+this.templateName)
+    .subscribe ((result) => {
+      console.log("Template deleted");
+      this.dialogRef.close();
+    });
+  }
+
+  saveTemplate(){
+    console.dir(this.template)
+     let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    this.http
+      .post(BACKEND_ROOT+'/fimp/api/zwave/products/template/'+this.templateType+'/'+this.templateName,JSON.stringify(this.template),  options )
+      .subscribe ((result) => {
+         console.log("Template is saved");
+         
+      });
+  }
+
+  ngOnDestroy() {
+    
+  }
+  
 
 }
 
