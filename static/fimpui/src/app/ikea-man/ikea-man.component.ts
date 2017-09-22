@@ -15,25 +15,25 @@ export class IkeaManComponent implements OnInit {
   }
 
   reloadIkeaDevices(){
-    let msg  = new FimpMessage("ikea-ad","cmd.network.get_all_nodes","null",null,null,null)
+    let msg  = new FimpMessage("ikea","cmd.network.get_all_nodes","null",null,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
   } 
 
   addDevice(){
     console.log("Add device")
-    let msg  = new FimpMessage("ikea-ad","cmd.thing.inclusion","bool",true,null,null)
+    let msg  = new FimpMessage("ikea","cmd.thing.inclusion","bool",true,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
    
   }
   removeDevice(){
     console.log("Remove device ")
-    let msg  = new FimpMessage("ikea-ad","cmd.thing.exclusion","bool",true,null,null)
+    let msg  = new FimpMessage("ikea","cmd.thing.exclusion","bool",true,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:ikea/ad:1",msg.toString());
     
   }
   
   generateExclusionReport(address:string){
-    let msg  = new FimpMessage("ikea-ad","evt.thing.exclusion_report","object",{"address":String(address)},null,null)
+    let msg  = new FimpMessage("ikea","evt.thing.exclusion_report","object",{"address":String(address)},null,null)
     this.fimp.publish("pt:j1/mt:evt/rt:ad/rn:ikea/ad:1",msg.toString());
     
   }

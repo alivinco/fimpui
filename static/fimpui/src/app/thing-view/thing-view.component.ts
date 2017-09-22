@@ -77,7 +77,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   getServiceName(techAdapterName:string):string{
     let serviceName = "zwave-ad";
     if (techAdapterName == "ikea"){
-      serviceName = "ikea-ad";
+      serviceName = "ikea";
     }
     return serviceName;
   }

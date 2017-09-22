@@ -289,7 +289,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     this.templateType = data["type"]
     this.template = {};
     this.template["auto_configs"] = {"assoc":[],"configs":[]};
-    this.template["service_grouping"] = [];
+    this.template["dev_custom"] = {"service_grouping":[],"service_descriptor":[],"basic_mapping":[]}
     this.template["docs_ref"] = ""
     console.log("Dialog constructor Opened");
   }
@@ -308,8 +308,8 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
          if(this.template.auto_configs == undefined) {
            this.template["auto_configs"] = {"assoc":[],"configs":[]}
          }
-         if(this.template.service_grouping == undefined) {
-           this.template["service_grouping"] = []
+         if(this.template.dev_custom == undefined) {
+           this.template["dev_custom"] = {"service_grouping":[],"service_descriptor":[],"basic_mapping":[]}
          }
          if(this.template.comment == undefined){
            this.template["comment"]=""
@@ -320,7 +320,10 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
          if( this.template["docs_ref"] == undefined){
           this.template["docs_ref"] = "";
          }
-      
+         // Converting json object into string, needed for editor 
+         this.template.dev_custom.service_descriptor.forEach(element => {
+           element.descriptor = JSON.stringify(element.descriptor, null, 2);
+         });
         //  this.templateStr = JSON.stringify(result, null, 2);
     });
   }
@@ -343,16 +346,24 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     }
   }
   addNewServiceGrouping() {
-    this.template.service_grouping.push({"endp":1,"service":"sensor_temp","group":"ch_0","comment":""})
+    this.template.dev_custom.service_grouping.push({"endp":1,"service":"sensor_temp","group":"ch_0","comment":""})
   }
 
   deleteServiceGrouping(serviceGrp:any) {
-    var i = this.template.service_grouping.indexOf(serviceGrp);
+    var i = this.template.dev_custom.service_grouping.indexOf(serviceGrp);
     if(i != -1) {
-      this.template.service_grouping.splice(i, 1);
+      this.template.dev_custom.service_grouping.splice(i, 1);
     }
   }
-
+  addNewServiceDescriptor() {
+    this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":"","comment":""});
+  }
+  deleteServiceDescriptor(serviceDescriptor:any) {
+    var i = this.template.dev_custom.service_descriptor.indexOf(serviceDescriptor);
+    if(i != -1) {
+      this.template.dev_custom.service_descriptor.splice(i, 1);
+    }
+  }
   templateOperation(opName:string) {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
@@ -374,10 +385,20 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     });
   }
 
+  prepareTemplate(){
+    // Converting descriptor back from string to object 
+    this.template.dev_custom.service_descriptor.forEach(element => {
+      element.descriptor = JSON.parse(element.descriptor);
+    });
+  }
+
   saveTemplate(){
+    this.prepareTemplate();
     console.dir(this.template)
      let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
+
+
     this.http
       .post(BACKEND_ROOT+'/fimp/api/zwave/products/template/'+this.templateType+'/'+this.templateName,JSON.stringify(this.template),  options )
       .subscribe ((result) => {

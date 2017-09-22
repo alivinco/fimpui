@@ -17,7 +17,7 @@
           <th style="width: 250px">Alias</th><th></th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.id}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> {{node.alias}} </td>
+          <td> {{node.address}}</td> <td> {{node.type}} </td> <td> {{node.service_type}} </td> <td> {{node.alias}} </td>
            <td> 
             <md-chip-list>
              <md-chip class="open-chip" [routerLink]="['/thing-view','ikea',node.address]">Services</md-chip>
