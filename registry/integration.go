@@ -38,13 +38,43 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 			log.Errorf("<MqRegInt> Crashed while processing message from topic = %s msgType = ", r, addr.MsgType)
 		}
 	}()
-	if iotMsg.Type == "evt.thing.inclusion_report" {
-		mg.processInclusionReport(iotMsg)
-	} else if iotMsg.Type == "evt.thing.exclusion_report" {
-		tech := addr.ResourceName
-		mg.processExclusionReport(iotMsg, tech)
-	}
+
+		switch iotMsg.Type {
+		case "evt.thing.inclusion_report":
+			mg.processInclusionReport(iotMsg)
+		case "evt.thing.exclusion_report":
+			tech := addr.ResourceName
+			mg.processExclusionReport(iotMsg, tech)
+		case "cmd.service.get_list":
+			//  pt:j1/mt:cmd/rt:app/rn:registry/ad:1
+			//  {"serv":"registry","type":"cmd.service.get_list","val_t":"str_map","val":{"serviceName":"out_bin_switch","filterWithoutAlias":"true"},"props":null,"tags":null,"uid":"1234455"}
+
+			filters,err := iotMsg.GetStrMapValue()
+			if err == nil {
+				var filterWithoutAlias bool
+				serviceName , ok := filters["serviceName"]
+				filterFithoutAliasStr , filterOk :=filters["filterWithoutAlias"]
+				if filterOk {
+					if filterFithoutAliasStr == "true" {
+						filterWithoutAlias = true
+					}
+				}
+				if ok {
+					response ,err :=  mg.registry.GetServices(serviceName,filterWithoutAlias)
+					if err != nil {
+						log.Error("<MqRegInt> Can get services .Err :",err)
+					}
+					responseMsg := fimpgo.NewMessage("evt.service.list","registry","object",response,nil,nil,iotMsg)
+					addr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeApp, ResourceName: "registry", ResourceAddress: "1"}
+					mg.msgTransport.Publish(&addr,responseMsg)
+				}
+			}
+		default:
+			log.Info("Unsupported message type :",iotMsg.Type)
+		}
 }
+
+
 func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error {
 	log.Info("<MqRegInt> New inclusion report")
 	newThing := Thing{}

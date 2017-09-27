@@ -1,0 +1,23 @@
+<div style="margin: 20px">
+    <md-select placeholder="Location" style="width:350px" [(ngModel)]="selectedLocationId" >
+                <md-option *ngFor="let location of locations" [value]="location.id">{{ location.alias }} ({{location.type}}) </md-option>
+    </md-select>
+    <p>        
+    <md-select #serviceInput placeholder="Service" style="width:350px" [(ngModel)]="selectedService" (change)="onServiceSelected()" >
+        <md-option *ngFor="let service of fimpServiceList" [value]="service.name" >{{ service.label }} ({{service.name}}) </md-option>
+    </md-select>
+    </p>
+    <md-nav-list>
+            <md-list-item *ngFor="let service of services">
+              <p md-line >{{ service.alias }} at {{ service.location_alias }} </p>
+              <p md-line >
+                 <md-select #serviceInput placeholder="Interface" style="width:300px"  [(ngModel)]="selectedInterface" (change)="onInterfaceSelected(service)"  >
+                     <span *ngFor="let intf of service.interfaces">
+                        <md-option *ngIf="msgFlowDirection == intf.intf_t"  [value]="intf.msg_t" >{{intf.msg_t}} </md-option>
+                     </span>
+                 </md-select>      
+              </p>
+            </md-list-item>
+    </md-nav-list>
+ </div>
+ 

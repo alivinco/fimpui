@@ -68,17 +68,8 @@ type Location struct {
 }
 
 type ServiceResponse struct {
-	ID            ID                     `json:"id"`
-	IntegrationId string                 `json:"integr_id"`
-	Name          string                 `json:"name"`
-	Alias         string                 `json:"alias"`
-	Address       string                 `json:"address"`
-	Groups        []string               `json:"groups"`
-	LocationId    ID                     `json:"location_id"`
+	Service
 	LocationAlias string                 `json:"location_alias"`
-	Props         map[string]interface{} `json:"props"`
-	Tags          []string               `json:"tags"`
-	Interfaces    []Interface            `json:"interfaces"`
 }
 
 type InterfaceFlatView struct {

@@ -1,7 +1,8 @@
 <h1 md-dialog-title>Service selector</h1>
 <md-dialog-content>
-    <reg-services (onSelect)="onSelected($event)" ></reg-services>
+    {{msgFlowDirectionD}}
+        <service-selector-wizard  [msgFlowDirection]="msgFlowDirectionD" (onSelect)="onSelected($event)" ></service-selector-wizard>
 </md-dialog-content>
 <md-dialog-actions>
 <button md-raised-button md-dialog-close>Close</button>
-</md-dialog-actions> 
+</md-dialog-actions>  

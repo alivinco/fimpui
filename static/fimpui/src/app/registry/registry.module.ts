@@ -5,7 +5,7 @@ import { MaterialModule,
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { ThingsComponent } from './things/things.component';
-import { ServicesComponent ,ServicesMainComponent } from './services/services.component';
+import { ServicesComponent ,ServicesMainComponent,ServiceSelectorWizardComponent } from './services/services.component';
 import { LocationsComponent } from './locations/locations.component';
 import { AdminComponent } from './admin/admin.component';
 import { ThingIntfUiComponent,KeysPipe } from 'app/registry/thing-intf-ui/thing-intf-ui.component'
@@ -23,7 +23,7 @@ import { FimpService } from 'app/fimp/fimp.service'
     HttpModule,
     CdkTableModule,
   ],
-  exports:[ServicesComponent,ThingIntfUiComponent,KeysPipe],
+  exports:[ServicesComponent,ThingIntfUiComponent,KeysPipe,ServiceSelectorWizardComponent], 
 
   declarations: [
     ThingsComponent,
@@ -32,6 +32,7 @@ import { FimpService } from 'app/fimp/fimp.service'
     LocationsComponent,
     AdminComponent,
     ThingIntfUiComponent,
+    ServiceSelectorWizardComponent,
     KeysPipe
   ],
   providers:[FimpService]

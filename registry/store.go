@@ -68,14 +68,30 @@ func (st *ThingRegistryStore) GetAllThings() ([]Thing, error) {
 	return things, err
 }
 
-func (st *ThingRegistryStore) GetAllServices() ([]Service, error) {
-	things, err := st.GetAllThings()
+func (st *ThingRegistryStore) GetServices(serviceNameFilter string,filterWithoutAlias bool) ([]ServiceResponse, error) {
+	var things []Thing;
+	err := st.db.All(&things)
+
 	if err != nil {
 		return nil, err
 	}
-	var result []Service
-	for i := range things {
-		result = append(result, things[i].Services...)
+	var result []ServiceResponse
+	for thi := range things {
+		for si := range things[thi].Services {
+			if (serviceNameFilter != "" && things[thi].Services[si].Name == serviceNameFilter) || serviceNameFilter == "" {
+				if !filterWithoutAlias || things[thi].Services[si].Alias != "" {
+					serviceResponse := ServiceResponse{Service:things[thi].Services[si]}
+					location , _ := st.GetLocationById(serviceResponse.LocationId)
+					if location != nil {
+						serviceResponse.LocationAlias = location.Alias
+					}
+					result = append(result,serviceResponse)
+				}
+
+
+			}
+
+		}
 	}
 	return result, nil
 }

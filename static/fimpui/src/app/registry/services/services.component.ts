@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild,OnInit,Output,EventEmitter} from '@angular/core';
+import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter} from '@angular/core';
 import {DataSource} from '@angular/cdk';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -10,8 +10,9 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
 import { ActivatedRoute } from '@angular/router';
-import {ServiceInterface} from '../model';
-import { BACKEND_ROOT } from "app/globals";
+import { ServiceInterface} from '../model';
+import { BACKEND_ROOT} from "app/globals";
+import { getFimpServiceList} from "app/fimp/service-lookup"
 import {ThingIntfUiComponent} from 'app/registry/thing-intf-ui/thing-intf-ui.component'
 
  
@@ -26,6 +27,74 @@ export class ServicesMainComponent {
   }
 
 }
+
+@Component({
+  selector: 'service-selector-wizard',
+  templateUrl: './service-selector-wizard.component.html',
+  styleUrls: ['./services.component.css']
+})
+export class ServiceSelectorWizardComponent implements OnInit {
+  @Input() msgFlowDirection : string;
+  private services : any;
+  private locations : any;
+  private selectedLocationId :string;
+  private selectedService:any;
+  private selectedInterface:any;
+  private fimpServiceList :any;
+  @Output() onSelect = new EventEmitter<ServiceInterface>();
+  ngOnInit() {
+    this.loadLocations();
+  }
+  constructor(private http : Http,private route: ActivatedRoute) { 
+    this.fimpServiceList = getFimpServiceList();  
+  }
+  selectInterface(intf:ServiceInterface) {
+    console.dir(intf);
+    this.onSelect.emit(intf);
+  }
+
+  loadServices(serviceName:string,locationId:string) {
+    let params: URLSearchParams = new URLSearchParams();
+    params.set('serviceName', serviceName);
+    params.set('filterWithoutAlias',"true");
+    this.http.get(BACKEND_ROOT+'/fimp/api/registry/services',{search:params})
+    .map((res: Response)=>{
+      let result = res.json();
+      return result;
+    }).subscribe(result=>{
+      this.services = result;
+    });
+  }
+  loadLocations() {
+    this.http.get(BACKEND_ROOT+'/fimp/api/registry/locations',{})
+    .map((res: Response)=>{
+      let result = res.json();
+      return result;
+    }).subscribe(result=>{
+      this.locations = result;
+    });
+  }
+
+  onServiceSelected(){
+    this.loadServices(this.selectedService,"");
+  }
+  onInterfaceSelected(service) {
+    var intf = new ServiceInterface();
+    intf.serviceName = this.selectedService;
+    intf.intfMsgType = this.selectedInterface;
+    intf.locationAlias = service.location_alias;
+    intf.serviceAlias = service.alias;
+    if (intf.intfMsgType.indexOf("cmd.")>=0) {
+      intf.intfAddress = "pt:j1/mt:cmd"+service.address
+    }else {
+      intf.intfAddress = "pt:j1/mt:evt"+service.address
+    }
+    
+    this.onSelect.emit(intf);
+  }
+
+}
+
 
 @Component({
   selector: 'reg-services',

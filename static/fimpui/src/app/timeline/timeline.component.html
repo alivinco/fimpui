@@ -1,11 +1,23 @@
  <div class="app-content">
  <md-card class="example-card">
  <md-card-header>
-    <b> Event stream </b>
+    <h4> Message stream </h4>
  </md-card-header>
  <md-card-content >
     
-
+<div>
+    <md-input-container style="width:300px ">
+        <input mdInput #topicFilterInput type="text" [(ngModel)] = "topicFilter"  placeholder="Topic filter" >
+    </md-input-container>
+    <md-input-container style="width:150px ">
+        <input mdInput #serviceFilterInput type="text" [(ngModel)] = "serviceFilter"   placeholder="Service filter" >
+    </md-input-container>
+    <md-input-container style="width:250px ">
+        <input mdInput #msgTypeFilterInput type="text" [(ngModel)] = "msgTypeFilter"  placeholder="Message type filter" >
+    </md-input-container>
+    <button md-raised-button (click)="filter()" >Filter</button>
+    <button md-raised-button (click)="resetFilter()" >Reset</button>
+</div>
 <ngx-datatable style="height:500px"
         #myTable
         class='material expandable'
@@ -17,7 +29,7 @@
         [rows]='messages.slice().reverse()'
        >
         <!-- Row Detail Template -->
-        <ngx-datatable-row-detail [rowHeight]="100" #myDetailRow  >
+        <ngx-datatable-row-detail [rowHeight]="150" #myDetailRow  >
           <ng-template let-row="row" ngx-datatable-row-detail-template>
             <div style="padding-left:35px;">
               <div><strong>Topic :</strong> {{row.topic}}</div>
@@ -25,6 +37,10 @@
               <div><strong>Interface :</strong> {{row.mtype}}</div>
               <div><strong>Message :</strong></div>
               <div>{{row.raw}}</div>
+              <div style="padding: 10px"> 
+                <button md-raised-button (click)="copyToMqttClient(row.topic,row.raw)" >Copy to MQTT client</button>  
+                <button md-raised-button (click)="sendMessage(row.topic,row.raw)" >Resend</button> 
+              </div> 
             </div>
           </ng-template>
         </ngx-datatable-row-detail>
@@ -44,12 +60,8 @@
             </a>
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Index" width="30">
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            {{row.$$index}}
-          </ng-template>
-        </ngx-datatable-column>
-        <ngx-datatable-column name="LocalTs"  width="80">
+       
+        <ngx-datatable-column name="Time" prop="LocalTs"  width="80">
           <ng-template let-row="row" ngx-datatable-cell-template>
             {{row.localTs | date:'HH:mm:ss'}}
           </ng-template>
@@ -59,17 +71,17 @@
             <strong>{{value}}</strong>
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Service" width="150">
+        <ngx-datatable-column name="Service" prop="service" width="150">
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
              {{value}}
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Mtype" width="200">
+        <ngx-datatable-column name="Msg. type"  prop="mtype" width="200">
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
              {{value}}
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Val" width="100">
+        <ngx-datatable-column name = "Value"  prop="Val" width="300">
           <ng-template let-row="row" let-value="value" ngx-datatable-cell-template>
              {{value}}
           </ng-template>
@@ -80,17 +92,17 @@
  </md-card-content>
  </md-card>
 
- <button md-raised-button (click)="settings.hidden = !settings.hidden" >Mqtt client</button>
+ <button style="margin: 10px" md-raised-button (click)="settings.hidden = !settings.hidden" >Mqtt client</button>
  <br/>
   <div #settings hidden > 
-      <md-input-container class="node-transition-field">
-          <input mdInput #topic placeholder="Topic">
+      <md-input-container style="width:300px" class="node-transition-field">
+          <input mdInput #topicInput [(ngModel)]="topic"  placeholder="Topic">
       </md-input-container>
       <md-input-container   style="width: 100%">
-      <textarea class="sourceEditor" md-autosize  minRows="6" mdInput #payload placeholder="Payload" > </textarea> 
+      <textarea class="sourceEditor" md-autosize [(ngModel)]="payload"  minRows="6" mdInput #payloadInput placeholder="Payload" > </textarea> 
       </md-input-container>
       <br/>
-      <button md-raised-button (click)="sendMessage(topic.value,payload.value)" >Send</button>
+      <button md-raised-button (click)="sendMessage(topicInput.value,payloadInput.value)" >Send</button>
   </div>
  
   

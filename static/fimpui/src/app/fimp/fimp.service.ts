@@ -7,14 +7,26 @@ import {
 } from 'angular2-mqtt';
 import { FimpMessage, NewFimpMessageFromString } from "app/fimp/Message";
 
+export class FimpFilter {
+  public topicFilter:string;
+  public serviceFilter:string;
+  public msgTypeFilter:string;
+}
 
 
 @Injectable()
 export class FimpService{
   private messages:FimpMessage[]=[];
+  private filteredMessages:FimpMessage[]=[];
   public observable: Observable<MqttMessage> = null;
+  
+  private fimpFilter : FimpFilter;
+  private isFilteringEnabled:boolean;
+
   constructor(public mqtt: MqttService) {
-     mqtt.onConnect.subscribe((message: any) => {
+    this.fimpFilter = new FimpFilter();
+    this.isFilteringEnabled = false; 
+    mqtt.onConnect.subscribe((message: any) => {
           console.log("FimService onConnect");
          // this.observable = null;
      }); 
@@ -35,6 +47,23 @@ export class FimpService{
     }
     return this.observable;
   }
+  public setFilter(topic:string,service:string,msgType:string) {
+    this.fimpFilter.topicFilter = topic;
+    this.fimpFilter.serviceFilter = service;
+    this.fimpFilter.msgTypeFilter = msgType;
+    if (topic == "" && service == "" && msgType == "" ){
+      this.isFilteringEnabled = false;
+    }else {
+      this.isFilteringEnabled = true;
+    }
+    console.log(this.isFilteringEnabled)
+    this.filteredMessages.length = 0;
+    this.messages.forEach(element => {
+      console.log("normal message")
+      this.saveFilteredMessage(element);
+    });
+  }
+    
   public subscribe(topic: string):Observable<MqttMessage>{
     return this.mqtt.observe(topic);
   }
@@ -50,11 +79,32 @@ export class FimpService{
       fimpMsg.raw = msg.payload.toString();
       fimpMsg.localTs =  Date.now();
       this.messages.push(fimpMsg);
+      this.saveFilteredMessage(fimpMsg);
  }
+ 
+ private saveFilteredMessage(fimpMsg : FimpMessage){
+  if (this.isFilteringEnabled) {
+    if ( ( (this.fimpFilter.topicFilter== undefined || this.fimpFilter.topicFilter == "") || this.fimpFilter.topicFilter == fimpMsg.topic) && 
+        ( (this.fimpFilter.serviceFilter== undefined || this.fimpFilter.serviceFilter == "") || this.fimpFilter.serviceFilter == fimpMsg.service) &&
+        ( (this.fimpFilter.msgTypeFilter== undefined || this.fimpFilter.msgTypeFilter == "") || this.fimpFilter.msgTypeFilter == fimpMsg.mtype)  ) {
+      this.filteredMessages.push(fimpMsg);
+    }
+  }else {
+    console.log("Adding message to filtered list")
+    this.filteredMessages.push(fimpMsg);
+  }    
+  
+}
+public getFilter():FimpFilter {
+  return this.fimpFilter;
+}
 
- public getMessagLog():FimpMessage[]{
-   return this.messages
+public getMessagLog():FimpMessage[]{
+   return this.messages;
  }
+ public getFilteredMessagLog():FimpMessage[]{
+  return this.filteredMessages;
+}
 }
 
 

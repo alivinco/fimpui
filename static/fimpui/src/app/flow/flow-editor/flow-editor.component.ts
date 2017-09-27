@@ -126,10 +126,12 @@ export class FlowEditorComponent implements OnInit {
     }  
  } 
  cloneNode(node:MetaNode){
-   let cloneNode = new MetaNode();
+  //  let cloneNode = new MetaNode();
    
-   Object.assign(cloneNode,node);
-   cloneNode.Id = this.getNewNodeId();
+  //  Object.assign(cloneNode,node);
+  //  cloneNode.Id = this.getNewNodeId();
+  // temp quick dirty way how to clone nested objects;
+   var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
    this.flow.Nodes.push(cloneNode);
  }
  addIfExpression(node:MetaNode){ 
@@ -359,27 +361,17 @@ export class FlowRunDialog {
   templateUrl: 'service-lookup-dialog.html',
   styleUrls: ['./flow-editor.component.css']
 })
-export class ServiceLookupDialog {
+export class ServiceLookupDialog  implements OnInit {
   interfaces :any;
-  constructor(public dialogRef: MdDialogRef<ServiceLookupDialog>,private http : Http) {
-    // this.http
-    //   .get(BACKEND_ROOT+'/fimp/registry/interfaces')
-    //   .map(function(res: Response){
-    //     let body = res.json();
-    //     let filteredBody = [];
-    //     body.forEach(element => {
-    //       if (element.service_name!="dev_sys"){
-    //         filteredBody.push(element);
-    //       }
-    //     });
-    //     return filteredBody;
-    //   }).subscribe ((result) => {
-    //      this.interfaces = result;
-    //   });
-    
-    // console.dir(data)
+  msgFlowDirectionD = "";
+  constructor(public dialogRef: MdDialogRef<ServiceLookupDialog>,private http : Http,@Inject(MD_DIALOG_DATA) msgFlowDirectionD : string) {
+    console.log("Msg flow direction:"+msgFlowDirectionD);
+    this.msgFlowDirectionD = msgFlowDirectionD
   }
-  
+  ngOnInit() {
+    console.log("ng on init Msg flow  direction:"+this.msgFlowDirectionD);  
+  }
+ 
   onSelected(intf :ServiceInterface){
     console.dir(intf);
     this.dialogRef.close(intf);

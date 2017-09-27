@@ -49,6 +49,39 @@
      <button md-raised-button color="primary" (click)="addNewConfig()">Add new config</button>
 
 <h3>Basic CC mapping</h3>
+        <md-list>
+               <md-list-item *ngFor="let serv of template.dev_custom.basic_mapping"> 
+                        <md-input-container class="node-label-field">
+                                        <input mdInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field">             
+                                        <input mdInput type="number" [(ngModel)]="serv.basic_value" placeholder="Basic value" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field"> 
+                                        <input mdInput type="text" [(ngModel)]="serv.serv" placeholder="Service" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field"> 
+                                        <input mdInput type="text" [(ngModel)]="serv.msg_type" placeholder="Message type" >
+                        </md-input-container> 
+                        <md-input-container class="node-label-field"> 
+                                        <input mdInput type="text" [(ngModel)]="serv.serv" placeholder="Fimp value" >
+                        </md-input-container>
+                        <div style="margin-bottom: 70px" >
+                              <md-checkbox [(ngModel)]="serv.map_range" > Full range </md-checkbox>
+                        </div> 
+                        <md-input-container class="node-label-field" style="width: 50px"> 
+                                        <input mdInput type="number" [(ngModel)]="serv.min" placeholder="Min" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field" style="width: 50px"> 
+                                        <input mdInput type="number" [(ngModel)]="serv.serv" placeholder="Max" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field"> 
+                                <input mdInput type="text" [(ngModel)]="serv.comment" placeholder="Comment " >
+                        </md-input-container>
+                        <button md-raised-button color="primary" (click)="deleteBasicMapping(serv)">Delete</button> 
+                </md-list-item>
+         </md-list>
+         <button md-raised-button color="primary" (click)="addNewBasicMapping()">Add basic mapping</button>
 <h3>Service grouping</h3>
 <md-list>
         <md-list-item *ngFor="let serv of template.dev_custom.service_grouping"> 
@@ -67,27 +100,37 @@
             <button md-raised-button color="primary" (click)="deleteServiceGrouping(serv)">Delete</button> 
        </md-list-item>
  </md-list>
- <button md-raised-button color="primary" (click)="addNewServiceGrouping()">Add new config</button>
+ <button md-raised-button color="primary" (click)="addNewServiceGrouping()">Add group</button>
  <h3>Custom service descriptor</h3>
  <md-list>
      <md-list-item *ngFor="let serv of template.dev_custom.service_descriptor" style="height: 170px" > 
                     <md-input-container class="node-label-field">
                                 <input mdInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
                     </md-input-container>
-                    <md-select #nodeIdInput style="width: 120px" class="value-selector" placeholder="Operation"[(ngModel)]="serv.operation" >
+                    <md-select #nodeIdInput style="width: 120px;margin-right: 10px;margin-left:10px" class="value-selector" placeholder="Operation"[(ngModel)]="serv.operation" >
                                 <md-option value = "add" > Add </md-option>
                                 <md-option value = "replace" > Replace </md-option>
                     </md-select>
                     
-                    <md-input-container style="width:90%"  >
+                    <md-input-container style="width:500px"  >
                                 <textarea style="height:150px"  mdInput  minRows="6"  [(ngModel)]="serv.descriptor" > </textarea> 
                     </md-input-container>
                     <button md-raised-button color="primary" (click)="deleteServiceDescriptor(serv)">Delete</button> 
                     
      </md-list-item>
  </md-list>
+ 
  <button md-raised-button color="primary" (click)="addNewServiceDescriptor()">Add service</button>
 
+ <p></p>
+ <br/>
+  <div #source hidden > 
+      <md-input-container   style="width: 100%">
+      <textarea class="sourceEditor" md-autosize [(ngModel)]="templateStr"  minRows="6" mdInput #payloadInput placeholder="Source" > </textarea> 
+      </md-input-container>
+      <br/>
+      <button md-raised-button (click)="saveSource()" >Save</button>
+  </div> 
 
 </md-dialog-content>
 <md-dialog-actions >
@@ -96,4 +139,5 @@
 <button md-raised-button  (click)="templateOperation('upload')" >Upload to cloud (stage)</button>
 <button md-raised-button color="warn" (click)="deleteTemplate()" >Delete</button>
 <button md-raised-button md-dialog-close>Close</button>
+<button md-raised-button (click)="source.hidden = !source.hidden;showSource()" >Show source</button>
 </md-dialog-actions>

@@ -364,6 +364,16 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
       this.template.dev_custom.service_descriptor.splice(i, 1);
     }
   }
+  addNewBasicMapping() {
+    this.template.dev_custom.basic_mapping.push({"endp":0,"basic_value":0,"serv":"","msg_type":"","fimp_value":{},"map_range":false,"min":0,"max":100,"comment":"" });
+  }
+  deleteBasicMapping(basicMapping:any) {
+    var i = this.template.dev_custom.basic_mapping.indexOf(basicMapping);
+    if(i != -1) {
+      this.template.dev_custom.basic_mapping.splice(i, 1);
+    }
+  }
+
   templateOperation(opName:string) {
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
@@ -391,6 +401,21 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
       element.descriptor = JSON.parse(element.descriptor);
     });
   }
+
+  showSource() {
+     this.prepareTemplate();
+     this.templateStr = JSON.stringify(this.template, null, 2);
+     this.template.dev_custom.service_descriptor.forEach(element => {
+        element.descriptor = JSON.stringify(element.descriptor,null,2);
+     });
+  }
+  saveSource() {
+    this.template = JSON.parse(this.templateStr);
+    this.template.dev_custom.service_descriptor.forEach(element => {
+      element.descriptor = JSON.stringify(element.descriptor,null,2);
+   });
+  }
+
 
   saveTemplate(){
     this.prepareTemplate();

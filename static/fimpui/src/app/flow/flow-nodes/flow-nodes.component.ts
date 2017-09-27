@@ -42,25 +42,24 @@ export class ActionNodeComponent implements OnInit {
       this.node["VariableName"] = "";
       this.node["IsVariableGlobal"] = false;
     }
-  
-
   }
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
-            width: '95%'
+            width: '500px',
+            data:"in"
           });
     dialogRef.afterClosed().subscribe(result => {
       if (result)
         this.nodes.forEach(element => {
            
             if (element.Id==nodeId) {
-              // console.dir(result);
               element.Service = result.serviceName
-              element.Label = element.Label + result.serviceAlias + " at "+result.loactionAlias
+              if(element.Label==""||element.Label==undefined){
+                element.Label =  result.serviceAlias + " at "+result.locationAlias
+              }
               element.ServiceInterface = result.intfMsgType
               element.Address = result.intfAddress
-              // element.Config.DefaultValue.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
-              element.Config.DefaultValue.ValueType =  result.intfValueType;
+              element.Config.DefaultValue.ValueType =  result.intfValueType
 
             }
         });
@@ -97,11 +96,13 @@ export class ActionNodeComponent implements OnInit {
          }
       });  
   }  
-  variableSelected(event:any,config:any){
-    if (config.VariableName.indexOf("__global__")!=-1) {
-      config.VariableName = config.LeftVariableName.replace("__global__","");
-      config.VariableIsGlobal = true;
-    }
+  variableSelected(event:any,config:any,isGlobal:boolean){
+    // if (config.VariableName.indexOf("__global__")!=-1) {
+    //   config.VariableName = config.VariableName.replace("__global__","");
+    //   config.VariableIsGlobal = true;
+    // }
+    config.IsVariableGlobal = isGlobal;
+
   }
 
 }
@@ -135,7 +136,8 @@ export class ReceiveNodeComponent implements OnInit {
   }
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
-            width: '95%'
+            width: '500px',
+            data:"out"
           });
     dialogRef.afterClosed().subscribe(result => {
       console.dir(result)
@@ -143,10 +145,12 @@ export class ReceiveNodeComponent implements OnInit {
         this.nodes.forEach(element => {
             if (element.Id==nodeId) {
               element.Service = result.serviceName
-              element.Label = element.Label + result.serviceAlias + " at "+result.loactionAlias
+              if(element.Label==""||element.Label==undefined){
+                element.Label =  result.serviceAlias + " at "+result.locationAlias
+              }
               element.ServiceInterface = result.intfMsgType
               element.Address = result.intfAddress
-              element.Config.ValueFilter.ValueType =  msgTypeToValueTypeMap[element.ServiceInterface]
+              element.Config.ValueFilter.ValueType =  result.intfValueType
             }
         });
     });      
@@ -220,7 +224,7 @@ export class TriggerNodeComponent implements OnInit {
   runFlow(node:MetaNode) {
     let dialogRef = this.dialog.open(FlowRunDialog,{
             // height: '95%',
-            width: '95%',
+            width: '500px',
             data:node
           });
     dialogRef.afterClosed().subscribe(result => {
@@ -232,7 +236,8 @@ export class TriggerNodeComponent implements OnInit {
 
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
-            width: '95%'
+            width: '500px',
+            data:"out"
           });
     dialogRef.afterClosed().subscribe(result => {
       console.dir(result)
@@ -240,7 +245,9 @@ export class TriggerNodeComponent implements OnInit {
         this.nodes.forEach(element => {
             if (element.Id==nodeId) {
               element.Service = result.serviceName
-              element.Label = element.Label + result.serviceAlias + " at "+result.loactionAlias
+              if(element.Label==""||element.Label==undefined){
+                element.Label =  result.serviceAlias + " at "+result.locationAlias
+              }
               element.ServiceInterface = result.intfMsgType
               element.Address = result.intfAddress
               element.Config.ValueFilter.ValueType =  result.intfValueType
