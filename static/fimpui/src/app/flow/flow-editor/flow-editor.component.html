@@ -47,7 +47,7 @@
                   <input mdInput [(ngModel)]="flow.Nodes[index].Label" placeholder="Label" >
             </md-input-container>
             <div *ngSwitchCase="'trigger'">  
-                <trigger-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" ></trigger-node>
+                <trigger-node [node]="flow.Nodes[index]" [nodes]="flow.Nodes" [flowId]="flow.Id" ></trigger-node>
             </div>
             <div *ngSwitchCase="'wait'"> 
               <div #nodebody hidden> 

@@ -1,6 +1,7 @@
 package registry
 
 type ID int
+const IDnil = 0
 
 type ThingRegistry struct {
 	Things    []Thing
@@ -45,6 +46,7 @@ type Service struct {
 	Tags          []string               `json:"tags"`
 	Interfaces    []Interface            `json:"interfaces"`
 	Attributes    map[string]ValueType   `json:"attributes"`
+
 }
 
 type Interface struct {
@@ -69,7 +71,8 @@ type Location struct {
 
 type ServiceResponse struct {
 	Service
-	LocationAlias string                 `json:"location_alias"`
+	LocationAlias string      `json:"location_alias"`
+	ThingId 	  ID 		  `json:"thing_id"`
 }
 
 type InterfaceFlatView struct {

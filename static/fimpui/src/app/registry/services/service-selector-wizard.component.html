@@ -9,7 +9,7 @@
     </p>
     <md-nav-list>
             <md-list-item *ngFor="let service of services">
-              <p md-line >{{ service.alias }} at {{ service.location_alias }} </p>
+              <p md-line >{{ service.alias }} at {{ service.location_alias }} ({{service.groups}}) </p>
               <p md-line >
                  <md-select #serviceInput placeholder="Interface" style="width:300px"  [(ngModel)]="selectedInterface" (change)="onInterfaceSelected(service)"  >
                      <span *ngFor="let intf of service.interfaces">

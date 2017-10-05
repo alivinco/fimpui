@@ -20,6 +20,21 @@
             </p>
         </md-expansion-panel>
         <md-expansion-panel>
+                <md-expansion-panel-header>
+                        <md-panel-title>
+                          Publish the flow as virtual device.
+                        </md-panel-title>
+                </md-expansion-panel-header>
+                   <md-input-container style="width: 130px">
+                        <input mdInput [(ngModel)]="flowPublishService" placeholder="Service" (change)="onPublishServiceChange()" >
+                   </md-input-container>
+                   <md-input-container style="width: 200px">
+                        <input mdInput [(ngModel)]="flowPublishInterface" placeholder="Interface" (change)="onPublishServiceChange()" >
+                   </md-input-container>
+                   <p>Address: {{ flowPublishAddress }}</p>
+                   <button md-raised-button (click)="publishFlowAsVirtualDevice()" >Publish</button>
+        </md-expansion-panel>
+        <md-expansion-panel>
            <md-expansion-panel-header>
               <md-panel-title>
                           Message filtering

@@ -68,29 +68,35 @@ func (st *ThingRegistryStore) GetAllThings() ([]Thing, error) {
 	return things, err
 }
 
-func (st *ThingRegistryStore) GetServices(serviceNameFilter string,filterWithoutAlias bool) ([]ServiceResponse, error) {
-	var things []Thing;
-	err := st.db.All(&things)
-
+func (st *ThingRegistryStore) GetServices(serviceNameFilter string,filterWithoutAlias bool,thingIdFilter ID,locationIdFilter ID) ([]ServiceResponse, error) {
+	var things []Thing
+	var err error
+	if thingIdFilter == 0 {
+		err = st.db.All(&things)
+	}else {
+		err = st.db.Select(q.Eq("ID", thingIdFilter)).Find(&things)
+	}
 	if err != nil {
 		return nil, err
 	}
 	var result []ServiceResponse
 	for thi := range things {
 		for si := range things[thi].Services {
-			if (serviceNameFilter != "" && things[thi].Services[si].Name == serviceNameFilter) || serviceNameFilter == "" {
+			if ( serviceNameFilter == "" || things[thi].Services[si].Name == serviceNameFilter ) &&
+				(things[thi].Services[si].LocationId == locationIdFilter || locationIdFilter == IDnil){
+				if things[thi].Services[si].Alias == "" {
+					things[thi].Services[si].Alias = things[thi].Alias
+				}
 				if !filterWithoutAlias || things[thi].Services[si].Alias != "" {
 					serviceResponse := ServiceResponse{Service:things[thi].Services[si]}
 					location , _ := st.GetLocationById(serviceResponse.LocationId)
 					if location != nil {
 						serviceResponse.LocationAlias = location.Alias
 					}
+					serviceResponse.ThingId = things[thi].ID
 					result = append(result,serviceResponse)
 				}
-
-
 			}
-
 		}
 	}
 	return result, nil

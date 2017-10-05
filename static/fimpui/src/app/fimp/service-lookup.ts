@@ -22,6 +22,13 @@ const FIMP_SERVICE_LIST = [
 
 ];
 
+const FIMP_INTERFACE_LIST = [
+    {"name":"cmd.lvl.set","label":"Generic level set","val_t":"int","icon":""},
+    {"name":"cmd.lvl.get_report","label":"Request level report","val_t":"null","icon":""},
+    {"name":"evt.lvl.report","label":"Level report","val_t":"int","icon":""},
+    {"name":"cmd.config.set","label":"Set configurations","val_t":"str_map","icon":""},
+    {"name":"evt.config.report","label":"List of configurations","val_t":"str_map","icon":""}
+]
 export function getFimpServiceList() {
     return FIMP_SERVICE_LIST
 }

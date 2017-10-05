@@ -5,6 +5,7 @@ import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/model"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 type MqttIntegration struct {
@@ -48,26 +49,34 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 		case "cmd.service.get_list":
 			//  pt:j1/mt:cmd/rt:app/rn:registry/ad:1
 			//  {"serv":"registry","type":"cmd.service.get_list","val_t":"str_map","val":{"serviceName":"out_bin_switch","filterWithoutAlias":"true"},"props":null,"tags":null,"uid":"1234455"}
-
 			filters,err := iotMsg.GetStrMapValue()
 			if err == nil {
 				var filterWithoutAlias bool
-				serviceName , ok := filters["serviceName"]
+				var locationId,thingId int
+
+				locationIdStr , _ := filters["locationId"]
+				thingIdStr,_ := filters["thingId"]
+				locationId , _ = strconv.Atoi(locationIdStr)
+				thingId , _ = strconv.Atoi(thingIdStr)
+
+				serviceName , _ := filters["serviceName"]
 				filterFithoutAliasStr , filterOk :=filters["filterWithoutAlias"]
 				if filterOk {
 					if filterFithoutAliasStr == "true" {
 						filterWithoutAlias = true
 					}
 				}
-				if ok {
-					response ,err :=  mg.registry.GetServices(serviceName,filterWithoutAlias)
+				//if ok {
+					response ,err :=  mg.registry.GetServices(serviceName,filterWithoutAlias,ID(thingId),ID(locationId))
 					if err != nil {
 						log.Error("<MqRegInt> Can get services .Err :",err)
 					}
 					responseMsg := fimpgo.NewMessage("evt.service.list","registry","object",response,nil,nil,iotMsg)
 					addr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeApp, ResourceName: "registry", ResourceAddress: "1"}
 					mg.msgTransport.Publish(&addr,responseMsg)
-				}
+				//}
+			}else {
+				log.Error("<MqRegInt> Can't parse value. Error :",err)
 			}
 		default:
 			log.Info("Unsupported message type :",iotMsg.Type)

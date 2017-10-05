@@ -208,6 +208,10 @@ export class CounterNodeComponent implements OnInit {
 export class TriggerNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
+  @Input() flowId:string;
+  flowPublishService: string;
+  flowPublishInterface : string;
+  flowPublishAddress : string;
   constructor(public dialog: MdDialog) { }
 
   ngOnInit() { 
@@ -233,7 +237,19 @@ export class TriggerNodeComponent implements OnInit {
     });      
   }
 
-
+  onPublishServiceChange(){
+    console.log(this.flowPublishService);
+    var msgType = "cmd";
+    if (this.flowPublishInterface.indexOf("evt.")>=0){
+      msgType = "evt";
+    }
+    this.flowPublishAddress = "pt:j1/mt:"+msgType+"/rt:dev/rn:flow/ad:1/sv:"+this.flowPublishService+"/ad:"+this.flowId;
+  }
+  publishFlowAsVirtualDevice(){
+    this.node.ServiceInterface = this.flowPublishInterface;
+    this.node.Service = this.flowPublishService;
+    this.node.Address = this.flowPublishAddress;
+  }
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
             width: '500px',

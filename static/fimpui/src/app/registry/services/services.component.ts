@@ -10,7 +10,7 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
 import { ActivatedRoute } from '@angular/router';
-import { ServiceInterface} from '../model';
+import { ServiceInterface,Service} from '../model';
 import { BACKEND_ROOT} from "app/globals";
 import { getFimpServiceList} from "app/fimp/service-lookup"
 import {ThingIntfUiComponent} from 'app/registry/thing-intf-ui/thing-intf-ui.component'
@@ -102,15 +102,13 @@ export class ServiceSelectorWizardComponent implements OnInit {
   styleUrls: ['./services.component.css']
 })
 export class ServicesComponent implements OnInit {
-  displayedColumns = ['thingTech','thingAddress', 'thingAlias','serviceName','serviceAlias',
-                    'intfType','intfMsgType','locationAlias','intfValueType','action'];
+  displayedColumns = ['name','alias','locationAlias','address','action'];
 
   dataSource: ServicesDataSource | null; 
   // usage (onSelect)="onSelected($event)">
   @Output() onSelect = new EventEmitter<ServiceInterface>();
   @ViewChild('filterThingAddr') filterThingAddr: ElementRef;
   @ViewChild('filterServiceName') filterServiceName: ElementRef;
-  @ViewChild('filterInterfaceType') filterInterfaceType: ElementRef;
 
   constructor(private http : Http,private route: ActivatedRoute) { 
     
@@ -120,28 +118,22 @@ export class ServicesComponent implements OnInit {
     let thingId = this.route.snapshot.params['filterValue'];
     console.log("Thing id  = ",thingId);
     this.dataSource = new ServicesDataSource(this.http);
-    this.dataSource.getData("","","",thingId);
+    this.dataSource.getData("","",thingId);
     Observable.fromEvent(this.filterThingAddr.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
         .subscribe(() => {
           if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
+          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,"")
         });
     Observable.fromEvent(this.filterServiceName.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
         .subscribe(() => {
           if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
+          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,"")
         }); 
-    Observable.fromEvent(this.filterInterfaceType.nativeElement, 'keyup')
-        .debounceTime(500)
-        .distinctUntilChanged()
-        .subscribe(() => {
-          if (!this.dataSource) { return; }
-          this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,this.filterInterfaceType.nativeElement.value,"")
-        });        
+           
   }
 
   selectInterface(intf:ServiceInterface) {
@@ -152,24 +144,22 @@ export class ServicesComponent implements OnInit {
 
 
 export class ServicesDataSource extends DataSource<any> {
-  services : ServiceInterface[] = [];
-  servicesObs = new BehaviorSubject<ServiceInterface[]>([]);
+  services : Service[] = [];
+  servicesObs = new BehaviorSubject<Service[]>([]);
   
   constructor(private http : Http) {
     super();
-    
   }
 
-  getData(thingAddr:string ,serviceName:string,interfaceType:string,thingId:string) {
+  getData(thingAddr:string ,serviceName:string,thingId:string) {
     let params: URLSearchParams = new URLSearchParams();
     params.set('serviceName', serviceName);
-    params.set('thingAddr', thingAddr);
-    params.set('intfMsgType', interfaceType);
+    params.set('thingId', thingId);
     if (thingId!="*") {
       params.set('thingId', thingId);
     }
     this.http
-        .get(BACKEND_ROOT+'/fimp/api/registry/interfaces',{search:params})
+        .get(BACKEND_ROOT+'/fimp/api/registry/services',{search:params})
         .map((res: Response)=>{
           let result = res.json();
           return this.mapThings(result);
@@ -179,32 +169,25 @@ export class ServicesDataSource extends DataSource<any> {
 
   }
   
-  connect(): Observable<ServiceInterface[]> {
+  connect(): Observable<Service[]> {
     return this.servicesObs;
   }
   disconnect() {}
 
-  mapThings(result:any):ServiceInterface[] {
-    let things : ServiceInterface[] = [];
+  mapThings(result:any):Service[] {
+    let services : Service[] = [];
     for (var key in result){
-            let thing = new ServiceInterface();
-            thing.thingId = result[key].thing_id;
-            thing.thingAddress = result[key].thing_address;
-            thing.thingTech = result[key].thing_tech; 
-            thing.thingAlias = result[key].thing_alias;
-            thing.serviceId = result[key].service_id;
-            thing.serviceName = result[key].service_name;
-            thing.serviceAlias = result[key].service_alias;
-            thing.serviceAddress = result[key].service_address;
-            thing.intfType = result[key].intf_type;
-            thing.intfMsgType = result[key].intf_msg_type;
-            thing.intfValueType = result[key].intf_val_type;
-            thing.intfAddress = result[key].intf_address;
-            thing.locationId = result[key].location_id;
-            thing.locationAlias = result[key].location_alias;
-            thing.locationType = result[key].location_type;
-            things.push(thing)
+            let service = new Service();
+            service.name = result[key].name;
+            service.alias = result[key].alias;
+            service.address = result[key].address; 
+            service.groups = result[key].groups;
+            service.locationId = result[key].location_id;
+            service.locationAlias = result[key].location_alias;
+            service.props = result[key].props;
+            service.interfaces = result[key].interfaces;
+            services.push(service)
      }
-     return things;     
+     return services;     
   }
 }

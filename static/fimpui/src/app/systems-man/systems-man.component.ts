@@ -45,5 +45,9 @@ export class SystemsManComponent implements OnInit {
     let msg  = new FimpMessage(service,"cmd.system.disconnect","null",null,null,null);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:"+service+"/ad:1",msg.toString());
  }
-
+ // Force system syncronization . 
+ public sync(service:string) {
+  let msg  = new FimpMessage(service,"cmd.system.sync","null",null,null,null);
+  this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:"+service+"/ad:1",msg.toString());
+}
 }

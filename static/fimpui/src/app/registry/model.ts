@@ -22,12 +22,15 @@ export class Thing {
 
 export class Service {
     name : string;
+    alias : string;
     address : string ;
     groups : string[];
-    location : string ;
+    locationId : string ;
+    locationAlias : string ;
     props : Map<string,any>;
     propSetRef : string;
     interfaces : Interface[]=[];
+
 }
 
 export class Interface {

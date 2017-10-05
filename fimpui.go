@@ -306,18 +306,21 @@ func main() {
 
 	e.GET("/fimp/api/registry/services", func(c echo.Context) error {
 		serviceName := c.QueryParam("serviceName")
+		locationIdStr := c.QueryParam("locationId")
+		thingIdStr := c.QueryParam("thingId")
+		thingId, _ := strconv.Atoi(thingIdStr)
+		locationId , _ := strconv.Atoi(locationIdStr)
 		filterWithoutAliasStr:= c.QueryParam("filterWithoutAlias")
 		var filterWithoutAlias bool
 		if filterWithoutAliasStr == "true" {
 			filterWithoutAlias = true
 		}
-		services, err := thingRegistryStore.GetServices(serviceName,filterWithoutAlias)
+		services, err := thingRegistryStore.GetServices(serviceName,filterWithoutAlias,registry.ID(thingId),registry.ID(locationId))
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
 		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-
 	})
 
 	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
@@ -337,9 +340,7 @@ func main() {
 		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-
 	})
-
 
 	e.GET("/fimp/api/registry/locations", func(c echo.Context) error {
 		locations, err := thingRegistryStore.GetAllLocations()

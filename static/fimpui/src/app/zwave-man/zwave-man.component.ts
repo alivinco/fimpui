@@ -365,7 +365,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     }
   }
   addNewBasicMapping() {
-    this.template.dev_custom.basic_mapping.push({"endp":0,"basic_value":0,"serv":"","msg_type":"","fimp_value":{},"map_range":false,"min":0,"max":100,"comment":"" });
+    this.template.dev_custom.basic_mapping.push({"endp":0,"basic_value":0,"service":"","msg_type":"","fimp_value":{},"map_range":false,"min":0,"max":100,"comment":"" });
   }
   deleteBasicMapping(basicMapping:any) {
     var i = this.template.dev_custom.basic_mapping.indexOf(basicMapping);

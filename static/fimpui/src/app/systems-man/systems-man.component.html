@@ -30,6 +30,7 @@
     <md-card-actions>
     <button md-raised-button (click)="getConnParams(service.value)" >Get connection parameters</button>
     <button md-raised-button (click)="connect(service.value,systemIdInput.value,securityKeyInput.value,addressInput.value)" >Connect</button>
+    <button md-raised-button (click)="sync(service.value)" >Synchronize</button>
     <button md-raised-button (click)="disconnect(service.value,securityKeyInput.value,addressInput.value)" >Disconnect</button>
     </md-card-actions>
 </md-card>
