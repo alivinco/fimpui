@@ -105,7 +105,7 @@ func main() {
 	mqttRegInt := registry.NewMqttIntegration(configs, thingRegistryStore)
 	mqttRegInt.InitMessagingTransport()
 	log.Info("<main> Started ")
-	//-------------------------------------
+	//----------VINCULUM CLIENT------------
 	log.Info("<main> Starting VinculumClient ")
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
 	err = vinculumClient.Connect()
@@ -129,8 +129,16 @@ func main() {
 	coreUrl := "ws://" + configs.VinculumAddress
 	go startWsCoreProxy(coreUrl)
 	//--------------------------------------
-
-	wsUpgrader := mqtt.WsUpgrader{strings.Replace(configs.MqttServerURI, "tcp://", "", -1)}
+	var brokerAddress string
+	var isSSL bool
+	if strings.Contains(configs.MqttServerURI,"ssl") {
+		brokerAddress = strings.Replace(configs.MqttServerURI, "ssl://", "", -1)
+		isSSL = true
+	}else {
+		brokerAddress = strings.Replace(configs.MqttServerURI, "tcp://", "", -1)
+		isSSL = false
+	}
+	wsUpgrader := mqtt.WsUpgrader{brokerAddress,isSSL}
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -138,7 +146,7 @@ func main() {
 
 		return c.JSON(http.StatusOK, sysInfo)
 	})
-	e.GET("/fimp/configs", func(c echo.Context) error {
+	e.GET("/fimp/api/configs", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, configs)
 	})
 	e.GET("/fimp/fr/upload-log-snapshot", func(c echo.Context) error {

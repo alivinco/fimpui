@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable,Subject } from 'rxjs/Rx';
+import { Http, Response,URLSearchParams }  from '@angular/http';
 import {
   MqttMessage,
   MqttModule,
   MqttService
 } from 'angular2-mqtt';
 import { FimpMessage, NewFimpMessageFromString } from "app/fimp/Message";
+import { BACKEND_ROOT } from "app/globals";
+import { ConfigsService } from 'app/configs.service';
 
 export class FimpFilter {
   public topicFilter:string;
@@ -22,28 +25,77 @@ export class FimpService{
   
   private fimpFilter : FimpFilter;
   private isFilteringEnabled:boolean;
-
-  constructor(public mqtt: MqttService) {
+  private globalTopicPrefix:string;
+  public mqttSeviceOptions:any;
+  constructor(public mqtt: MqttService,private configs:ConfigsService) {
     this.fimpFilter = new FimpFilter();
     this.isFilteringEnabled = false; 
-    mqtt.onConnect.subscribe((message: any) => {
-          console.log("FimService onConnect");
-         // this.observable = null;
-     }); 
-     this.subscribeToAll("pt:j1/#");
+    this.mqtt.onConnect.subscribe((message: any) => {
+          console.log("FimpService onConnect");
+          // this.observable = null;
+          this.init();
+    }); 
+    this.connect();
+   
   }
-  public subscribeToAll(topic: string):Observable<MqttMessage>{
-    console.log("Subscribing to all messages ")
+  public init() {
+    var topic =  this.prepareTopic("pt:j1/#");
+    this.subscribeToAll(topic);
+  }
+  public connect(){
+    let mqttHost : string = window.location.hostname;
+    this.mqttSeviceOptions  = {
+      hostname:mqttHost,
+      port: 8081,
+      path: '/mqtt',
+      username:this.configs.configs.username,
+      password:this.configs.configs.password
+    };
+    this.mqttSeviceOptions["gloabalTopicPrefix"] = this.configs.configs.globalTopicPrefix
+    this.globalTopicPrefix = this.configs.configs.globalTopicPrefix;
+    this.mqtt.connect(this.mqttSeviceOptions);
+  }
+  private prepareTopic(topic:string):string {
+    if (this.globalTopicPrefix != "") {
+     topic = this.globalTopicPrefix+"/"+topic;
+    }
+    return topic;
+  }
+  public detachGlobalPrefix(topic:string):string{
+    if (this.globalTopicPrefix!="") {
+      if (topic != undefined) {
+        var ptPos = topic.indexOf("pt:")
+        var resultTopic = topic.substring(ptPos);
+        var prefix = topic.substr(0,ptPos);
+        console.log("Result topic = "+resultTopic);
+        console.log("Result prefix = "+prefix);
+        return resultTopic;
+      }else {
+        return topic;
+      }
+      
+    }else {
+      return topic;
+    }
+  }
+
+  private subscribeToAll(topic: string):Observable<MqttMessage>{
+    console.log("Subscribing to all messages ") 
+    // topic = this.prepareTopic(topic);
+    console.log("Subscribing to topic "+topic); 
     this.observable = this.mqtt.observe(topic);
     this.observable.subscribe((msg) => {
-      console.log("New message from topic :"+msg.topic+" message :"+msg.payload)
+      var msgTopic = this.detachGlobalPrefix(msg.topic)
+      console.log("New message from topic :"+msgTopic+" message :"+msg.payload)
       this.saveMessage(msg);
     });
     return this.observable
   }
   public getGlobalObservable():Observable<MqttMessage>{
+    console.log("Getting global observable");
     if (this.observable == null){
-      this.subscribeToAll("pt:j1/#");
+      var topic =  this.prepareTopic("pt:j1/#");
+      this.subscribeToAll(topic);
     }
     return this.observable;
   }
@@ -65,9 +117,13 @@ export class FimpService{
   }
     
   public subscribe(topic: string):Observable<MqttMessage>{
+    var topic =  this.prepareTopic(topic);
+    console.log("Subscribing to topic "+topic);
     return this.mqtt.observe(topic);
   }
   public publish(topic: string, message: string) {
+    topic =  this.prepareTopic(topic);
+    console.log("Publishing to topic "+topic);
     this.mqtt.publish(topic, message, {qos: 1}).subscribe((err)=>{
       console.log(err);
     });
@@ -75,7 +131,7 @@ export class FimpService{
  private saveMessage(msg:MqttMessage){
       console.log("Saving new message to log")
       let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
-      fimpMsg.topic = msg.topic;
+      fimpMsg.topic = this.detachGlobalPrefix(msg.topic);
       fimpMsg.raw = msg.payload.toString();
       fimpMsg.localTs =  Date.now();
       this.messages.push(fimpMsg);

@@ -46,7 +46,8 @@ func NewManager(config *fimpuimodel.FimpUiConfigs) (*Manager,error) {
 
 func (mg *Manager) InitMessagingTransport() {
 	clientId := mg.config.MqttClientIdPrefix+"flow_manager"
-	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, clientId, "", "", true, 1, 1)
+	mg.msgTransport = fimpgo.NewMqttTransport(mg.config.MqttServerURI, clientId, mg.config.MqttUsername, mg.config.MqttPassword, true, 1, 1)
+	mg.msgTransport.SetGlobalTopicPrefix(mg.config.MqttTopicGlobalPrefix)
 	err := mg.msgTransport.Start()
 	log.Info("<FlMan> Mqtt transport connected")
 	if err != nil {
@@ -68,7 +69,6 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 				log.Debug("<FlMan> Message is dropped (no listeners) for flow with id = ", id)
 			}
 		}
-
 	}
 }
 

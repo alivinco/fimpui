@@ -1,6 +1,6 @@
 import { RouterModule, Routes } from '@angular/router';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule,APP_INITIALIZER } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -15,7 +15,8 @@ import { TimelineComponent } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
 import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
 import { FimpService} from './fimp/fimp.service';
-import { ThingsDbService} from './things-db.service';
+import { ThingsDbService } from './things-db.service';
+import { ConfigsService } from './configs.service';
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 // import { ThingIntfUiComponent , KeysPipe }from './thing-intf-ui/thing-intf-ui.component'
 import 'hammerjs';
@@ -56,17 +57,22 @@ if (localStorage.getItem("mqttPort")!= null){
 }
 console.log("Port:"+localStorage.getItem("mqttPort"));
 export const MQTT_SERVICE_OPTIONS = {
-  connectOnCreate: true,
-  hostname:mqttHost,
-  port: mqttPort,
-  path: '/mqtt',
- 
+  connectOnCreate: false
+  // hostname:mqttHost,
+  // port: mqttPort,
+  // path: '/mqtt',
+  // username:"5Qm19y",
+  // password:"66ldpVL19cab"
 };
 
 export function mqttServiceFactory() {
   console.log("Starting mqttService");
   let mqs =  new MqttService(MQTT_SERVICE_OPTIONS);
   return mqs;
+}
+
+export function startupServiceFactory(startupService: ConfigsService): Function {
+  return () => startupService.load();
 }
 
 @NgModule({
@@ -102,7 +108,13 @@ export function mqttServiceFactory() {
     RegistryModule,
     
   ],
-  providers: [FimpService,ThingsDbService],
+  providers: [FimpService,ThingsDbService,ConfigsService,{
+    // Provider for APP_INITIALIZER
+    provide: APP_INITIALIZER,
+    useFactory: startupServiceFactory,
+    deps: [ConfigsService],
+    multi: true
+}],
   entryComponents:[AddDeviceDialog,TemplateEditorDialog], 
   bootstrap: [AppComponent]
 })

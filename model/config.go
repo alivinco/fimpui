@@ -5,6 +5,9 @@ type FimpUiConfigs struct {
 	ReportLogSizeLimit int64    `json:"report_log_size_limit"`
 	VinculumAddress    string   `json:"vinculum_address"`
 	MqttServerURI      string   `json:"mqtt_server_uri"`
+	MqttUsername       string   `json:"mqtt_server_username"`
+	MqttPassword       string   `json:"mqtt_server_password"`
+	MqttTopicGlobalPrefix string `json:"mqtt_topic_global_prefix"`
 	FlowStorageDir     string 	`json:"flow_storage_dir"`
 	RegistryDbFile     string   `json:"registry_db_file"`
 	ContextStorageDir  string 	`json:"context_storage_dir"`

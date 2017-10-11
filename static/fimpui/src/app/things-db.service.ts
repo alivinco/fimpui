@@ -10,7 +10,7 @@ export class ThingsDbService {
     this.fimp.getGlobalObservable().subscribe((msg) => {
       console.log("ThingsDBservice new message ")
       let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
-      fimpMsg.topic = msg.topic;
+      fimpMsg.topic = fimp.detachGlobalPrefix(msg.topic);
       if (fimpMsg.service == "zwave-ad" && fimpMsg.mtype == "evt.thing.inclusion_report"){
         this.onFimpMessage(fimpMsg);
       } 

@@ -36,7 +36,7 @@ export class FlightRecorderComponent implements OnInit {
      console.log("Loading system info")
      
      this.http
-      .get('/fimp/configs')
+      .get('/fimp/api/configs')
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);

@@ -5,11 +5,21 @@
     </md-card-header>
     <md-card-content>
     <md-input-container>
-        <input #host mdInput placeholder="Hostname" value = "{{mqttHost}}" >
+        <input #host mdInput placeholder="Hostname" [value] = "fimpService.mqttSeviceOptions.hostname" >
     </md-input-container>
     <md-input-container>
-        <input #port mdInput type="number" placeholder="Port" [value] = "mqttPort" >
+        <input #port mdInput type="number" placeholder="Port" [value] = "fimpService.mqttSeviceOptions.port" >
     </md-input-container>
+    <md-input-container>
+      <input #port mdInput  placeholder="Username" [value] = "fimpService.mqttSeviceOptions.username" >
+    </md-input-container>
+    <md-input-container>
+      <input #port mdInput  placeholder="Password" [value] = "fimpService.mqttSeviceOptions.password" >
+    </md-input-container>
+    <md-input-container>
+      <input #port mdInput  placeholder="Global topic prefix" [value] = "fimpService.mqttSeviceOptions.gloabalTopicPrefix" >
+    </md-input-container>
+   
     </md-card-content>
     <md-card-actions>
       <button md-raised-button color="accent" (click)="save(host.value,port.value)">Save</button>
@@ -41,7 +51,7 @@
       <p><a href="">POST /fimp/flow/definition/:id - Upsert Flow definition </a></p>
       <p><a href="">DELETE /fimp/flow/definition/:id - Delete Flow </a></p>
       <p>Global settings </p>
-      <p><a href="/fimp/configs">GET /fimp/configs - Get global configs</a></p>
+      <p><a href="/fimp/api/configs">GET /fimp/api/configs - Get global configs</a></p>
       <p><a href="/fimp/fr/upload-log-snapshot">GET /fimp/fr/upload-log-snapshot - Upload log snapshots to cloud storage </a></p>
      
     </md-card-content>

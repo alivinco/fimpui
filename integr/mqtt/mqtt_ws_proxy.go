@@ -8,6 +8,7 @@ import (
 	//"encoding/hex"
 	log "github.com/Sirupsen/logrus"
 	"io"
+	"crypto/tls"
 )
 
 var (
@@ -21,6 +22,7 @@ var (
 
 type WsUpgrader struct {
 	BrokerAddress string
+	IsSSL bool
 }
 
 func (wu *WsUpgrader) Upgrade(c echo.Context) error {
@@ -31,7 +33,7 @@ func (wu *WsUpgrader) Upgrade(c echo.Context) error {
 	}
 
 	log.Info("<MqWsProxy> Upgraded ")
-	session := MqttWsProxySession{wsConn: ws}
+	session := MqttWsProxySession{wsConn: ws,isSSL:wu.IsSSL}
 	session.Connect(wu.BrokerAddress)
 	session.WsReader()
 	return nil
@@ -40,11 +42,16 @@ func (wu *WsUpgrader) Upgrade(c echo.Context) error {
 type MqttWsProxySession struct {
 	wsConn     *websocket.Conn
 	brokerConn net.Conn
+	isSSL bool
 }
 
 func (mp *MqttWsProxySession) Connect(address string) error {
 	var err error
-	mp.brokerConn, err = net.Dial("tcp", address)
+	if mp.isSSL {
+		mp.brokerConn, err = tls.Dial("tcp", address,nil)
+	}else {
+		mp.brokerConn, err = net.Dial("tcp", address)
+	}
 	if err != nil {
 		log.Error("<MqWsProxy> Can't connect to broker . Error :", err)
 		return err
@@ -62,8 +69,8 @@ func (mp *MqttWsProxySession) WsReader() {
 			log.Error("<MqWsProxy> Read error :", err)
 			break
 		} else if msgType == websocket.BinaryMessage {
-			//fmt.Println("Sending packet WS -> broker")
-			//fmt.Printf("%s", hex.Dump(msg))
+			//log.Debugf("Sending packet WS -> broker")
+			//log.Debugf("%s", hex.Dump(msg))
 			mp.brokerConn.Write(msg)
 		} else {
 			log.Debug(" Message with type = ", msgType)

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Http, Response }  from '@angular/http';
 import { Observable } from 'rxjs/Rx';
+import { FimpService} from 'app/fimp/fimp.service';
 @Component({
   moduleId: module.id,
   selector: 'fimp-ui',
@@ -16,6 +17,18 @@ export class AppComponent {
   toggleHeading() {
     this.showHeading = !this.showHeading;
   }
+
+  // loadConfigsAndSetupMqttConnection() {
+  //    let MQTT_SERVICE_OPTIONS_1 = {
+  //        hostname:mqttHost,
+  //        port: mqttPort,
+  //        path: '/mqtt'
+         
+  //     };
+  //    this.fimpService.mqtt.connect(MQTT_SERVICE_OPTIONS_1);
+    
+    
+  // }
 
   loadSystemInfo() {
      console.log("Loading system info")
