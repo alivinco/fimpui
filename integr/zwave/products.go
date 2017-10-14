@@ -70,7 +70,6 @@ func(cl *ProductCloudStore) getFullPath(isStable bool,fileName string) string {
 	}else {
 		return cl.productDir+"/cache/"+fileName
 	}
-
 }
 
 func(cl *ProductCloudStore) DeleteTemplate(isStable bool,fileName string ) error {

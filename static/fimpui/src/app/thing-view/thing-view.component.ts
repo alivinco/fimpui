@@ -60,7 +60,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
         console.log("Sensor report");
         for (let svc of this.thing.services){
             // console.log("Comparing "+msg.topic+" with "+ "pt:j1/mt:evt"+svc.address);
-            var topic = this.fimp.detachGlobalPrefix(topic);
+            var topic = this.fimp.detachGlobalPrefix(msg.topic);
             if (topic == "pt:j1/mt:evt"+svc.address) {
               // console.log("Matching service "+fimpMsg.service);
               for (let inf of svc.interfaces) {

@@ -33,7 +33,6 @@ export class FimpService{
     this.mqtt.onConnect.subscribe((message: any) => {
           console.log("FimpService onConnect");
           // this.observable = null;
-          this.init();
     }); 
     this.connect();
    
@@ -48,11 +47,11 @@ export class FimpService{
       hostname:mqttHost,
       port: 8081,
       path: '/mqtt',
-      username:this.configs.configs.username,
-      password:this.configs.configs.password
+      username:this.configs.configs.mqtt_server_username,
+      password:this.configs.configs.mqtt_server_password
     };
-    this.mqttSeviceOptions["gloabalTopicPrefix"] = this.configs.configs.globalTopicPrefix
-    this.globalTopicPrefix = this.configs.configs.globalTopicPrefix;
+    this.mqttSeviceOptions["globalTopicPrefix"] = this.configs.configs.mqtt_topic_global_prefix;
+    this.globalTopicPrefix = this.configs.configs.mqtt_topic_global_prefix;
     this.mqtt.connect(this.mqttSeviceOptions);
   }
   private prepareTopic(topic:string):string {

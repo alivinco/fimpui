@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Http, Response,URLSearchParams }  from '@angular/http';
+import { ConfigsService } from 'app/configs.service';
+import { BACKEND_ROOT } from "app/globals";
+
 @Component({
   selector: 'app-flight-recorder',
   templateUrl: './flight-recorder.component.html',
@@ -9,7 +12,7 @@ export class FlightRecorderComponent implements OnInit {
   private reportLogFiles:string[]=[];
   private reportLogMaxSize:number = 0;
   private hostAlias:string = localStorage.getItem("hostAlias") ;
-  constructor(private http : Http) { }
+  constructor(private http : Http,private configs:ConfigsService) { }
 
   ngOnInit() {
     this.loadSystemConfigs()
@@ -36,7 +39,7 @@ export class FlightRecorderComponent implements OnInit {
      console.log("Loading system info")
      
      this.http
-      .get('/fimp/api/configs')
+      .get(BACKEND_ROOT+'/fimp/api/configs')
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);

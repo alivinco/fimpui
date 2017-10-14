@@ -34,14 +34,31 @@ type Thing struct {
 	Props          []string  `json:"props"`
 }
 
+type App struct {
+	ID 			ID `json:"id" storm:"id,increment"`
+	Services       []Service `json:"services"`
+}
+
+type Adapter struct {
+	ID 			ID `json:"id" storm:"id,increment"`
+	Services       []Service `json:"services"`
+}
+
+type Bridge struct {
+	ID 			ID `json:"id" storm:"id,increment"`
+	Services       []Service `json:"services"`
+}
+
 type Service struct {
 	ID            ID                     `json:"id" , storm:"id,increment"`
 	IntegrationId string                 `json:"integr_id" storm:"index"`
-	Name          string                 `json:"name"`
+	ParentContainerId   string  		 `json:"container_id" storm:"index"`
+	ParentContainerType string 			 `json:"container_type" storm:"index"`
+	Name          string                 `json:"name" storm:"index"`
 	Alias         string                 `json:"alias"`
 	Address       string                 `json:"address"`
 	Groups        []string               `json:"groups"`
-	LocationId    ID                     `json:"location_id"`
+	LocationId    ID                     `json:"location_id" storm:"index"`
 	Props         map[string]interface{} `json:"props"`
 	Tags          []string               `json:"tags"`
 	Interfaces    []Interface            `json:"interfaces"`

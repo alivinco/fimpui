@@ -212,6 +212,8 @@ func (fl *Flow) IsFlowInterestedInMessage(topic string ) bool {
 	for i :=range fl.activeSubscriptions {
 		if utils.RouteIncludesTopic(fl.activeSubscriptions[i],topic) {
 			return true
+		}else {
+			//log.Debug(fl.Id+"<Flow> Not interested in topic : ",topic)
 		}
 	}
 	return false

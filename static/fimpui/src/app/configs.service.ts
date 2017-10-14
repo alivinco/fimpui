@@ -34,15 +34,16 @@ export class ConfigsService {
                     console.log("Config loaded:");
                     console.dir(result);
                     let mqttHost : string = window.location.hostname;
-                    this.configs  = {
-                        hostname:mqttHost,
-                        port: 8081,
-                        path: '/mqtt',
-                        username:result["mqtt_server_username"],
-                        password:result["mqtt_server_password"],
+                    this.configs = result;
+                    // this.configs  = {
+                    //     hostname:mqttHost,
+                    //     port: 8081,
+                    //     path: '/mqtt',
+                    //     username:result["mqtt_server_username"],
+                    //     password:result["mqtt_server_password"],
 
-                    };
-                    this.configs["globalTopicPrefix"] = result["mqtt_topic_global_prefix"]
+                    // };
+                    // this.configs["globalTopicPrefix"] = result["mqtt_topic_global_prefix"]
                 })
                 .catch((err: any) => Promise.resolve());
             
