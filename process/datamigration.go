@@ -57,6 +57,7 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 		if devices[i].Fimp.Address != "" {
 			tech := commTechMap[devices[i].Fimp.Adapter]
 			thing ,err := thingRegistryStore.GetThingByAddress(tech,devices[i].Fimp.Address)
+
 			if err != nil {
 				log.Infof("Device %s not found in registry. Generate inclusion report first",devices[i].Client.Name)
 				//newThing := registry.Thing{}
@@ -67,16 +68,21 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 				//thingRegistryStore.UpsertThing(newThing)
 			}else {
 				thing.Alias = devices[i].Client.Name
-			    for si := range thing.Services {
-					for _,group := range thing.Services[si].Groups {
+				services,err := thingRegistryStore.GetExtendedServices("",false,thing.ID,registry.IDnil)
+				if err != nil {
+					log.Error("<VincMigration> Can't get services from registry")
+					continue
+				}
+			    for si := range services {
+					for _,group := range services[si].Groups {
 						if group == devices[i].Fimp.Group {
 							for k,_ := range devices[i].Param {
-								if thing.Services[si].Name == vincToServiceNameMap[k] {
-									thing.Services[si].IntegrationId = strconv.Itoa(devices[i].ID)
-									thing.Services[si].Alias = devices[i].Client.Name
+								if services[si].Name == vincToServiceNameMap[k] {
+									services[si].IntegrationId = strconv.Itoa(devices[i].ID)
+									services[si].Alias = devices[i].Client.Name
 									location,err := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
 									if err == nil {
-										thing.Services[si].LocationId = location.ID
+										services[si].LocationId = location.ID
 										thing.LocationId = location.ID
 									}else {
 										log.Debug("Can't find location with integration ID = ",devices[i].Room)

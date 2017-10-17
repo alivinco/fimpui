@@ -1,16 +1,24 @@
 package registry
 
+import "time"
+
 type ID int
 const IDnil = 0
+
+const (
+	AppContainer = "app"
+	ThingContainer = "thing"
+)
 
 type ThingRegistry struct {
 	Things    []Thing
 	Locations []Location
 }
 
-type ValueType struct {
+type ValueContainer struct {
 	Value     interface{}
 	ValueType string
+	UpdatedAt time.Time
 }
 
 type Thing struct {
@@ -28,10 +36,12 @@ type Thing struct {
 	HwVersion      string    `json:"hw_ver"`
 	SwVersion      string    `json:"sw_ver"`
 	PowerSource    string    `json:"power_source"`
+	WakeUpInterval string    `json:"wakeup_interval"`
 	Tags           []string  `json:"tags"`
 	LocationId     ID        `json:"location_id"`
-	Services       []Service `json:"services"`
-	Props          []string  `json:"props"`
+	PropSets                   map[string]map[string]interface{}  `json:"prop_set"`
+	TechSpecificProps          map[string]string             `json:"tech_specific_props"`
+	UpdatedAt 		time.Time `json:"updated_at"`
 }
 
 type App struct {
@@ -50,19 +60,19 @@ type Bridge struct {
 }
 
 type Service struct {
-	ID            ID                     `json:"id" , storm:"id,increment"`
+	ID            ID                     `json:"id"  storm:"id,increment"`
 	IntegrationId string                 `json:"integr_id" storm:"index"`
-	ParentContainerId   string  		 `json:"container_id" storm:"index"`
-	ParentContainerType string 			 `json:"container_type" storm:"index"`
-	Name          string                 `json:"name" storm:"index"`
-	Alias         string                 `json:"alias"`
-	Address       string                 `json:"address"`
-	Groups        []string               `json:"groups"`
-	LocationId    ID                     `json:"location_id" storm:"index"`
-	Props         map[string]interface{} `json:"props"`
-	Tags          []string               `json:"tags"`
-	Interfaces    []Interface            `json:"interfaces"`
-	Attributes    map[string]ValueType   `json:"attributes"`
+	ParentContainerId   ID  		 `json:"container_id" storm:"index"`
+	ParentContainerType string              `json:"container_type" storm:"index"`
+	Name          string                    `json:"name" storm:"index"`
+	Alias         string                    `json:"alias"`
+	Address       string                    `json:"address"`
+	Groups        []string                  `json:"groups"`
+	LocationId    ID                        `json:"location_id" storm:"index"`
+	Props         map[string]interface{}    `json:"props"`
+	Tags          []string                  `json:"tags"`
+	Interfaces    []Interface               `json:"interfaces"`
+	Attributes    map[string]ValueContainer `json:"attributes"`
 
 }
 
@@ -86,10 +96,15 @@ type Location struct {
 	State          string     `json:"state"`
 }
 
-type ServiceResponse struct {
+type ServiceExtendedView struct {
 	Service
 	LocationAlias string      `json:"location_alias"`
-	ThingId 	  ID 		  `json:"thing_id"`
+}
+
+type ThingExtendedView struct {
+	Thing
+	Services       []ServiceExtendedView `json:"services"`
+	LocationAlias string                 `json:"location_alias"`
 }
 
 type InterfaceFlatView struct {

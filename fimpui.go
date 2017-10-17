@@ -323,7 +323,7 @@ func main() {
 		if filterWithoutAliasStr == "true" {
 			filterWithoutAlias = true
 		}
-		services, err := thingRegistryStore.GetServices(serviceName,filterWithoutAlias,registry.ID(thingId),registry.ID(locationId))
+		services, err := thingRegistryStore.GetExtendedServices(serviceName,filterWithoutAlias,registry.ID(thingId),registry.ID(locationId))
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
 		} else {
@@ -332,17 +332,18 @@ func main() {
 	})
 
 	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
-		thingAddr := c.QueryParam("thingAddr")
-		thingTech := c.QueryParam("thingTech")
-		serviceName := c.QueryParam("serviceName")
-		intfMsgType := c.QueryParam("intfMsgType")
-		locationIdStr := c.QueryParam("locationId")
-		var locationId int
-		locationId, _ = strconv.Atoi(locationIdStr)
-		var thingId int
-		thingIdStr := c.QueryParam("thingId")
-		thingId, _ = strconv.Atoi(thingIdStr)
-		services, err := thingRegistryStore.GetFlatInterfaces(thingAddr, thingTech, serviceName, intfMsgType, registry.ID(locationId), registry.ID(thingId))
+		//thingAddr := c.QueryParam("thingAddr")
+		//thingTech := c.QueryParam("thingTech")
+		//serviceName := c.QueryParam("serviceName")
+		//intfMsgType := c.QueryParam("intfMsgType")
+		//locationIdStr := c.QueryParam("locationId")
+		//var locationId int
+		//locationId, _ = strconv.Atoi(locationIdStr)
+		//var thingId int
+		//thingIdStr := c.QueryParam("thingId")
+		//thingId, _ = strconv.Atoi(thingIdStr)
+		//services, err := thingRegistryStore.GetFlatInterfaces(thingAddr, thingTech, serviceName, intfMsgType, registry.ID(locationId), registry.ID(thingId))
+		services := []registry.ServiceExtendedView{}
 		if err == nil {
 			return c.JSON(http.StatusOK, services)
 		} else {
@@ -360,7 +361,7 @@ func main() {
 	})
 
 	e.GET("/fimp/api/registry/thing/:tech/:address", func(c echo.Context) error {
-		things, err := thingRegistryStore.GetThingByAddress(c.Param("tech"), c.Param("address"))
+		things, err := thingRegistryStore.GetThingExtendedViewByAddress(c.Param("tech"), c.Param("address"))
 		if err == nil {
 			return c.JSON(http.StatusOK, things)
 		} else {

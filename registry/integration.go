@@ -6,6 +6,7 @@ import (
 	"github.com/alivinco/fimpui/model"
 	"github.com/pkg/errors"
 	"strconv"
+	"github.com/alivinco/fimpgo/fimptype"
 )
 
 type MqttIntegration struct {
@@ -68,7 +69,7 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 					}
 				}
 				//if ok {
-					response ,err :=  mg.registry.GetServices(serviceName,filterWithoutAlias,ID(thingId),ID(locationId))
+					response ,err :=  mg.registry.GetExtendedServices(serviceName,filterWithoutAlias,ID(thingId),ID(locationId))
 					if err != nil {
 						log.Error("<MqRegInt> Can get services .Err :",err)
 					}
@@ -80,32 +81,60 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 				log.Error("<MqRegInt> Can't parse value. Error :",err)
 			}
 		default:
-			log.Info("Unsupported message type :",iotMsg.Type)
+			log.Info("<MqRegInt> Unsupported message type :",iotMsg.Type)
 		}
 }
 
 
 func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error {
 	log.Info("<MqRegInt> New inclusion report")
-	newThing := Thing{}
-	err := msg.GetObjectValue(&newThing)
+	inclReport := fimptype.ThingInclusionReport{}
+	err := msg.GetObjectValue(&inclReport)
 	log.Debugf("%+v\n", err)
-	log.Debugf("%+v\n", newThing)
-	if newThing.CommTechnology != "" && newThing.Address != "" {
-		_, err := mg.registry.GetThingByAddress(newThing.CommTechnology, newThing.Address)
+	log.Debugf("%+v\n", inclReport)
+	if inclReport.CommTechnology != "" && inclReport.Address != "" {
+		var thing *Thing
+		thing, err := mg.registry.GetThingByAddress(inclReport.CommTechnology, inclReport.Address)
 		if err != nil {
-			_, err = mg.registry.UpsertThing(&newThing)
+			thing = &Thing{}
+		} else {
+			log.Info("<MqRegInt> Thing already in registry . Updating")
+		}
+			thing.Address = inclReport.Address
+			thing.Alias = inclReport.Alias
+			thing.CommTechnology = inclReport.CommTechnology
+			thing.DeviceId = inclReport.DeviceId
+			thing.HwVersion = inclReport.HwVersion
+			thing.SwVersion = inclReport.SwVersion
+			thing.ManufacturerId = inclReport.ManufacturerId
+			thing.PowerSource = inclReport.PowerSource
+			thing.ProductHash = inclReport.ProductHash
+			thing.ProductName = inclReport.ProductName
+			thing.Tags = inclReport.Tags
+			thing.PropSets = inclReport.PropSets
+			thing.TechSpecificProps = inclReport.TechSpecificProps
+			thing.WakeUpInterval = inclReport.WakeUpInterval
+			thingId, err := mg.registry.UpsertThing(thing)
 			if err != nil {
 				log.Error("<MqRegInt> Can't insert new Thing . Error: ", err)
 			}
-		} else {
-			// updating existing node
-			log.Info("<MqRegInt> Thing already in registry . Skipped.")
-			//if thing.ProductHash == "" {
-			//	newThing.ID = thing.ID
-			//	err = mg.registry.UpsertThing(newThing)
-			//}
-		}
+			for i :=range inclReport.Services  {
+				service := Service{}
+				service.Name = inclReport.Services[i].Name
+				service.Address = inclReport.Services[i].Address
+				service.Alias = inclReport.Services[i].Alias
+				service.Tags = inclReport.Services[i].Tags
+				service.Props = inclReport.Services[i].Props
+				service.Groups = inclReport.Services[i].Groups
+				service.Interfaces = make([]Interface,len(inclReport.Services[i].Interfaces))
+				service.ParentContainerId = thingId
+				service.ParentContainerType = ThingContainer
+				for iIntf := range inclReport.Services[i].Interfaces {
+					service.Interfaces[iIntf] = Interface(inclReport.Services[i].Interfaces[iIntf])
+				}
+				mg.registry.UpsertService(&service)
+			}
+
 
 	} else {
 		log.Error("<MqRegInt> Either address or commTech is empty ")
