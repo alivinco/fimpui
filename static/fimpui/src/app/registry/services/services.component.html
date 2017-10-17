@@ -29,7 +29,7 @@
     </ng-container>
     <ng-container cdkColumnDef="action">
       <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>  
-      <md-cell *cdkCellDef="let row"><md-chip-list> <md-chip (click)="selectInterface(row)" >Edit</md-chip>  </md-chip-list> </md-cell>
+      <md-cell *cdkCellDef="let row"><md-chip-list> <md-chip (click)="showServiceEditorDialog(row)" >Edit</md-chip>  </md-chip-list> </md-cell>
     </ng-container>
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
     <md-row *cdkRowDef="let row; columns: displayedColumns;">

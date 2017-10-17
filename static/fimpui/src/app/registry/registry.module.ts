@@ -6,13 +6,14 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { ThingsComponent } from './things/things.component';
 import { ServicesComponent ,ServicesMainComponent,ServiceSelectorWizardComponent } from './services/services.component';
-import { LocationsComponent } from './locations/locations.component';
+import { LocationsComponent,LocationSelectorWizardComponent } from './locations/locations.component';
 import { AdminComponent } from './admin/admin.component';
 import { ThingIntfUiComponent,KeysPipe } from 'app/registry/thing-intf-ui/thing-intf-ui.component'
 
 import { RegistryRoutingModule } from "./registry-routing.module";
 import { CdkTableModule } from '@angular/cdk';
 import { FimpService } from 'app/fimp/fimp.service'
+import { ServiceEditorDialog }from 'app/registry/services/service-editor.component'
 
 @NgModule({
   imports: [
@@ -33,8 +34,11 @@ import { FimpService } from 'app/fimp/fimp.service'
     AdminComponent,
     ThingIntfUiComponent,
     ServiceSelectorWizardComponent,
-    KeysPipe
+    LocationSelectorWizardComponent,
+    KeysPipe,
+    ServiceEditorDialog
   ],
-  providers:[FimpService]
+  providers:[FimpService],
+  entryComponents: [ServiceEditorDialog]
 })
 export class RegistryModule { }

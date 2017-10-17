@@ -1,4 +1,5 @@
 import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter} from '@angular/core';
+import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 import {DataSource} from '@angular/cdk';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -14,6 +15,7 @@ import { ServiceInterface,Service} from '../model';
 import { BACKEND_ROOT} from "app/globals";
 import { getFimpServiceList} from "app/fimp/service-lookup"
 import {ThingIntfUiComponent} from 'app/registry/thing-intf-ui/thing-intf-ui.component'
+import {ServiceEditorDialog} from 'app/registry/services/service-editor.component'
 
  
 @Component({
@@ -103,22 +105,22 @@ export class ServiceSelectorWizardComponent implements OnInit {
 })
 export class ServicesComponent implements OnInit {
   displayedColumns = ['name','alias','locationAlias','address','action'];
-
+  thingId : string ;
   dataSource: ServicesDataSource | null; 
   // usage (onSelect)="onSelected($event)">
   @Output() onSelect = new EventEmitter<ServiceInterface>();
   @ViewChild('filterThingAddr') filterThingAddr: ElementRef;
   @ViewChild('filterServiceName') filterServiceName: ElementRef;
 
-  constructor(private http : Http,private route: ActivatedRoute) { 
+  constructor(private http : Http,private route: ActivatedRoute,public dialog: MdDialog) { 
     
   }
 
   ngOnInit() {
-    let thingId = this.route.snapshot.params['filterValue'];
-    console.log("Thing id  = ",thingId);
+    this.thingId = this.route.snapshot.params['filterValue'];
+    console.log("Thing id  = ",this.thingId);
     this.dataSource = new ServicesDataSource(this.http);
-    this.dataSource.getData("","",thingId);
+    this.dataSource.getData("","",this.thingId);
     Observable.fromEvent(this.filterThingAddr.nativeElement, 'keyup')
         .debounceTime(500)
         .distinctUntilChanged()
@@ -135,7 +137,18 @@ export class ServicesComponent implements OnInit {
         }); 
            
   }
-
+  showServiceEditorDialog(service:Service) {
+    let dialogRef = this.dialog.open(ServiceEditorDialog,{
+            width: '400px',
+            data:service
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+        {
+           this.dataSource.getData("","",this.thingId) 
+        }
+    });      
+  }
   selectInterface(intf:ServiceInterface) {
     console.dir(intf);
     this.onSelect.emit(intf);
@@ -178,6 +191,7 @@ export class ServicesDataSource extends DataSource<any> {
     let services : Service[] = [];
     for (var key in result){
             let service = new Service();
+            service.id = result[key].id
             service.name = result[key].name;
             service.alias = result[key].alias;
             service.address = result[key].address; 

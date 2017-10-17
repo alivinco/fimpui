@@ -300,6 +300,10 @@ func (st *ThingRegistryStore) UpsertService(service *Service) (ID, error) {
 	return service.ID, nil
 }
 
+func (st *ThingRegistryStore) UpdateServiceFields(id ID,alias string ,locationId ID) error {
+	return st.db.Update(&Service{ID:id,Alias:alias,LocationId:locationId})
+}
+
 func (st *ThingRegistryStore) UpsertLocation(location *Location) (ID, error) {
 	var err error
 	if location.ID == 0 {

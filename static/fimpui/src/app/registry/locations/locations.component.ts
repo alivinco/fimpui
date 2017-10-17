@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild,OnInit} from '@angular/core';
+import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter} from '@angular/core';
 import {DataSource} from '@angular/cdk';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -76,4 +76,35 @@ export class LocationsDataSource extends DataSource<any> {
      }
      return locations;     
   }
+}
+
+@Component({
+  selector: 'location-selector',
+  templateUrl: './location-selector.html',
+  styleUrls: ['./locations.component.css']
+})
+export class LocationSelectorWizardComponent implements OnInit {
+  @Input() currentLocation : number;
+  private locations : Location[];
+  private selectedLocationId :number;
+  @Output() onSelect = new EventEmitter<number>();
+  ngOnInit() {
+    this.loadLocations();
+  }
+  constructor(private http : Http,) { 
+  }
+  
+  loadLocations() {
+    this.http.get(BACKEND_ROOT+'/fimp/api/registry/locations',{})
+    .map((res: Response)=>{
+      let result = res.json();
+      return result;
+    }).subscribe(result=>{
+      this.locations = result;
+    });
+  }
+  onLocationSelected(location:Location) {
+     this.onSelect.emit(this.selectedLocationId);
+  }
+
 }

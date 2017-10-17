@@ -331,6 +331,33 @@ func main() {
 		}
 	})
 
+	e.POST("/fimp/api/registry/service-fields", func(c echo.Context) error {
+		// The service update only selected fields and not entire object
+		service := registry.Service{}
+		err := c.Bind(&service)
+		if err == nil {
+			log.Info("<REST> Saving service fields")
+			thingRegistryStore.UpsertService(&service)
+			return c.NoContent(http.StatusOK)
+		} else {
+			log.Info("<REST> Can't bind service")
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
+	e.PUT("/fimp/api/registry/service", func(c echo.Context) error {
+		service := registry.Service{}
+		err := c.Bind(&service)
+		if err == nil {
+			log.Info("<REST> Saving service")
+			thingRegistryStore.UpsertService(&service)
+			return c.NoContent(http.StatusOK)
+		} else {
+			log.Info("<REST> Can't bind service")
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
 	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
 		//thingAddr := c.QueryParam("thingAddr")
 		//thingTech := c.QueryParam("thingTech")

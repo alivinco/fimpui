@@ -21,6 +21,7 @@ export class Thing {
 }
 
 export class Service {
+    id : number;
     name : string;
     alias : string;
     address : string ;
