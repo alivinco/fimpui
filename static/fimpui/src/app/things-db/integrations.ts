@@ -13,6 +13,7 @@ export function MapJsonToThingObject(val:any):Thing {
     thing.alias = val.alias;
     thing.commTech = val.comm_tech;
     thing.deviceId = val.device_id;
+    thing.productName = val.product_name;
     thing.hwVersion = val.hw_ver;
     thing.swVersion = val.sw_ver;
     thing.manufacturerId = val.manufacturer_id;

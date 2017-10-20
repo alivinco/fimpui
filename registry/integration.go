@@ -107,9 +107,10 @@ func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error
 			thing.HwVersion = inclReport.HwVersion
 			thing.SwVersion = inclReport.SwVersion
 			thing.ManufacturerId = inclReport.ManufacturerId
-			thing.PowerSource = inclReport.PowerSource
+			thing.ProductId = inclReport.ProductId
 			thing.ProductHash = inclReport.ProductHash
 			thing.ProductName = inclReport.ProductName
+			thing.PowerSource = inclReport.PowerSource
 			thing.Tags = inclReport.Tags
 			thing.PropSets = inclReport.PropSets
 			thing.TechSpecificProps = inclReport.TechSpecificProps

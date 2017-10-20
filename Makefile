@@ -1,4 +1,4 @@
-version="0.2.0"
+version="0.2.2"
 version_file=VERSION
 working_dir=$(shell pwd)
 arch="armhf"
@@ -42,12 +42,6 @@ package-deb-doc:
 	cp -R static/fhcore debian/opt/fimpui/static/
 	docker run --rm -v ${working_dir}:/build -w /build --name debuild debian dpkg-deb --build debian
 	@echo "Done"
-
-git-version:
-	@echo "Getting latest version from git"
-	@git describe --tags | sed 's/^v//' | sed 's/-\(alpha\|beta\|rc\)/~\1/' | sed 's/-/./' | sed 's/-g/+/' | sed 's/-/./' > "$(working_dir)/VERSION"
-	@sed -i "s/^VERSION.*/VERSION = \"$(version)\"/" "$(version_file)"
-	@echo "Set version to $(version)"
 
 tar-arm: build-js build-go-arm package-deb-doc
 	@echo "The application was packaged into tar archive "

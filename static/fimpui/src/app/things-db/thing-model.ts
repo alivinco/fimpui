@@ -3,6 +3,7 @@ export class Thing {
     address :string ;
     commTech :string ;
     productHash : string;
+    productName:string;
     manufacturerId : string;
     productId : string ; 
     deviceId :string ;

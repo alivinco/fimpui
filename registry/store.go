@@ -79,6 +79,16 @@ func (st *ThingRegistryStore) GetAllThings() ([]Thing, error) {
 	return things, err
 }
 
+func (st *ThingRegistryStore) ExtendThingsWithLocation(things []Thing) ([]ThingWithLocationView) {
+	response := make([]ThingWithLocationView,len(things))
+	for i := range things {
+		response[i].Thing = things[i]
+		loc , _ := st.GetLocationById(things[i].LocationId)
+		response[i].LocationAlias = loc.Alias
+	}
+	return response
+}
+
 func (st *ThingRegistryStore) GetAllServices() ([]Service, error) {
 	var services []Service
 	err := st.db.All(&services)
@@ -86,18 +96,20 @@ func (st *ThingRegistryStore) GetAllServices() ([]Service, error) {
 }
 // GetThingExtendedViewById return thing enhanced with linked services and location Alias
 func (st *ThingRegistryStore) GetThingExtendedViewById(Id ID) (*ThingExtendedView, error) {
-	var thing ThingExtendedView
+	var thing Thing
+	var thingExView  ThingExtendedView
 	err := st.db.One("ID", Id, &thing)
+	thingExView.Thing = thing
 	services , err := st.GetExtendedServices("",false,Id,IDnil)
-	thing.Services = make([]ServiceExtendedView,len(services))
+	thingExView.Services = make([]ServiceExtendedView,len(services))
 	for i := range services {
-		thing.Services[i] = services[i]
+		thingExView.Services[i] = services[i]
 	}
 	location , _ := st.GetLocationById(thing.LocationId)
 	if location != nil {
-		thing.LocationAlias = location.Alias
+		thingExView.LocationAlias = location.Alias
 	}
-	return &thing, err
+	return &thingExView, err
 }
 
 func (st *ThingRegistryStore) GetServiceByAddress(serviceName string ,serviceAddress string) (*Service, error) {
@@ -302,6 +314,10 @@ func (st *ThingRegistryStore) UpsertService(service *Service) (ID, error) {
 
 func (st *ThingRegistryStore) UpdateServiceFields(id ID,alias string ,locationId ID) error {
 	return st.db.Update(&Service{ID:id,Alias:alias,LocationId:locationId})
+}
+
+func (st *ThingRegistryStore) UpdateThingFields(id ID,alias string ,locationId ID) error {
+	return st.db.Update(&Thing{ID:id,Alias:alias,LocationId:locationId})
 }
 
 func (st *ThingRegistryStore) UpsertLocation(location *Location) (ID, error) {

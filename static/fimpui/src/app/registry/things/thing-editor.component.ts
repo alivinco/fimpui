@@ -5,16 +5,16 @@ import { MD_DIALOG_DATA} from '@angular/material';
 import { BACKEND_ROOT } from "app/globals";
 
 @Component({
-    selector: 'service-editor-dialog',
-    templateUrl: 'service-editor-dialog.html',
+    selector: 'thing-editor-dialog',
+    templateUrl: 'thing-editor-dialog.html',
   })
-  export class ServiceEditorDialog {
+  export class ThingEditorDialog {
     locationId : number;
     alias : string;
-    serviceId : number;     
-    constructor(public dialogRef: MdDialogRef<ServiceEditorDialog>,@Inject(MD_DIALOG_DATA) public data: any,public snackBar: MdSnackBar,private http : Http) {
+    thingId : number;     
+    constructor(public dialogRef: MdDialogRef<ThingEditorDialog>,@Inject(MD_DIALOG_DATA) public data: any,public snackBar: MdSnackBar,private http : Http) {
           console.dir(data)
-          this.serviceId = data.id
+          this.thingId = data.id
           this.alias = data.alias
           this.locationId = data.locationId
     }
@@ -24,11 +24,11 @@ import { BACKEND_ROOT } from "app/globals";
     save(){
       let headers = new Headers({ 'Content-Type': 'application/json' });
       let options = new RequestOptions({headers:headers});
-      let request = {"id":this.serviceId,"alias":this.alias,"location_id":this.locationId}
+      let request = {"id":this.thingId,"alias":this.alias,"location_id":this.locationId}
       this.http
-        .put(BACKEND_ROOT+'/fimp/api/registry/service',JSON.stringify(request),  options )
+        .put(BACKEND_ROOT+'/fimp/api/registry/thing',JSON.stringify(request),  options )
         .subscribe ((result) => {
-           console.log("Service fields were saved");
+           console.log("Thing fields were saved");
            this.dialogRef.close("ok");
         });
     }

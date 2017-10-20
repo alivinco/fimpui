@@ -43,7 +43,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
         { 
           this.nodes = fimpMsg.val;
-          //this.loadThingsFromRegistry()
+          this.loadThingsFromRegistry()
 
           // for(var key in fimpMsg.val){
           //   this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
@@ -74,6 +74,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       this.reloadNodes();
     }else {
       this.nodes = JSON.parse(localStorage.getItem("zwaveNodesList"));
+      this.loadThingsFromRegistry();
     }
     
   }
@@ -90,7 +91,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 
   loadThingsFromRegistry() {
      this.http
-      .get(BACKEND_ROOT+'/fimp/api/registry/interfaces')
+      .get(BACKEND_ROOT+'/fimp/api/registry/things')
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);
@@ -100,8 +101,9 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
          for(let node of this.nodes) {
            for (let thing of result) {
               // change node.id to node.address
-               if (node.address == thing.thing_address) {
-                  node["alias"] = thing.location_alias + thing.thing_alias
+               if (node.address == thing.address && thing.comm_tech == "zw") {
+                  node["alias"] = thing.location_alias +" "+ thing.alias
+                  node["product_name"] = thing.product_name
                }
            }
          }

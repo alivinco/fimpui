@@ -57,7 +57,7 @@
     <ng-container cdkColumnDef="action">
       <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
       <md-cell *cdkCellDef="let row"><md-chip-list> 
-        <md-chip  > Edit </md-chip>
+        <md-chip (click)="showThingEditorDialog(row)" > Edit </md-chip>
         <md-chip [routerLink]="['/registry/services','thingId',row.id]"> Services </md-chip> 
         <md-chip [routerLink]="['/thing-view',row.commTech,row.address]"> Explore </md-chip> 
         <md-chip (click)="deleteThing(row.id)"> Delete </md-chip> 

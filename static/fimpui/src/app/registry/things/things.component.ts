@@ -1,4 +1,5 @@
 import {Component, ElementRef, ViewChild,OnInit} from '@angular/core';
+import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 import {DataSource} from '@angular/cdk';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -12,6 +13,7 @@ import 'rxjs/add/observable/fromEvent';
 import { Thing } from '../model';
 import { ActivatedRoute } from '@angular/router';
 import { BACKEND_ROOT } from "app/globals";
+import { ThingEditorDialog} from 'app/registry/things/thing-editor.component'
 
 @Component({
   selector: 'app-things',
@@ -21,21 +23,22 @@ import { BACKEND_ROOT } from "app/globals";
 export class ThingsComponent implements OnInit {
   displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productName','productHash','action'];
   dataSource: ThingsDataSource | null;
+  locationId:string;
 
   @ViewChild('filterAddr') filter: ElementRef;
 
-  constructor(private http : Http,private route: ActivatedRoute) { 
+  constructor(private http : Http,private route: ActivatedRoute,public dialog: MdDialog) { 
     
   }
 
   ngOnInit() {
-    let locationId = this.route.snapshot.params['filterValue'];
+    this.locationId = this.route.snapshot.params['filterValue'];
     this.dataSource = new ThingsDataSource(this.http);
-    if (locationId=="*"){
-      locationId = "";
+    if (this.locationId=="*"){
+      this.locationId = "";
     }
     
-    this.dataSource.getData(locationId);
+    this.dataSource.getData(this.locationId);
     Observable.fromEvent(this.filter.nativeElement, 'keyup')
         .debounceTime(150)
         .distinctUntilChanged()
@@ -43,6 +46,18 @@ export class ThingsComponent implements OnInit {
           if (!this.dataSource) { return; }
           this.dataSource.filter = this.filter.nativeElement.value;
         });
+  }
+  showThingEditorDialog(service:Thing) {
+    let dialogRef = this.dialog.open(ThingEditorDialog,{
+            width: '400px',
+            data:service
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+        {
+           this.dataSource.getData(this.locationId) 
+        }
+    });      
   }
 
   deleteThing(id:string) {

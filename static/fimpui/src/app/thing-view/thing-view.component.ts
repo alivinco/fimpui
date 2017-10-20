@@ -47,6 +47,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
+      // adapter topic 
       if (fimpMsg.service == serviceName )
         {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
@@ -57,6 +58,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
         } 
 
       }else {
+        // device topic
         console.log("Sensor report");
         for (let svc of this.thing.services){
             // console.log("Comparing "+msg.topic+" with "+ "pt:j1/mt:evt"+svc.address);
@@ -109,6 +111,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
         return body;
       }).subscribe ((result) => {
           this.thing = MapJsonToThingObject(result);
+          console.dir(this.thing)
           this.rows = this.thing.services;
           this.subscribeForFimpMsg(techAdapterName,address);                
       },err=> {

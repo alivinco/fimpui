@@ -304,8 +304,9 @@ func main() {
 		} else {
 			things, err = thingRegistryStore.GetAllThings()
 		}
+		thingsWithLocation := thingRegistryStore.ExtendThingsWithLocation(things)
 		if err == nil {
-			return c.JSON(http.StatusOK, things)
+			return c.JSON(http.StatusOK, thingsWithLocation)
 		} else {
 			return c.JSON(http.StatusInternalServerError, err)
 		}
@@ -331,19 +332,33 @@ func main() {
 		}
 	})
 
-	e.POST("/fimp/api/registry/service-fields", func(c echo.Context) error {
-		// The service update only selected fields and not entire object
-		service := registry.Service{}
-		err := c.Bind(&service)
-		if err == nil {
-			log.Info("<REST> Saving service fields")
-			thingRegistryStore.UpsertService(&service)
-			return c.NoContent(http.StatusOK)
-		} else {
-			log.Info("<REST> Can't bind service")
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
+	//e.POST("/fimp/api/registry/service-fields", func(c echo.Context) error {
+	//	// The service update only selected fields and not entire object
+	//	service := registry.Service{}
+	//	err := c.Bind(&service)
+	//	if err == nil {
+	//		log.Info("<REST> Saving service fields")
+	//		thingRegistryStore.UpsertService(&service)
+	//		return c.NoContent(http.StatusOK)
+	//	} else {
+	//		log.Info("<REST> Can't bind service")
+	//		return c.JSON(http.StatusInternalServerError, err)
+	//	}
+	//})
+	//
+	//e.POST("/fimp/api/registry/thing-fields", func(c echo.Context) error {
+	//	// The service update only selected fields and not entire object
+	//	thing := registry.Thing{}
+	//	err := c.Bind(&thing)
+	//	if err == nil {
+	//		log.Info("<REST> Saving thing fields")
+	//		thingRegistryStore.UpsertThing(&thing)
+	//		return c.NoContent(http.StatusOK)
+	//	} else {
+	//		log.Info("<REST> Can't bind thing")
+	//		return c.JSON(http.StatusInternalServerError, err)
+	//	}
+	//})
 
 	e.PUT("/fimp/api/registry/service", func(c echo.Context) error {
 		service := registry.Service{}
@@ -405,7 +420,14 @@ func main() {
 		thing := registry.Thing{}
 		err := c.Bind(&thing)
 		fmt.Println(err)
-		thingRegistryStore.UpsertThing(&thing)
+		if err == nil {
+			log.Info("<REST> Saving thing")
+			thingRegistryStore.UpsertThing(&thing)
+			return c.NoContent(http.StatusOK)
+		} else {
+			log.Info("<REST> Can't bind thing")
+			return c.JSON(http.StatusInternalServerError, err)
+		}
 		return c.NoContent(http.StatusOK)
 	})
 

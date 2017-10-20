@@ -14,6 +14,7 @@ import { RegistryRoutingModule } from "./registry-routing.module";
 import { CdkTableModule } from '@angular/cdk';
 import { FimpService } from 'app/fimp/fimp.service'
 import { ServiceEditorDialog }from 'app/registry/services/service-editor.component'
+import { ThingEditorDialog }from 'app/registry/things/thing-editor.component'
 
 @NgModule({
   imports: [
@@ -36,9 +37,10 @@ import { ServiceEditorDialog }from 'app/registry/services/service-editor.compone
     ServiceSelectorWizardComponent,
     LocationSelectorWizardComponent,
     KeysPipe,
-    ServiceEditorDialog
+    ServiceEditorDialog,
+    ThingEditorDialog
   ],
   providers:[FimpService],
-  entryComponents: [ServiceEditorDialog]
+  entryComponents: [ServiceEditorDialog,ThingEditorDialog]
 })
 export class RegistryModule { }

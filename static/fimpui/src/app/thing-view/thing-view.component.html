@@ -7,12 +7,9 @@
     
   <h3>Thing:</h3>
  
-  <md-grid-list cols="2" rowHeight="250" [style.background]="'lightblue'"  > 
-    <md-grid-tile>
        <table>
-        <tr><td><b>Alias:</b></td> <td>{{ thing.alias }}</td> <td> 
-           
-           </td> </tr>
+        <tr><td style="width:250px"><b>Alias:</b></td> <td>{{ thing.alias }}</td> </tr>
+        <tr><td style="width:250px"><b>ProductName:</b></td> <td>{{ thing.productName }}</td> </tr>
         <tr><td><b>Address:</b></td><td> {{ thing.address }} </td> </tr>
         <tr><td><b>Comunication tech:</b></td><td> {{ thing.commTech }} </td> </tr>
         <tr><td><b>Product hash:</b></td><td> {{ thing.productHash }} </td> </tr>
@@ -22,17 +19,10 @@
         <tr><td><b>Category:</b></td><td> {{ thing.category }} </td> </tr>
         <tr><td><b>Hardware version:</b></td><td> {{ thing.hwVersion }} </td> </tr>
         <tr><td><b>Software version:</b></td><td> {{ thing.swVersion }} </td> </tr>
-       </table> 
-    </md-grid-tile>
-    <md-grid-tile >
-       <table>
         <tr><td><b>Power source:</b></td><td> {{ thing.powerSource }} </td> </tr>
         <tr><td><b>Wakeup interval:</b></td><td> {{ thing.wakeupInterval }} </td> </tr>
        </table> 
-    </md-grid-tile>
- 
-  </md-grid-list>
-
+  
   <h3>Services:</h3>
   <div>
       <ngx-datatable class="material expandable"

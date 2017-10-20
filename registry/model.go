@@ -101,6 +101,11 @@ type ServiceExtendedView struct {
 	LocationAlias string      `json:"location_alias"`
 }
 
+type ThingWithLocationView struct{
+	Thing
+	LocationAlias string     `json:"location_alias"`
+}
+
 type ThingExtendedView struct {
 	Thing
 	Services       []ServiceExtendedView `json:"services"`
