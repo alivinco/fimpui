@@ -11,6 +11,8 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
 import {Location} from '../model';
 import { BACKEND_ROOT } from "app/globals";
+import { LocationEditorDialog} from 'app/registry/locations/location-editor.component'
+import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
 
 @Component({
   selector: 'app-locations',
@@ -24,13 +26,32 @@ displayedColumns = ['id','type','alias','address','geo','action'];
 // 'serviceName','serviceAlias','intfMsgType'];
   dataSource: LocationsDataSource | null;
 
-  constructor(private http : Http) { 
+  constructor(private http : Http,public dialog: MdDialog) { 
     
   }
 
   ngOnInit() {
     this.dataSource = new LocationsDataSource(this.http);
    
+  }
+  deleteLocation(id:string) {
+    this.http
+     .delete(BACKEND_ROOT+'/fimp/api/registry/location/'+id)
+     .subscribe ((result) => {
+        this.dataSource.getData();
+     });
+   } 
+  showLocationEditorDialog(service:Location) {
+    let dialogRef = this.dialog.open(LocationEditorDialog,{
+            width: '400px',
+            data:service
+          });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+        {
+           this.dataSource.getData() 
+        }
+    });      
   }
 }
 
@@ -61,7 +82,7 @@ export class LocationsDataSource extends DataSource<any> {
     return this.locationsObs;
   }
   disconnect() {}
-
+  
   mapThings(result:any):Location[] {
     let locations : Location[] = [];
     for (var key in result){
@@ -86,10 +107,11 @@ export class LocationsDataSource extends DataSource<any> {
 export class LocationSelectorWizardComponent implements OnInit {
   @Input() currentLocation : number;
   private locations : Location[];
-  private selectedLocationId :number;
+  selectedLocationId :number;
   @Output() onSelect = new EventEmitter<number>();
   ngOnInit() {
     this.loadLocations();
+    this.selectedLocationId = this.currentLocation;
   }
   constructor(private http : Http,) { 
   }
@@ -103,7 +125,7 @@ export class LocationSelectorWizardComponent implements OnInit {
       this.locations = result;
     });
   }
-  onLocationSelected(location:Location) {
+  onSelected() {
      this.onSelect.emit(this.selectedLocationId);
   }
 

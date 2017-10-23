@@ -46,3 +46,6 @@ md-chip {
 .mat-cell:nth-child(3), .mat-header-cell:nth-child(3) {
   flex: 0 0 200px;
 }
+.mat-cell:nth-child(4), .mat-header-cell:nth-child(4) {
+  flex: 0 0 400px;
+}

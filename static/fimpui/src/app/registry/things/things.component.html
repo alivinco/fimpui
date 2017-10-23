@@ -32,6 +32,10 @@
       <md-header-cell *cdkHeaderCellDef> Alias </md-header-cell>
       <md-cell *cdkCellDef="let row"> {{row.alias}} </md-cell>
     </ng-container>
+    <ng-container cdkColumnDef="locationAlias">
+      <md-header-cell *cdkHeaderCellDef> Location </md-header-cell>
+      <md-cell *cdkCellDef="let row"> {{row.locationAlias}} </md-cell>
+    </ng-container>
 
     <!-- Name Column -->
     <ng-container cdkColumnDef="address">

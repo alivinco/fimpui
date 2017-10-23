@@ -8,6 +8,8 @@ const IDnil = 0
 const (
 	AppContainer = "app"
 	ThingContainer = "thing"
+	AttributeUpdatedByCmd = 1
+	AttributeUpdatedByEvt = 2
 )
 
 type ThingRegistry struct {
@@ -15,10 +17,11 @@ type ThingRegistry struct {
 	Locations []Location
 }
 
-type ValueContainer struct {
+type AttributeValueContainer struct {
 	Value     interface{}
 	ValueType string
 	UpdatedAt time.Time
+	UpdatedBy int
 }
 
 type Thing struct {
@@ -60,19 +63,19 @@ type Bridge struct {
 }
 
 type Service struct {
-	ID            ID                     `json:"id"  storm:"id,increment"`
-	IntegrationId string                 `json:"integr_id" storm:"index"`
-	ParentContainerId   ID  		 `json:"container_id" storm:"index"`
+	ID            ID                        `json:"id"  storm:"id,increment"`
+	IntegrationId string                    `json:"integr_id" storm:"index"`
+	ParentContainerId   ID  		        `json:"container_id" storm:"index"`
 	ParentContainerType string              `json:"container_type" storm:"index"`
 	Name          string                    `json:"name" storm:"index"`
 	Alias         string                    `json:"alias"`
-	Address       string                    `json:"address"`
+	Address       string                    `json:"address" storm:"index"`
 	Groups        []string                  `json:"groups"`
 	LocationId    ID                        `json:"location_id" storm:"index"`
 	Props         map[string]interface{}    `json:"props"`
 	Tags          []string                  `json:"tags"`
 	Interfaces    []Interface               `json:"interfaces"`
-	Attributes    map[string]ValueContainer `json:"attributes"`
+	Attributes    map[string]AttributeValueContainer `json:"attributes"`
 
 }
 

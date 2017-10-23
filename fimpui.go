@@ -373,6 +373,19 @@ func main() {
 		}
 	})
 
+	e.PUT("/fimp/api/registry/location", func(c echo.Context) error {
+		location := registry.Location{}
+		err := c.Bind(&location)
+		if err == nil {
+			log.Info("<REST> Saving location")
+			thingRegistryStore.UpsertLocation(&location)
+			return c.NoContent(http.StatusOK)
+		} else {
+			log.Info("<REST> Can't bind location")
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
 	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
 		//thingAddr := c.QueryParam("thingAddr")
 		//thingTech := c.QueryParam("thingTech")
@@ -438,6 +451,18 @@ func main() {
 		if err == nil {
 			return c.NoContent(http.StatusOK)
 		}
+		log.Error("<REST> Can't delete thing ")
+		return c.JSON(http.StatusInternalServerError, err)
+	})
+
+	e.DELETE("/fimp/api/registry/location/:id", func(c echo.Context) error {
+		idStr := c.Param("id")
+		thingId, _ := strconv.Atoi(idStr)
+		err := thingRegistryStore.DeleteLocation(registry.ID(thingId))
+		if err == nil {
+			return c.NoContent(http.StatusOK)
+		}
+		log.Error("<REST> Failed to delete thing . Error : ",err)
 		return c.JSON(http.StatusInternalServerError, err)
 	})
 

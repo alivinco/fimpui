@@ -21,7 +21,7 @@ import { ThingEditorDialog} from 'app/registry/things/thing-editor.component'
   styleUrls: ['./things.component.css']
 })
 export class ThingsComponent implements OnInit {
-  displayedColumns = ['id', 'alias', 'address','manufacturerId','productId','productName','productHash','action'];
+  displayedColumns = ['id', 'alias','locationAlias', 'address','manufacturerId','productName','productHash','action'];
   dataSource: ThingsDataSource | null;
   locationId:string;
 
@@ -59,14 +59,14 @@ export class ThingsComponent implements OnInit {
         }
     });      
   }
-
+  
   deleteThing(id:string) {
     this.http
      .delete(BACKEND_ROOT+'/fimp/api/registry/thing/'+id)
      .subscribe ((result) => {
         this.dataSource.getData("");
      });
- } 
+  } 
   }
 
   /**
@@ -120,6 +120,7 @@ export class ThingsDataSource extends DataSource<any> {
             thing.productHash = result[key].product_hash;
             thing.manufacturerId = result[key].manufacturer_id;
             thing.locationId = result[key].location_id;
+            thing.locationAlias = result[key].location_alias;
             things.push(thing)
      }
      return things;     

@@ -13,6 +13,7 @@ export class Thing {
     powerSource : string;
     wakeupInterval : string;
     locationId:number;
+    locationAlias:string;
     services:Service[]=[];
     category:string;
     propertySets : Map<string,Map<string,any>>;

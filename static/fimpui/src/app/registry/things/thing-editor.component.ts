@@ -18,8 +18,9 @@ import { BACKEND_ROOT } from "app/globals";
           this.alias = data.alias
           this.locationId = data.locationId
     }
-    onLocationSeleted(locationId:number ) {
-        console.log("Location selected = "+locationId)
+    onLocationSelected(locationId:number ) {
+        console.log("Location selected = "+locationId) 
+        this.locationId = locationId
     }
     save(){
       let headers = new Headers({ 'Content-Type': 'application/json' });

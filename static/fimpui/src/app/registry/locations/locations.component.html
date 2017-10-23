@@ -43,12 +43,17 @@
     <ng-container cdkColumnDef="action">
       <md-header-cell *cdkHeaderCellDef> Action </md-header-cell>
       <md-cell *cdkCellDef="let row"><md-chip-list> 
-        <md-chip  > Edit </md-chip>
+        <md-chip (click)="showLocationEditorDialog(row)" > Edit </md-chip>
         <md-chip [routerLink]="['/registry/things','locationId',row.id]"> Things </md-chip> 
+        <md-chip (click)="deleteLocation(row.id)"> Delete </md-chip> 
       </md-chip-list> </md-cell>
     </ng-container>
     
     <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
     <md-row *cdkRowDef="let row; columns: displayedColumns;"></md-row>
   </md-table>
+<div style="width:100%;height:60px">&nbsp; </div>
+  <div>
+    <button class="add-button" (click)="showLocationEditorDialog(null)" md-mini-fab>Add</button>
+  </div>
 </div>

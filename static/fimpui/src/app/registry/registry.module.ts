@@ -15,6 +15,7 @@ import { CdkTableModule } from '@angular/cdk';
 import { FimpService } from 'app/fimp/fimp.service'
 import { ServiceEditorDialog }from 'app/registry/services/service-editor.component'
 import { ThingEditorDialog }from 'app/registry/things/thing-editor.component'
+import { LocationEditorDialog }from 'app/registry/locations/location-editor.component'
 
 @NgModule({
   imports: [
@@ -38,9 +39,10 @@ import { ThingEditorDialog }from 'app/registry/things/thing-editor.component'
     LocationSelectorWizardComponent,
     KeysPipe,
     ServiceEditorDialog,
-    ThingEditorDialog
+    ThingEditorDialog,
+    LocationEditorDialog
   ],
   providers:[FimpService],
-  entryComponents: [ServiceEditorDialog,ThingEditorDialog]
+  entryComponents: [ServiceEditorDialog,ThingEditorDialog,LocationEditorDialog]
 })
 export class RegistryModule { }

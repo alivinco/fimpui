@@ -283,6 +283,23 @@ func (st *ThingRegistryStore) UpsertThing(thing *Thing) (ID, error) {
 		log.Debug("<Reg> Thing saved ")
 	}
 
+	// Updating linked services
+	services ,_ := st.GetExtendedServices("",false,thing.ID,IDnil)
+	var isChanged bool;
+	for i := range services{
+		isChanged = false
+		if services[i].Alias == "" {
+			services[i].Alias = thing.Alias
+			isChanged = true
+		}
+		if services[i].LocationId == IDnil {
+			services[i].LocationId = thing.LocationId
+			isChanged = true
+		}
+		if isChanged {
+			st.UpsertService(&services[i].Service)
+		}
+	}
 	return thing.ID, nil
 }
 
@@ -297,6 +314,7 @@ func (st *ThingRegistryStore) UpsertService(service *Service) (ID, error) {
 		}
 	}
 	if service.ID == IDnil {
+		// Create new service
 		err = st.db.Save(service)
 	} else {
 		err = st.db.Update(service)
@@ -312,13 +330,6 @@ func (st *ThingRegistryStore) UpsertService(service *Service) (ID, error) {
 	return service.ID, nil
 }
 
-func (st *ThingRegistryStore) UpdateServiceFields(id ID,alias string ,locationId ID) error {
-	return st.db.Update(&Service{ID:id,Alias:alias,LocationId:locationId})
-}
-
-func (st *ThingRegistryStore) UpdateThingFields(id ID,alias string ,locationId ID) error {
-	return st.db.Update(&Thing{ID:id,Alias:alias,LocationId:locationId})
-}
 
 func (st *ThingRegistryStore) UpsertLocation(location *Location) (ID, error) {
 	var err error
@@ -360,21 +371,20 @@ func (st *ThingRegistryStore) DeleteThing(id ID) error {
 
 func (st *ThingRegistryStore) DeleteService(id ID) error {
 	service, err := st.GetServiceById(id)
-	log.Debug("<Reg> Deleting service ", service.ID)
+	log.Debug("<Reg> Deleting service = ", service.ID)
 	if err != nil {
 		return err
 	}
-	st.db.DeleteStruct(service)
-	return nil
+	return st.db.DeleteStruct(service)
 }
 
 func (st *ThingRegistryStore) DeleteLocation(id ID) error {
 	location, err := st.GetLocationById(id)
+	log.Debug("<Reg> Deleting location = ", location.ID)
 	if err != nil {
 		return err
 	}
-	st.db.DeleteStruct(&location)
-	return nil
+	return st.db.DeleteStruct(location)
 }
 
 func (st *ThingRegistryStore) ClearAll() error {
