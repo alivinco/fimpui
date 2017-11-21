@@ -429,6 +429,11 @@ func main() {
 		return c.NoContent(http.StatusOK)
 	})
 
+	e.POST("/fimp/api/registry/reindex", func(c echo.Context) error {
+		thingRegistryStore.ReindexAll()
+		return c.NoContent(http.StatusOK)
+	})
+
 	e.PUT("/fimp/api/registry/thing", func(c echo.Context) error {
 		thing := registry.Thing{}
 		err := c.Bind(&thing)

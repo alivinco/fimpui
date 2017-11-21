@@ -51,10 +51,10 @@
 <h3>Basic CC mapping</h3>
         <md-list>
                <md-list-item *ngFor="let serv of template.dev_custom.basic_mapping"> 
-                        <md-input-container class="node-label-field">
+                        <md-input-container class="node-label-field" style="width: 50px">
                                         <input mdInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
                         </md-input-container>
-                        <md-input-container class="node-label-field">             
+                        <md-input-container class="node-label-field" style="width: 50px">             
                                         <input mdInput type="number" [(ngModel)]="serv.basic_value" placeholder="Basic value" >
                         </md-input-container>
                         <md-input-container class="node-label-field"> 
@@ -62,18 +62,24 @@
                         </md-input-container>
                         <md-input-container class="node-label-field"> 
                                         <input mdInput type="text" [(ngModel)]="serv.msg_type" placeholder="Message type" >
+                        </md-input-container>
+                        <md-input-container class="node-label-field" style="width:85px"> 
+                                        <input mdInput type="text" [(ngModel)]="serv.fimp_value.val_t" placeholder="Fimp value type" >
                         </md-input-container> 
                         <md-input-container class="node-label-field"> 
-                                        <input mdInput type="text" [(ngModel)]="serv.serv" placeholder="Fimp value" >
+                                        <input mdInput type="text" [(ngModel)]="serv.fimp_value.val" placeholder="Fimp value" >
                         </md-input-container>
-                        <div style="margin-bottom: 70px" >
-                              <md-checkbox [(ngModel)]="serv.map_range" > Full range </md-checkbox>
-                        </div> 
-                        <md-input-container class="node-label-field" style="width: 50px"> 
+                        <div style="margin-bottom: 15px;width:155px" >
+                                <md-checkbox [(ngModel)]="serv.is_get_report_cmd" >Get Report Cmd</md-checkbox>
+                        </div>
+                        <div style="margin-bottom: 15px;width:120px" >
+                                <md-checkbox [(ngModel)]="serv.map_range" > Full range </md-checkbox>
+                          </div>  
+                        <md-input-container class="node-label-field" style="width: 40px"> 
                                         <input mdInput type="number" [(ngModel)]="serv.min" placeholder="Min" >
                         </md-input-container>
-                        <md-input-container class="node-label-field" style="width: 50px"> 
-                                        <input mdInput type="number" [(ngModel)]="serv.serv" placeholder="Max" >
+                        <md-input-container class="node-label-field" style="width: 40px"> 
+                                        <input mdInput type="number" [(ngModel)]="serv.max" placeholder="Max" >
                         </md-input-container>
                         <md-input-container class="node-label-field"> 
                                 <input mdInput type="text" [(ngModel)]="serv.comment" placeholder="Comment " >
@@ -82,6 +88,7 @@
                 </md-list-item>
          </md-list>
          <button md-raised-button color="primary" (click)="addNewBasicMapping()">Add basic mapping</button>
+
 <h3>Service grouping</h3>
 <md-list>
         <md-list-item *ngFor="let serv of template.dev_custom.service_grouping"> 
@@ -101,6 +108,27 @@
        </md-list-item>
  </md-list>
  <button md-raised-button color="primary" (click)="addNewServiceGrouping()">Add group</button>
+
+ <h3>Service customization</h3>
+ <md-list>
+         <md-list-item *ngFor="let serv of template.dev_custom.service_fields"> 
+             <md-input-container class="node-label-field">
+                         <input mdInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
+             </md-input-container>
+             <md-input-container class="node-label-field">             
+                         <input mdInput type="text" [(ngModel)]="serv.service" placeholder="Service name" >
+             </md-input-container>
+             <div style="margin-bottom: 15px;width:120px" >
+                <md-checkbox [(ngModel)]="serv.enabled" > Is enabled </md-checkbox>
+             </div>  
+             <md-input-container class="node-label-field"> 
+                     <input mdInput type="text" [(ngModel)]="serv.comment" placeholder="Comment " >
+             </md-input-container>
+             <button md-raised-button color="primary" (click)="deleteServiceFieldCustomization(serv)">Delete</button> 
+        </md-list-item>
+  </md-list>
+  <button md-raised-button color="primary" (click)="addNewServiceFieldCustomization()">Add service customization</button>
+
  <h3>Custom service descriptor</h3>
  <md-list>
      <md-list-item *ngFor="let serv of template.dev_custom.service_descriptor" style="height: 170px" > 

@@ -15,13 +15,14 @@
     <md-card-content>
           <table>
            
-          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th><th style="width: 150px">Alias</th><th style="width: 70px">Status</th><th>Actions</th></tr> </thead>
+          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th><th style="width: 150px">Alias</th><th style="width: 70px">Status</th><th >Actions</th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td> <td> {{node.alias}}</td> <td> {{node.status}} </td> <td>
-             
+          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td> <td> {{node.alias}}</td> <td> {{node.status}} </td>
+           <td  >
              <md-chip-list>
              <md-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]">Services</md-chip>
+             <md-chip class="open-chip" (click)="openTemplateEditor(node.hash+'.json','stable')">Template</md-chip>
              <md-chip (click)="updateDevice(node.address)">Update</md-chip>
              <md-chip color="warn" (click)="deleteFailedDevice(node.address)">Delete</md-chip>
              <md-chip color="warn" (click)="replaceDevice(node.address)">Replace</md-chip>
@@ -31,6 +32,8 @@
           </tbody> 
          </table>
      <p>Adapter state: {{zwAdState}}</p> 
+     <p>Incl proc state: {{inclProcState}}</p>
+     <p>Enabled global non-secure incl.: {{globalNonSecureInclMode}}</p>
      <p>Last error : {{errorMsg}}</p> 
      <md-progress-bar  [mode]="progressBarMode" ></md-progress-bar>   
     </md-card-content>
@@ -45,6 +48,10 @@
         <button md-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button> 
         <button md-raised-button color="accent" (click)="updateNetwork()">Start network update </button> 
        <p> <button md-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> </p>
+       <p> 
+        <button md-raised-button  (click)="setGatewayMode('enableGlobalForceNonSecure')">Enable global non-secure inclusion</button>
+        <button md-raised-button  (click)="setGatewayMode('disableGlobalForceNonSecure')">Disable global non-secure inclusion</button>
+      </p> 
        <p> 
          <button md-raised-button  (click)="downloadTemplatesFromCloud()">Download all stable templates from cloud </button>
          <button md-raised-button  (click)="uploadCacheToCloud()">Upload unstable templates into cloud </button>

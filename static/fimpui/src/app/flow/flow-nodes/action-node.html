@@ -59,31 +59,31 @@
                         </md-radio-button>
                 </md-radio-group>
                 <md-input-container *ngSwitchCase="'str_array'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : ['abc','cde']">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"   placeholder="Default value : [&quot;abc&quot;,&quot;cde&quot;]">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'int_array'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : [1,2] ">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : [1,2] ">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'float_array'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : [1.2,0.5] ">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : [1.2,0.5] ">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'bool_array'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : [true,false]">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : [true,false]">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'str_map'" class="node-transition-field">
-                    <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : {'a':'a1','b':'b2'}">
+                    <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : {&quot;a&quot;:&quot;a1&quot;,&quot;b&quot;:&quot;b2&quot;}">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'int_map'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : {'a':1,'b':2}">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : {&quot;a&quot;:1,&quot;b&quot;:2}">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'float_map'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : {'a':0.5,'b':1.5}">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : {&quot;a&quot;:0.5,&quot;b&quot;:1.5}">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'bool_map'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : {'a':true,'b':false}">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : {&quot;a&quot;:true,&quot;b&quot;:false}">
                 </md-input-container>
                 <md-input-container *ngSwitchCase="'object'" class="node-transition-field">
-                        <input mdInput [(ngModel)]="node.Config.DefaultValue.Value" placeholder="Default value : {'a':'b','b':3}">
+                        <input mdInput [(ngModel)]="complexValueAsString" (change)="updateComplexValue()"  placeholder="Default value : {&quot;a&quot;:&quot;b&quot;,&quot;b&quot;:3}">
                 </md-input-container>
             </span>
       
@@ -97,6 +97,12 @@
                         <md-option *ngFor="let vari of globalVars" [value]="vari" >{{vari}}</md-option>
                 </md-select>
             </p>  
+            <p>
+                <md-input-container class="node-transition-field" style="width:250px">
+                    <input mdInput [(ngModel)]="propsAsString" (change)="updateProps()"  placeholder="Props format : {&quot;a&quot;:&quot;b&quot;,&quot;b&quot;:3}">
+                </md-input-container>
+            </p>
+
         </md-expansion-panel>
         </div>
     <p>

@@ -21,6 +21,7 @@
         <tr><td><b>Software version:</b></td><td> {{ thing.swVersion }} </td> </tr>
         <tr><td><b>Power source:</b></td><td> {{ thing.powerSource }} </td> </tr>
         <tr><td><b>Wakeup interval:</b></td><td> {{ thing.wakeupInterval }} </td> </tr>
+        <tr><td><b>Security:</b></td><td> {{ thing.security }} </td> </tr>
        </table> 
   
   <h3>Services:</h3>
@@ -52,6 +53,7 @@
         <ngx-datatable-column name="Interfaces" width="600">
           <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
                <p><b>Address: </b>{{row.address}}</p>
+               <p><b>Enabled: </b>{{row.enabled}}</p>
                <p><b>Secure : </b>{{row.props.is_secure}} <b>Unsecure : </b>{{row.props.is_unsecure}} </p>
                <p *ngIf="row.props.sup_units"> <b>Supported units:</b> {{row.props.sup_units}} </p>
                <p *ngIf="row.props.sup_events"><b>Supported events:</b> {{row.props.sup_events}} </p>
@@ -73,7 +75,6 @@
         </ngx-datatable-column>
       </ngx-datatable>
 </div>
-
 
 </md-card-content>
  </md-card>

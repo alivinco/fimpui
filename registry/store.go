@@ -387,6 +387,15 @@ func (st *ThingRegistryStore) DeleteLocation(id ID) error {
 	return st.db.DeleteStruct(location)
 }
 
+func (st *ThingRegistryStore) ReindexAll() error {
+	log.Info("Starting reindex")
+	err:=st.db.ReIndex(&Thing{})
+	err =st.db.ReIndex(&Location{})
+	err =st.db.ReIndex(&Service{})
+	log.Info("Reindex is complete")
+	return err
+}
+
 func (st *ThingRegistryStore) ClearAll() error {
 	thing := Thing{}
 	location := Location{}

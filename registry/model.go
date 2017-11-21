@@ -25,7 +25,7 @@ type AttributeValueContainer struct {
 }
 
 type Thing struct {
-	ID             ID        `json:"id" storm:"id,increment"`
+	ID             ID        `json:"id" storm:"id,increment,index"`
 	IntegrationId  string    `json:"integr_id" storm:"index"`
 	Address        string    `json:"address" storm:"index"`
 	Type           string    `json:"type"`
@@ -40,8 +40,9 @@ type Thing struct {
 	SwVersion      string    `json:"sw_ver"`
 	PowerSource    string    `json:"power_source"`
 	WakeUpInterval string    `json:"wakeup_interval"`
+	Security       string    `json:"security"`
 	Tags           []string  `json:"tags"`
-	LocationId     ID        `json:"location_id"`
+	LocationId     ID        `json:"location_id" storm:"index"`
 	PropSets                   map[string]map[string]interface{}  `json:"prop_set"`
 	TechSpecificProps          map[string]string             `json:"tech_specific_props"`
 	UpdatedAt 		time.Time `json:"updated_at"`
@@ -63,11 +64,12 @@ type Bridge struct {
 }
 
 type Service struct {
-	ID            ID                        `json:"id"  storm:"id,increment"`
+	ID            ID                        `json:"id"  storm:"id,increment,index"`
 	IntegrationId string                    `json:"integr_id" storm:"index"`
 	ParentContainerId   ID  		        `json:"container_id" storm:"index"`
 	ParentContainerType string              `json:"container_type" storm:"index"`
 	Name          string                    `json:"name" storm:"index"`
+	Enabled       bool                      `json:"enabled"`
 	Alias         string                    `json:"alias"`
 	Address       string                    `json:"address" storm:"index"`
 	Groups        []string                  `json:"groups"`
@@ -87,7 +89,7 @@ type Interface struct {
 }
 
 type Location struct {
-	ID             ID         `json:"id" storm:"id,increment"`
+	ID             ID         `json:"id" storm:"id,increment,index"`
 	IntegrationId  string     `json:"integr_id"`
 	Type           string     `json:"type"`
 	Alias          string     `json:"alias"`
@@ -99,37 +101,4 @@ type Location struct {
 	State          string     `json:"state"`
 }
 
-type ServiceExtendedView struct {
-	Service
-	LocationAlias string      `json:"location_alias"`
-}
 
-type ThingWithLocationView struct{
-	Thing
-	LocationAlias string     `json:"location_alias"`
-}
-
-type ThingExtendedView struct {
-	Thing
-	Services       []ServiceExtendedView `json:"services"`
-	LocationAlias string                 `json:"location_alias"`
-}
-
-type InterfaceFlatView struct {
-	ThingId            ID       `json:"thing_id"`
-	ThingAddress       string   `json:"thing_address"`
-	ThingTech          string   `json:"thing_tech"`
-	ThingAlias         string   `json:"thing_alias"`
-	ServiceId          ID       `json:"service_id"`
-	ServiceName        string   `json:"service_name"`
-	ServiceAlias       string   `json:"service_alias"`
-	ServiceAddress     string   `json:"service_address"`
-	InterfaceType      string   `json:"intf_type"`
-	InterfaceMsgType   string   `json:"intf_msg_type"`
-	InterfaceAddress   string   `json:"intf_address"`
-	InterfaceValueType string   `json:"intf_val_type"`
-	LocationId         ID       `json:"location_id"`
-	LocationAlias      string   `json:"location_alias"`
-	LocationType       string   `json:"location_type"`
-	Groups             []string `json:"groups"`
-}

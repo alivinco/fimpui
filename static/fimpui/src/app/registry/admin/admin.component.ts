@@ -29,4 +29,12 @@ export class AdminComponent implements OnInit {
        console.log("All entries were deleted");
     });
   }
+ 
+  public reindexRegistry(){
+    this.http
+    .post(BACKEND_ROOT+'/fimp/api/registry/reindex',null)
+    .subscribe ((result) => {
+       console.log("DB reindexed successfully");
+    });
+  }
 }

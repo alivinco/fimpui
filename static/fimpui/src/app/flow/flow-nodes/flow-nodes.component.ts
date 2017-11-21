@@ -31,6 +31,8 @@ export class ActionNodeComponent implements OnInit {
   @Input() flowId:string;
   localVars:any;
   globalVars:any;
+  complexValueAsString:any; //string representation of node.Config.DefaultValue.Value
+  propsAsString:any;
   constructor(public dialog: MdDialog,private http : Http) { 
     this.loadContext();
    }
@@ -42,7 +44,25 @@ export class ActionNodeComponent implements OnInit {
       this.node["VariableName"] = "";
       this.node["IsVariableGlobal"] = false;
     }
+    try{
+      this.complexValueAsString = JSON.stringify(this.node.Config.DefaultValue.Value);
+    }catch (err){
+      console.log("Can't stringify complex default value")
+    }
+    try{
+      this.propsAsString = JSON.stringify(this.node.Config.Props);
+    }catch (err){
+      console.log("Can't stringify props ")
+    }
+    
   }
+  updateComplexValue(){
+    this.node.Config.DefaultValue.Value = JSON.parse(this.complexValueAsString)
+  }
+  updateProps(){
+    this.node.Config.Props = JSON.parse(this.propsAsString)
+  }
+
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
             width: '500px',
@@ -240,9 +260,14 @@ export class TriggerNodeComponent implements OnInit {
   onPublishServiceChange(){
     console.log(this.flowPublishService);
     var msgType = "cmd";
-    if (this.flowPublishInterface.indexOf("evt.")>=0){
-      msgType = "evt";
+    try{
+      if (this.flowPublishInterface.indexOf("evt.")>=0){
+        msgType = "evt";
+      }
+    }catch(err){
+      
     }
+    
     this.flowPublishAddress = "pt:j1/mt:"+msgType+"/rt:dev/rn:flow/ad:1/sv:"+this.flowPublishService+"/ad:"+this.flowId;
   }
   publishFlowAsVirtualDevice(){

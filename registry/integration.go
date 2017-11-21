@@ -115,6 +115,7 @@ func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error
 			thing.PropSets = inclReport.PropSets
 			thing.TechSpecificProps = inclReport.TechSpecificProps
 			thing.WakeUpInterval = inclReport.WakeUpInterval
+			thing.Security = inclReport.Security
 			thingId, err := mg.registry.UpsertThing(thing)
 			if err != nil {
 				log.Error("<MqRegInt> Can't insert new Thing . Error: ", err)
@@ -123,6 +124,7 @@ func (mg *MqttIntegration) processInclusionReport(msg *fimpgo.FimpMessage) error
 				service := Service{}
 				service.Name = inclReport.Services[i].Name
 				service.Address = inclReport.Services[i].Address
+				service.Enabled = inclReport.Services[i].Enabled
 				service.Alias = inclReport.Services[i].Alias
 				service.Tags = inclReport.Services[i].Tags
 				service.Props = inclReport.Services[i].Props

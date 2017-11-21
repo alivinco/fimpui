@@ -24,6 +24,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   selectedOption: string; 
   nodes : any[];
   zwAdState : string;
+  globalNonSecureInclMode : string;
+  inclProcState : string;
   errorMsg : string;
   globalSub : Subscription;
   progressBarMode : string ;
@@ -33,7 +35,9 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
 
   ngOnInit() {
+    this.zwAdState = "UNKNOWN";
     this.showProgress(false);
+    this.getAdapterStates();
     this.loadLocalTemplates();
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
       console.log(msg.payload.toString());
@@ -64,6 +68,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
             this.errorMsg = fimpMsg.props["msg"];
         }else if (fimpMsg.mtype == "evt.network.update_report") {
             this.zwAdState = fimpMsg.val;
+        }else if (fimpMsg.mtype == "evt.adapter.states_report") {
+          this.zwAdState = fimpMsg.val["adapter_state"];
+          this.inclProcState = fimpMsg.val["base_net_proc_state"];
+          this.globalNonSecureInclMode = fimpMsg.val["enabled_global_non_secure"];
         }
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
@@ -112,12 +120,17 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
  
   reloadNodes(){
+    this.getAdapterStates();
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
     this.showProgress(true);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
   resetNetwork(){
     let msg  = new FimpMessage("zwave-ad","cmd.network.reset","null",null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+  getAdapterStates(){
+    let msg  = new FimpMessage("zwave-ad","cmd.adapter.get_states","null",null,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
   restartAdapter(){
@@ -133,6 +146,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   updateDevice(nodeId :number){
     let msg  = new FimpMessage("zwave-ad","cmd.network.node_update","int",Number(nodeId),null,null)
     this.showProgress(true);
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+  setGatewayMode(mode:string){
+    let msg  = new FimpMessage("zwave-ad","cmd.mode.set","string",mode,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
   deleteFailedDevice(nodeId :number){
@@ -157,8 +174,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   addDevice(){
     console.log("Add device")
-    let msg  = new FimpMessage("zwave-ad","cmd.thing.inclusion","bool",true,null,null)
-    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+   
     let dialogRef = this.dialog.open(AddDeviceDialog, {
       height: '400px',
       width: '600px',
@@ -219,6 +235,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   
   openTemplateEditor(templateName:string,templateType :string ) {
+    templateName = templateName.replace("zw_","");
     let dialogRef = this.dialog.open(TemplateEditorDialog,{
             // height: '95%',
             width: '95%',
@@ -238,6 +255,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 export class AddDeviceDialog implements OnInit, OnDestroy  {
   private messages:string[]=[];
   globalSub : Subscription;
+  customTemplateName : string;
+  forceInterview : boolean;
+  forceNonSecure : boolean;
+
   constructor(public dialogRef: MdDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
     
     console.log("Dialog constructor Opened");
@@ -268,9 +289,22 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   ngOnDestroy() {
     this.globalSub.unsubscribe();
   }
+
+  startInclusion(){
+    var props = new Map<string,string>();
+    props["template_name"] = this.customTemplateName;
+    props["force_non_secure"] = "false";
+    if(this.forceInterview) {
+      props["template_name"] = "__interview__";
+    } 
+    if(this.forceNonSecure){
+      props["force_non_secure"] = "true";
+    }
+    let msg  = new FimpMessage("zwave-ad","cmd.thing.inclusion","bool",true,props,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
   stopInclusion(){
     let msg  = new FimpMessage("zwave-ad","cmd.thing."+this.data,"bool",false,null,null)
-    
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
     this.dialogRef.close();
   }
@@ -311,7 +345,10 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
            this.template["auto_configs"] = {"assoc":[],"configs":[]}
          }
          if(this.template.dev_custom == undefined) {
-           this.template["dev_custom"] = {"service_grouping":[],"service_descriptor":[],"basic_mapping":[]}
+           this.template["dev_custom"] = {"service_grouping":[],"service_fields":[],"service_descriptor":[],"basic_mapping":[]}
+         }
+         if(this.template.dev_custom.service_fields == undefined) {
+          this.template["dev_custom"]["service_fields"] = [];
          }
          if(this.template.comment == undefined){
            this.template["comment"]=""
@@ -351,12 +388,24 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     this.template.dev_custom.service_grouping.push({"endp":1,"service":"sensor_temp","group":"ch_0","comment":""})
   }
 
+  addNewServiceFieldCustomization() {
+    this.template.dev_custom.service_fields.push({"endp":1,"service":"","enabled":true,"comment":""})
+  }
+
   deleteServiceGrouping(serviceGrp:any) {
     var i = this.template.dev_custom.service_grouping.indexOf(serviceGrp);
     if(i != -1) {
       this.template.dev_custom.service_grouping.splice(i, 1);
     }
   }
+  deleteServiceFieldCustomization(serviceGrp:any) {
+    var i = this.template.dev_custom.service_fields.indexOf(serviceGrp);
+    if(i != -1) {
+      this.template.dev_custom.service_fields.splice(i, 1);
+    }
+  }
+
+
   addNewServiceDescriptor() {
     this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":"","comment":""});
   }
@@ -367,7 +416,8 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     }
   }
   addNewBasicMapping() {
-    this.template.dev_custom.basic_mapping.push({"endp":0,"basic_value":0,"service":"","msg_type":"","fimp_value":{},"map_range":false,"min":0,"max":100,"comment":"" });
+    this.template.dev_custom.basic_mapping.push({"endp":0,"basic_value":0,"service":"","msg_type":"","fimp_value":{"val":"","val_t":"string"},
+    "map_range":false,"is_get_report_cmd":false,"min":0,"max":100,"comment":"" });
   }
   deleteBasicMapping(basicMapping:any) {
     var i = this.template.dev_custom.basic_mapping.indexOf(basicMapping);

@@ -1,7 +1,17 @@
 <h1 md-dialog-title> Add new device </h1>
 <md-dialog-content>
 <div *ngFor="let message of messages">{{message}}</div>
+<md-input-container class="node-transition-field">
+   <input mdInput [(ngModel)]="customTemplateName" placeholder="templateName">
+</md-input-container>    
+<div style="margin-bottom: 30px" >
+   <md-checkbox [(ngModel)]="forceInterview" > Force interview </md-checkbox>
+</div>
+<div style="margin-bottom: 30px" >
+   <md-checkbox [(ngModel)]="forceNonSecure" > Force non-secure inclusion </md-checkbox>
+</div>     
 </md-dialog-content>
 <md-dialog-actions>
+<button md-raised-button color="accent" (click)="startInclusion()" >Start </button>
 <button md-raised-button color="warn" (click)="stopInclusion()" >Stop and close</button>
 </md-dialog-actions>

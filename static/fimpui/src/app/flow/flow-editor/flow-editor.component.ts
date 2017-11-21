@@ -165,7 +165,7 @@ export class FlowEditorComponent implements OnInit {
         node.Config["IsValueFilterEnabled"] = false;
         break;
       case "action":
-        node.Config = {"VariableName":"","IsVariableGlobal":false}; 
+        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}}; 
         node.Config["DefaultValue"] = {"Value":"","ValueType":""};
         break;
       case "counter":
