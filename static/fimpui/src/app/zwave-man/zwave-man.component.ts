@@ -156,7 +156,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
      let val = {"address":String(nodeId),"stop":""}
     let msg  = new FimpMessage("zwave-ad","cmd.thing.delete","str_map",val,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
-    let dialogRef = this.dialog.open(AddDeviceDialog, {
+    let dialogRef = this.dialog.open(RemoveDeviceDialog, {
       height: '400px',
       width: '600px',
       data : "exclusion",
@@ -166,7 +166,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     let val = {"address":String(nodeId),"stop":""}
     let msg  = new FimpMessage("zwave-ad","cmd.thing.replace","str_map",val,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
-    let dialogRef = this.dialog.open(AddDeviceDialog, {
+    let dialogRef = this.dialog.open(RemoveDeviceDialog, {
       height: '400px',
       width: '600px',
       data : "inclusion",
@@ -188,7 +188,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     console.log("Remove device ")
     let msg  = new FimpMessage("zwave-ad","cmd.thing.exclusion","bool",true,null,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
-    let dialogRef = this.dialog.open(AddDeviceDialog, {
+    let dialogRef = this.dialog.open(RemoveDeviceDialog, {
       height: '400px',
       width: '600px',
       data:"exclusion",
@@ -247,10 +247,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
 
 }
-
+//////////////////////////////////////////////////////////////////////
 @Component({
   selector: 'add-device-dialog',
-  templateUrl: './dialog.html',
+  templateUrl: './dialog-add-node.html',
 })
 export class AddDeviceDialog implements OnInit, OnDestroy  {
   private messages:string[]=[];
@@ -310,6 +310,62 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   }
 
 }
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+@Component({
+  selector: 'remove-device-dialog',
+  templateUrl: './dialog-remove-node.html',
+})
+export class RemoveDeviceDialog implements OnInit, OnDestroy  {
+  private messages:string[]=[];
+  globalSub : Subscription;
+  customTemplateName : string;
+  forceInterview : boolean;
+  forceNonSecure : boolean;
+
+  constructor(public dialogRef: MdDialogRef<RemoveDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
+    
+    console.log("Dialog constructor Opened");
+  }
+  ngOnInit(){
+    this.messages = [];
+    this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
+      
+      let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
+      if (fimpMsg.service == "zwave-ad" )
+        {
+        if(fimpMsg.mtype == "evt.thing.inclusion_report" )
+        { 
+          this.messages.push("Node added :"+fimpMsg.val.address);
+          this.messages.push("Product name :"+fimpMsg.val.product_name);
+        } else if (fimpMsg.mtype == "evt.thing.exclusion_report" ){
+          this.messages.push("Node removed :"+fimpMsg.val.address);
+        }
+         else if (fimpMsg.mtype == "evt.thing.inclusion_status_report" ){
+          this.messages.push("New state :"+fimpMsg.val);
+        } else if (fimpMsg.mtype == "evt.error.report" ){
+          this.messages.push("Error : code:"+fimpMsg.val+" message:"+fimpMsg.props["msg"]);
+        }
+      }
+      //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
+    });
+  }
+  ngOnDestroy() {
+    this.globalSub.unsubscribe();
+  }
+
+  stopExclusion(){
+    let msg  = new FimpMessage("zwave-ad","cmd.thing."+this.data,"bool",false,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+    this.dialogRef.close();
+  }
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
+
 
 @Component({
   selector: 'template-editor-dialog',

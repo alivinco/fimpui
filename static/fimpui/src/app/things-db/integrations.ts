@@ -21,11 +21,13 @@ export function MapJsonToThingObject(val:any):Thing {
     thing.productHash = val.product_hash;
     thing.productId = val.product_id;
     thing.category = val.category;
+    thing.security = val.security
     thing.wakeupInterval = val.wakeup_interval;
     for (let fimpService of val.services ) {
         let service = new Service();
         service.name = fimpService.name;
         service.address = fimpService.address;
+        service.enabled = fimpService.enabled;
         service.groups = fimpService.groups;
         service.props = fimpService.props;
         for (let fimpIntf of fimpService.interfaces) {

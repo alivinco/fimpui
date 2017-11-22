@@ -7,7 +7,7 @@ import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
 
 import { MaterialModule } from '@angular/material';
-import { ZwaveManComponent , AddDeviceDialog } from './zwave-man/zwave-man.component';
+import { ZwaveManComponent , AddDeviceDialog,RemoveDeviceDialog } from './zwave-man/zwave-man.component';
 import { TemplateEditorDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { SystemsManComponent } from './systems-man/systems-man.component';
@@ -82,6 +82,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     IkeaManComponent,
     SystemsManComponent,
     AddDeviceDialog,
+    RemoveDeviceDialog,
     TimelineComponent,
     ThingViewComponent,
     ThingsTableComponent,
@@ -115,7 +116,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     deps: [ConfigsService],
     multi: true
 }],
-  entryComponents:[AddDeviceDialog,TemplateEditorDialog], 
+  entryComponents:[AddDeviceDialog,RemoveDeviceDialog,TemplateEditorDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

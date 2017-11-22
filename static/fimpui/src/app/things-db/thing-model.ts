@@ -13,6 +13,7 @@ export class Thing {
     wakeupInterval : string;
     services:Service[]=[];
     category:string;
+    security:string;
     propertySets : Map<string,Map<string,any>>;
     techSpecificProps : Map<string,string>;
 
@@ -21,6 +22,7 @@ export class Thing {
 export class Service {
     name : string;
     address : string ;
+    enabled: boolean;
     groups : string[];
     location : string ;
     props : Map<string,any>;
