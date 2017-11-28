@@ -39,7 +39,7 @@
            <strong>{{value}}</strong>
           </ng-template>
         </ngx-datatable-column>
-        <ngx-datatable-column name="Groups" width="60">
+        <ngx-datatable-column name="Groups" width="70">
           <ng-template let-column="column" ngx-datatable-header-template>
             {{column.name}}
           </ng-template>
@@ -50,7 +50,7 @@
           </ng-template>
         </ngx-datatable-column>
         
-        <ngx-datatable-column name="Interfaces" width="600">
+        <ngx-datatable-column name="Interfaces" width="700">
           <ng-template let-value="value" let-row="row" ngx-datatable-cell-template>
                <p><b>Address: </b>{{row.address}}</p>
                <p><b>Enabled: </b>{{row.enabled}}</p>
@@ -59,9 +59,11 @@
                <p *ngIf="row.props.sup_events"><b>Supported events:</b> {{row.props.sup_events}} </p>
                <p *ngIf="row.props.sup_setpoints"><b>Supported setpoints:</b> {{row.props.sup_setpoints}} </p>
                <p *ngIf="row.props.sup_states"><b>Supported states:</b> {{row.props.sup_states}} </p>
+               <p *ngIf="row.props.sup_tstates"><b>Supported target states:</b> {{row.props.sup_tstates}} </p>
                <p *ngIf="row.props.sup_modes"><b>Supported modes:</b> {{row.props.sup_modes}} </p>
                <p *ngIf="row.props.sup_scenes"><b>Supported scenes:</b> {{row.props.sup_scenes}} </p>
                <p *ngIf="row.props.sup_components"><b>Supported components:</b> {{row.props.sup_components}} </p>
+               <p *ngIf="row.props.sup_notiftypes"><b>Supported notif. types:</b> {{row.props.sup_notiftypes}} </p>
                <table>
                  <tr><th>type</th><th>msg</th><th>val. type</th><th ></th> </tr>
                  <tr *ngFor="let intf of value">

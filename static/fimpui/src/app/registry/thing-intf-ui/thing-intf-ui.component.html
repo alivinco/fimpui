@@ -124,11 +124,50 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
+            <td class="control-first-td">&nbsp;</td>
             <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
           </tr>
           </table>
         </form>
       </div>
+      <div *ngSwitchCase="'cmd.tstate.set'"> 
+        <form class="intf-form">
+        <table class="table-full-width" cellspacing="0">
+          <tr>
+              <td class="control-first-td" ><md-input-container class="example-full-width">
+                  <input #targetState mdInput placeholder="mode">
+                </md-input-container></td>
+            <td><button md-raised-button (click)="cmdStateSet(targetState.value)" >Set target</button>
+          </tr>
+          </table>
+        </form>
+      </div>
+      <div *ngSwitchCase="'cmd.notiftype.set'"> 
+          <form class="intf-form">
+          <table class="table-full-width" cellspacing="0">
+            <tr>
+              <td><md-input-container class="example-full-width">
+                <input #notifTypeInput mdInput placeholder="Notification type">
+              </md-input-container></td>
+              <td>
+                <div style="margin-bottom: 15px;width:100px" >
+                    <md-checkbox #notifTypeStateInput  >State</md-checkbox>
+                </div>
+               </td>
+              <td><button md-raised-button (click)="cmdSetBoolArrayOneItem(notifTypeInput.value,notifTypeStateInput.checked)" >Set</button></td>
+            </tr>
+            </table>
+          </form>
+      </div>
+      <div *ngSwitchCase="'cmd.notiftype.get_report'"> 
+          <form class="intf-form">
+          <table class="table-full-width" cellspacing="0">
+            <tr>
+              <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+            </tr>
+            </table>
+          </form>
+        </div>
       <div *ngSwitchCase="'cmd.lock.set'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
@@ -227,7 +266,7 @@
       <div *ngSwitchCase="'cmd.config.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><md-input-container class="example-full-width">
+            <td class="control-first-td"><md-input-container class="example-full-width">
               <input #confName mdInput placeholder="name">
             </md-input-container></td>
             <td><button md-raised-button (click)="cmdConfigReportGet(confName.value)" >Get</button></td>
@@ -239,7 +278,7 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
+            <td ><md-input-container class="example-full-width">
               <input #group mdInput placeholder="group">
             </md-input-container></td>
             <td><md-input-container class="example-full-width">
@@ -269,7 +308,7 @@
       <div *ngSwitchCase="'cmd.group.get_members'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><md-input-container class="example-full-width">
+            <td class="control-first-td"><md-input-container class="example-full-width">
               <input #groupName mdInput placeholder="group">
             </md-input-container></td>
             <td><button md-raised-button (click)="cmdGroupReportGet(groupName.value)" >Get</button></td>
