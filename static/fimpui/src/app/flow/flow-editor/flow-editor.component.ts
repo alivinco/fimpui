@@ -9,6 +9,7 @@ import { msgTypeToValueTypeMap } from "app/things-db/mapping";
 import { BACKEND_ROOT } from "app/globals";
 import { RegistryModule} from 'app/registry/registry.module'
 import { ServiceInterface } from "app/registry/model";
+import * as D3NE from "d3-node-editor";
 
 export class MetaNode {
   Id               :string;
@@ -46,6 +47,7 @@ export class FlowEditorComponent implements OnInit {
   ngOnInit() {
     let id  = this.route.snapshot.params['id'];
     this.loadFlow(id);
+    this.initD3Flow();
     
   }
  
@@ -63,6 +65,137 @@ export class FlowEditorComponent implements OnInit {
          this.loadContext();
       });
   }
+
+  initD3Flow(){
+
+    var numSocket = new D3NE.Socket("number", "Number value", "hint");
+    
+    var componentNum = new D3NE.Component("Number", {
+       builder: function builder(node) {
+          var out1 = new D3NE.Output("Number", numSocket);
+          var numControl = new D3NE.Control('<input type="number">', function (el, c) {
+             el.value = c.getData('num') || 1;
+    
+             function upd() {
+                c.putData("num", parseFloat(el.value));
+                editor.eventListener.trigger("change");
+             }
+    
+             el.addEventListener("input", upd);
+             el.addEventListener("mousedown", function (e) {
+                e.stopPropagation();
+             }); // prevent node movement when selecting text in the input field
+             upd();
+          });
+    
+          return node.addControl(numControl).addOutput(out1);
+       },
+       worker: function worker(node, inputs, outputs) {
+          outputs[0] = node.data.num;
+       }
+    });
+
+    var componentFlowNode = new D3NE.Component("FlowNode", {
+      builder: function builder(node) {
+         var out1 = new D3NE.Output("Number", numSocket);
+         var numControl = new D3NE.Control('<button md-raised-button (click)="addNode(\'counter\')" >Counter</button>', function (el, c) {
+            
+         });
+   
+         return node.addControl(numControl).addOutput(out1);
+      },
+      worker: function worker(node, inputs, outputs) {
+         outputs[0] = node.data.num;
+      }
+   });
+    
+    var componentAdd = new D3NE.Component("Add", {
+       builder: function builder(node) {
+          var inp1 = new D3NE.Input("Number", numSocket);
+          var inp2 = new D3NE.Input("Number", numSocket);
+          var out = new D3NE.Output("Number", numSocket);
+    
+          var numControl = new D3NE.Control('<input readonly type="number">', function (el, control) {
+             control.setValue = function (val) {
+                el.value = val;
+             };
+          });
+    
+          return node.addInput(inp1).addInput(inp2).addControl(numControl).addOutput(out);
+       },
+       worker: function worker(node, inputs, outputs) {
+          var sum = inputs[0][0] + inputs[1][0];
+          editor.nodes.find(function (n) {
+             return n.id == node.id;
+          }).controls[0].setValue(sum);
+          outputs[0] = sum;
+       }
+    });
+    
+    var menu = new D3NE.ContextMenu({
+       Values: {
+          Value: componentNum,
+          Action: function Action() {
+             alert("ok");
+          }
+       },
+       Add: componentAdd
+    });
+    
+    var container = document.getElementById("nodeEditor");
+    var components = [componentNum, componentAdd,componentFlowNode];
+    var editor = new D3NE.NodeEditor("demo@0.1.0", container, components, menu);
+    
+    var nn = componentNum.newNode();
+    nn.data.num = 2;
+    var n1 = componentNum.builder(nn);
+    var n2 = componentNum.builder(componentNum.newNode());
+    var add = componentAdd.builder(componentAdd.newNode());
+    var flowNode =  componentFlowNode.builder( componentFlowNode.newNode());
+    
+    n1.position = [80, 200];
+    n2.position = [80, 400];
+    add.position = [500, 240];
+    flowNode.position = [200,400];
+    
+    editor.connect(n1.outputs[0], add.inputs[0]);
+    editor.connect(n2.outputs[0], add.inputs[1]);
+    
+    editor.addNode(n1);
+    editor.addNode(n2);
+    editor.addNode(add);
+    editor.addNode(flowNode);
+    //  editor.selectNode(tnode);
+    
+    var engine = new D3NE.Engine("demo@0.1.0", components);
+    
+    // editor.eventListener.on("change", _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+    //    return regeneratorRuntime.wrap(function _callee$(_context) {
+    //       while (1) {
+    //          switch (_context.prev = _context.next) {
+    //             case 0:
+    //                _context.next = 2;
+    //                return engine.abort();
+    
+    //             case 2:
+    //                _context.next = 4;
+    //                return engine.process(editor.toJSON());
+    
+    //             case 4:
+    //             case "end":
+    //                return _context.stop();
+    //          }
+    //       }
+    //    }, _callee, this);
+    // })));
+    
+    editor.view.zoomAt(editor.nodes);
+    editor.eventListener.trigger("change");
+    editor.view.resize();
+
+
+  }
+
   loadContext() {
     this.http
       .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flow.Id)

@@ -55,3 +55,12 @@
 md-chip {
   cursor: pointer;
 }
+
+#nodeEditor{
+  position: relative;
+ height: 200px;
+}
+
+.socket.number{
+   background: #96b38a
+}
