@@ -9,7 +9,10 @@
 </div>
 <div style="margin-bottom: 30px" >
    <md-checkbox [(ngModel)]="forceNonSecure" > Force non-secure inclusion </md-checkbox>
-</div>     
+</div> 
+<md-input-container class="node-transition-field">
+    <input mdInput [(ngModel)]="s2pin" placeholder="S2 pin" value="0">
+</md-input-container>       
 </md-dialog-content>
 <md-dialog-actions>
 <button md-raised-button color="accent" (click)="startInclusion()" >Start </button>

@@ -43,6 +43,19 @@
       <button md-raised-button (click)="reloadNodes()">Reload list</button>
       <button md-raised-button (click)="settings.hidden = !settings.hidden" >Advanced</button>
       <br/>
+      <div> Ping device:
+         <md-input-container >
+          <input mdInput #pingFromInput placeholder="from node">
+        </md-input-container>
+        <md-input-container > 
+          <input mdInput #pingToInput placeholder="to node">
+        </md-input-container>
+        <md-input-container style="width:50px"> 
+            <input mdInput #txLevelInput placeholder="lvl">
+        </md-input-container>
+          <button md-raised-button (click)="pingNode(pingFromInput.value,pingToInput.value,txLevelInput.value)">Ping</button>
+          <p>Result : {{ pingResult }} </p>
+      </div>
       <div #settings hidden > 
         <p>Advanced settings </p>
         <button md-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button> 

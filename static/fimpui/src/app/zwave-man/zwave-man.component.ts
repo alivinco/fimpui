@@ -31,6 +31,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   progressBarMode : string ;
   localTemplates : string[];
   localTemplatesCache : string[];
+  pingResult :string;
   constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router,private http : Http) {
   }
 
@@ -72,6 +73,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
           this.zwAdState = fimpMsg.val["adapter_state"];
           this.inclProcState = fimpMsg.val["base_net_proc_state"];
           this.globalNonSecureInclMode = fimpMsg.val["enabled_global_non_secure"];
+        }
+      }else if (fimpMsg.service == "dev_sys") {
+        if (fimpMsg.mtype == "evt.ping.report") {
+            this.pingResult = fimpMsg.val.status;
         }
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
@@ -118,7 +123,12 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
          localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));         
       });
   }
- 
+  pingNode(fromNode:string,toNode:string,level:string){
+    this.pingResult = "working...";
+    let val = {"tx_level":level}
+    let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:dev_sys/ad:"+fromNode+"_0",msg.toString());
+  }
   reloadNodes(){
     this.getAdapterStates();
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
@@ -258,6 +268,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   customTemplateName : string;
   forceInterview : boolean;
   forceNonSecure : boolean;
+  s2pin : string;
 
   constructor(public dialogRef: MdDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
     
@@ -294,6 +305,8 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
     var props = new Map<string,string>();
     props["template_name"] = this.customTemplateName;
     props["force_non_secure"] = "false";
+    props["pin"] = this.s2pin;
+
     if(this.forceInterview) {
       props["template_name"] = "__interview__";
     } 
