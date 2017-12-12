@@ -1,7 +1,7 @@
 import { Component, OnInit,Inject } from '@angular/core';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
-import { MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
-import { MD_DIALOG_DATA} from '@angular/material';
+import { MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
+import { MAT_DIALOG_DATA} from '@angular/material';
 import { BACKEND_ROOT } from "app/globals";
 
 @Component({
@@ -13,7 +13,7 @@ import { BACKEND_ROOT } from "app/globals";
     alias : string;
     type : string;
     address : string;     
-    constructor(public dialogRef: MdDialogRef<LocationEditorDialog>,@Inject(MD_DIALOG_DATA) public data: any,public snackBar: MdSnackBar,private http : Http) {
+    constructor(public dialogRef: MatDialogRef<LocationEditorDialog>,@Inject(MAT_DIALOG_DATA) public data: any,public snackBar: MatSnackBar,private http : Http) {
           console.dir(data)
           if (data){
             this.locationId = Number(data.id);

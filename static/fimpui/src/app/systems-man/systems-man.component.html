@@ -1,37 +1,37 @@
 
 
-<nav md-tab-nav-bar>
-    <a md-tab-link [routerLink]="['/zwave-man']" >Z-Wave</a>
-    <a md-tab-link [routerLink]="['/ikea-man']" >Ikea Tradfri</a>
-    <a md-tab-link [routerLink]="['/systems-man']" >Systems</a>
+<nav mat-tab-nav-bar>
+    <a mat-tab-link [routerLink]="['/zwave-man']" >Z-Wave</a>
+    <a mat-tab-link [routerLink]="['/ikea-man']" >Ikea Tradfri</a>
+    <a mat-tab-link [routerLink]="['/systems-man']" >Systems</a>
 </nav>
 <div class="systems-man">
-<md-card class="example-card">
-    <md-card-header>
-  <md-card-title> <h3> System adapter managment </h3> </md-card-title>
-  <md-card-subtitle> Connect or disconnect a system adapter to FH </md-card-subtitle>
-    </md-card-header>
-  <md-card-content>
-    <md-input-container class="example-full-width">
-            <input #service mdInput placeholder="service">
-    </md-input-container>
+<mat-card class="example-card">
+    <mat-card-header>
+  <mat-card-title> <h3> System adapter managment </h3> </mat-card-title>
+  <mat-card-subtitle> Connect or disconnect a system adapter to FH </mat-card-subtitle>
+    </mat-card-header>
+  <mat-card-content>
+    <mat-input-container class="example-full-width">
+            <input #service matInput placeholder="service">
+    </mat-input-container>
     <p>
-    <md-input-container class="example-full-width">
-        <input #systemIdInput mdInput placeholder="id" [(ngModel)]= "systemId" >
-    </md-input-container>
-    <md-input-container class="example-full-width">
-        <input #addressInput mdInput placeholder="address" [(ngModel)]="address" >
-      </md-input-container>
-    <md-input-container class="example-full-width">
-            <input #securityKeyInput mdInput placeholder="securityKey" [(ngModel)]="securityKey">
-    </md-input-container>
+    <mat-input-container class="example-full-width">
+        <input #systemIdInput matInput placeholder="id" [(ngModel)]= "systemId" >
+    </mat-input-container>
+    <mat-input-container class="example-full-width">
+        <input #addressInput matInput placeholder="address" [(ngModel)]="address" >
+      </mat-input-container>
+    <mat-input-container class="example-full-width">
+            <input #securityKeyInput matInput placeholder="securityKey" [(ngModel)]="securityKey">
+    </mat-input-container>
     </p>
-  </md-card-content>
-    <md-card-actions>
-    <button md-raised-button (click)="getConnParams(service.value)" >Get connection parameters</button>
-    <button md-raised-button (click)="connect(service.value,systemIdInput.value,securityKeyInput.value,addressInput.value)" >Connect</button>
-    <button md-raised-button (click)="sync(service.value)" >Synchronize</button>
-    <button md-raised-button (click)="disconnect(service.value,securityKeyInput.value,addressInput.value)" >Disconnect</button>
-    </md-card-actions>
-</md-card>
+  </mat-card-content>
+    <mat-card-actions>
+    <button mat-raised-button (click)="getConnParams(service.value)" >Get connection parameters</button>
+    <button mat-raised-button (click)="connect(service.value,systemIdInput.value,securityKeyInput.value,addressInput.value)" >Connect</button>
+    <button mat-raised-button (click)="sync(service.value)" >Synchronize</button>
+    <button mat-raised-button (click)="disconnect(service.value,securityKeyInput.value,addressInput.value)" >Disconnect</button>
+    </mat-card-actions>
+</mat-card>
 </div>

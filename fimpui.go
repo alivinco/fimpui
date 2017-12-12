@@ -26,6 +26,7 @@ import (
 
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"github.com/alivinco/fimpui/integr/zwave"
+	"github.com/alivinco/fimpui/statsdb"
 )
 
 type SystemInfo struct {
@@ -104,6 +105,12 @@ func main() {
 	log.Info("<main> Starting MqttIntegration ")
 	mqttRegInt := registry.NewMqttIntegration(configs, thingRegistryStore)
 	mqttRegInt.InitMessagingTransport()
+	log.Info("<main> Started ")
+	//---------STATS STORE-----------------
+	log.Info("<main> Stats store ")
+	statsStore := statsdb.NewStatsStore("stats.db")
+	streamProcessor := statsdb.NewStreamProcessor(configs,statsStore)
+	streamProcessor.InitMessagingTransport()
 	log.Info("<main> Started ")
 	//----------VINCULUM CLIENT------------
 	log.Info("<main> Starting VinculumClient ")
@@ -291,6 +298,22 @@ func main() {
 		}
 	})
 
+	e.GET("/fimp/api/stats/event-log", func(c echo.Context) error {
+
+		pageSize := 1000
+		page := 0
+		pageSize, _ = strconv.Atoi(c.QueryParam("pageSize"))
+		page, _ = strconv.Atoi(c.QueryParam("page"))
+		statsErrors, err := statsStore.GetEvents(pageSize,page)
+
+		if err == nil {
+			return c.JSON(http.StatusOK, statsErrors)
+		} else {
+			log.Error("Faild to fetch errors ",err)
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+	})
 
 	e.GET("/fimp/api/registry/things", func(c echo.Context) error {
 

@@ -1,6 +1,18 @@
-import { Component, OnInit , ViewChild } from '@angular/core';
 import { FimpService} from 'app/fimp/fimp.service'
 import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message'; 
+import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter,Inject} from '@angular/core';
+import {DataSource} from '@angular/cdk/collections';
+import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {Observable} from 'rxjs/Observable';
+import { Http, Response,URLSearchParams }  from '@angular/http';
+import 'rxjs/add/operator/startWith';
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/debounceTime';
+import 'rxjs/add/operator/distinctUntilChanged';
+import 'rxjs/add/observable/fromEvent';
+import { BACKEND_ROOT } from "app/globals";
+import {MatDialog, MatDialogRef,MAT_DIALOG_DATA,MatSnackBar, MatTableDataSource} from '@angular/material';
 
 @Component({
   selector: 'timeline',
@@ -9,22 +21,29 @@ import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message';
   styleUrls: ['./timeline.component.css']
 })
 export class TimelineComponent implements OnInit {
-  private messages:FimpMessage[]=[];
   private topic :string;
   private payload:string;
-
   private topicFilter:string;
   private serviceFilter:string;
   private msgTypeFilter:string;
+  private fimpService:FimpService;
+  displayedColumns = ['time','topic','service','msgType','value'];
+  // dataSource: MatTableDataSource<FimpMessage>;
+  dataSource: TimelineDataSource|null;
+  constructor(private fimp: FimpService,public dialog: MatDialog) { 
+    this.fimpService = fimp;
+    var filter = fimp.getFilter();
+    this.topicFilter = filter.topicFilter;
+    this.serviceFilter = filter.serviceFilter;
+    this.msgTypeFilter = filter.msgTypeFilter; 
+    // this.messages = this.fimp.getFilteredMessagLog();  
+  }
 
-  @ViewChild('myTable') table: any;
-  constructor(private fimp: FimpService) { 
-   var filter = fimp.getFilter();
-   this.topicFilter = filter.topicFilter;
-   this.serviceFilter = filter.serviceFilter;
-   this.msgTypeFilter = filter.msgTypeFilter; 
-   this.messages = this.fimp.getFilteredMessagLog();  
-   };
+  ngOnInit() {
+    this.dataSource = new TimelineDataSource(this.fimpService);
+    // this.dataSource = new MatTableDataSource();
+    // this.dataSource.data = this.fimpService.getMessagLog();
+  }
   
   filter() {
     this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);  
@@ -43,15 +62,56 @@ export class TimelineComponent implements OnInit {
     this.fimp.publish(topic,payload);
   } 
 
+  openDialog(fimpMsg:FimpMessage): void {
+    let dialogRef = this.dialog.open(MsgDetailsDialog, {
+      width: '500px',
+      data: {"fimp":fimpMsg,"parent":this}
+    });
 
-  ngOnInit() {
-   
   }
-  
-  toggleExpandRow(row) {
-    console.log('Toggled Expand Row!', row);
-    this.table.rowDetail.toggleExpandRow(row);
-  }
- 
+
 
 }
+
+export class TimelineDataSource extends DataSource<any> {
+  events : FimpMessage[] = [];
+  eventsObs = new BehaviorSubject<FimpMessage[]>([]);
+  
+  constructor(private fimp: FimpService) {
+    super();
+    this.events = fimp.getMessagLog();
+    
+    this.eventsObs.next(this.events);
+
+    this.fimp.getGlobalObservable().subscribe((msg) => {
+       this.eventsObs.next(this.events);
+    });
+  }
+   
+  connect(): Observable<FimpMessage[]> {
+    return this.eventsObs;
+  }
+  disconnect() {}
+}
+
+
+@Component({
+  selector: 'msg-details-dialog',
+  templateUrl: 'msg-details-dialog.html',
+})
+export class MsgDetailsDialog {
+  fimpMsg : FimpMessage;
+  parentComp : TimelineComponent;
+  constructor(
+    public dialogRef: MatDialogRef<MsgDetailsDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: any) { 
+      this.fimpMsg = data.fimp;
+      this.parentComp = data.parent;
+    }
+
+  close(): void {
+    this.dialogRef.close();
+  }
+
+}
+

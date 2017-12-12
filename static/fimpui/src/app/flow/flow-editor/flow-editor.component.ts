@@ -1,8 +1,8 @@
 import { Component, OnInit,Inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
-import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
-import {MD_DIALOG_DATA} from '@angular/material';
+import {MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
+import {MAT_DIALOG_DATA} from '@angular/material';
 import { FimpService } from "app/fimp/fimp.service";
 import { FimpMessage } from "app/fimp/Message";
 import { msgTypeToValueTypeMap } from "app/things-db/mapping";
@@ -39,7 +39,7 @@ export class FlowEditorComponent implements OnInit {
   localVars:any;
   globalVars:any;
   
-  constructor(private route: ActivatedRoute,private http : Http,public dialog: MdDialog) {
+  constructor(private route: ActivatedRoute,private http : Http,public dialog: MatDialog) {
     this.flow = new Flow();
    }
 
@@ -282,7 +282,7 @@ export class Flow {
 })
 export class FlowSourceDialog {
   flowSourceText :string ;
-  constructor(public dialogRef: MdDialogRef<FlowSourceDialog>,@Inject(MD_DIALOG_DATA) public data: Flow) {
+  constructor(public dialogRef: MatDialogRef<FlowSourceDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow) {
     this.flowSourceText = JSON.stringify(data, null, 2)
   }
   save(){
@@ -300,7 +300,7 @@ export class FlowSourceDialog {
 export class ContextDialog {
   localContext :string ;
   globalContext : string;
-  constructor(public dialogRef: MdDialogRef<ContextDialog>,@Inject(MD_DIALOG_DATA) public data: Flow,private http : Http) {
+  constructor(public dialogRef: MatDialogRef<ContextDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow,private http : Http) {
      this.http
       .get(BACKEND_ROOT+'/fimp/flow/context/'+data.Id)
       .map(function(res: Response){
@@ -335,7 +335,7 @@ export class FlowRunDialog {
   valueType : string ;
   actionData : MetaNode;
   
-  constructor(public dialogRef: MdDialogRef<FlowRunDialog>,@Inject(MD_DIALOG_DATA) public data: MetaNode,private fimp:FimpService,public snackBar: MdSnackBar) {
+  constructor(public dialogRef: MatDialogRef<FlowRunDialog>,@Inject(MAT_DIALOG_DATA) public data: MetaNode,private fimp:FimpService,public snackBar: MatSnackBar) {
     // data.Config. = {"Value":true,"ValueType":msgTypeToValueTypeMap[data.ServiceInterface]}
     // this.valueType = msgTypeToValueTypeMap[data.ServiceInterface];
     // this.actionData = new MetaNode();
@@ -364,7 +364,7 @@ export class FlowRunDialog {
 export class ServiceLookupDialog  implements OnInit {
   interfaces :any;
   msgFlowDirectionD = "";
-  constructor(public dialogRef: MdDialogRef<ServiceLookupDialog>,private http : Http,@Inject(MD_DIALOG_DATA) msgFlowDirectionD : string) {
+  constructor(public dialogRef: MatDialogRef<ServiceLookupDialog>,private http : Http,@Inject(MAT_DIALOG_DATA) msgFlowDirectionD : string) {
     console.log("Msg flow direction:"+msgFlowDirectionD);
     this.msgFlowDirectionD = msgFlowDirectionD
   }

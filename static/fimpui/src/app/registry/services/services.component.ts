@@ -1,6 +1,6 @@
 import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter} from '@angular/core';
-import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
-import {DataSource} from '@angular/cdk';
+import {MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
+import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 import { Http, Response,URLSearchParams }  from '@angular/http';
@@ -112,7 +112,7 @@ export class ServicesComponent implements OnInit {
   @ViewChild('filterThingAddr') filterThingAddr: ElementRef;
   @ViewChild('filterServiceName') filterServiceName: ElementRef;
 
-  constructor(private http : Http,private route: ActivatedRoute,public dialog: MdDialog) { 
+  constructor(private http : Http,private route: ActivatedRoute,public dialog: MatDialog) { 
     
   }
 

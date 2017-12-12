@@ -1,36 +1,36 @@
 <div>
     <div #nodebody hidden> 
         <div *ngFor="let nod of node.Config.Expressions;let index = index;trackBy:trackByIndex;">
-            <md-input-container style="width: 150px">
-                <input mdInput [(ngModel)]="node.Config.Expressions[index].Name" placeholder="Name">
-            </md-input-container>
-            <md-input-container style="width: 200px">
-                <input mdInput [(ngModel)]="node.Config.Expressions[index].Expression" placeholder="Expression">
-            </md-input-container>
-            <md-input-container style="width:200px">
-                    <input mdInput [(ngModel)]="node.Config.Expressions[index].Comment" placeholder="Comment">
-            </md-input-container>
+            <mat-input-container style="width: 150px">
+                <input matInput [(ngModel)]="node.Config.Expressions[index].Name" placeholder="Name">
+            </mat-input-container>
+            <mat-input-container style="width: 200px">
+                <input matInput [(ngModel)]="node.Config.Expressions[index].Expression" placeholder="Expression">
+            </mat-input-container>
+            <mat-input-container style="width:200px">
+                    <input matInput [(ngModel)]="node.Config.Expressions[index].Comment" placeholder="Comment">
+            </mat-input-container>
             <a href="https://godoc.org/github.com/robfig/cron#Job" target="_blank"> Help  </a>
         </div>
         <div style="margin-bottom: 30px" >
-                <md-checkbox [(ngModel)]="node.Config.GenerateAstroTimeEvents" > Generate Astro time events </md-checkbox>
+                <mat-checkbox [(ngModel)]="node.Config.GenerateAstroTimeEvents" > Generate Astro time events </mat-checkbox>
        </div> 
-        <md-input-container style="width: 150px">
-            <input mdInput [(ngModel)]="node.Config.Latitude" placeholder="Latitude">
-        </md-input-container>
-        <md-input-container style="width: 150px">
-            <input mdInput [(ngModel)]="node.Config.Longitude" placeholder="Longitude">
-        </md-input-container>
+        <mat-input-container style="width: 150px">
+            <input matInput [(ngModel)]="node.Config.Latitude" placeholder="Latitude">
+        </mat-input-container>
+        <mat-input-container style="width: 150px">
+            <input matInput [(ngModel)]="node.Config.Longitude" placeholder="Longitude">
+        </mat-input-container>
     </div>
     <p>
-        <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
-            <md-option value = "" > End! </md-option>
-            <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-        </md-select>
-        <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
-            <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-        </md-select>
+        <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
+            <mat-option value = "" > End! </mat-option>
+            <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
+        </mat-select>
+        <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
+            <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
+        </mat-select>
     </p>
-    <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
+    <p><button mat-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
  
 </div>

@@ -1,82 +1,82 @@
-<h1 md-dialog-title> Run the flow </h1>
-<md-dialog-content>
+<h1 mat-dialog-title> Run the flow </h1>
+<mat-dialog-content>
         <div [ngSwitch]="valueType">
                 <div *ngSwitchCase="'string'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'int'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput type="number" [(ngModel)]="value" placeholder="Default value">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'float'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput type="number" [(ngModel)]="value" placeholder="Default value">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="''">
         
                 </div>
                 <div *ngSwitchCase="'bool'">
-                    <md-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="value">
-                        <md-radio-button class="example-radio-button" [value]="true">
+                    <mat-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="value">
+                        <mat-radio-button class="example-radio-button" [value]="true">
                             true (On)
-                        </md-radio-button>
-                        <md-radio-button class="example-radio-button" [value]="false">
+                        </mat-radio-button>
+                        <mat-radio-button class="example-radio-button" [value]="false">
                             false (Off)
-                        </md-radio-button>
-                    </md-radio-group>
+                        </mat-radio-button>
+                    </mat-radio-group>
                 </div>
                  <div *ngSwitchCase="'str_array'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : ['abc','cde']">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'int_array'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : [1,2] ">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'float_array'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : [1.2,0.5] ">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'bool_array'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : [true,false]">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'str_map'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : {'a':'a1','b':'b2'}">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'int_map'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : {'a':1,'b':2}">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'float_map'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : {'a':0.5,'b':1.5}">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'bool_map'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : {'a':true,'b':false}">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'object'">
-                    <md-input-container class="node-transition-field">
+                    <mat-input-container class="node-transition-field">
                         <input mdInput [(ngModel)]="value" placeholder="Default value : {'a':'b','b':3}">
-                    </md-input-container>
+                    </mat-input-container>
                 </div>
             </div>
-</md-dialog-content>
-<md-dialog-actions>
-<button md-raised-button color="warn" (click)="run()" >Run</button>
-<button md-raised-button md-dialog-close>Close</button>
-</md-dialog-actions> 
+</mat-dialog-content>
+<mat-dialog-actions>
+<button mat-raised-button color="warn" (click)="run()" >Run</button>
+<button mat-raised-button mat-dialog-close>Close</button>
+</mat-dialog-actions> 

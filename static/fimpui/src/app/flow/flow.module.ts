@@ -7,22 +7,55 @@ import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTr
 import { TriggerNodeComponent ,CounterNodeComponent} from './flow-nodes/flow-nodes.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
-import { MaterialModule } from '@angular/material';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RegistryModule} from 'app/registry/registry.module'
 import { VariableElementComponent} from 'app/flow/flow-nodes/ui-elements/ui-elements.component'
-import { CdkTableModule } from '@angular/cdk';
+import { CdkTableModule } from '@angular/cdk/table';
+import { MatTableModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatButtonModule,
+  MatChipsModule,
+  MatIconModule,
+  MatSliderModule,
+  MatCheckboxModule,
+  MatListModule,
+  MatSelectModule, 
+  MatOptionModule,
+  MatDialogModule,
+  MatCardModule,
+  MatSidenavModule,
+  MatRadioModule,
+  MatExpansionModule,
+  MatTabsModule,
+  MatCheckbox} from '@angular/material';
 
 
 @NgModule({
   imports: [
     CommonModule,
     FlowRoutingModule,
-    MaterialModule,
+    MatInputModule,
+    MatButtonModule,
+    MatFormFieldModule, 
+    MatTableModule,
+    MatChipsModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatListModule,
+    MatIconModule,
+    MatSliderModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatCardModule,
+    MatSidenavModule,
+    MatRadioModule,
+    MatExpansionModule,
     FormsModule,
     HttpModule,
     RegistryModule,
+    MatTabsModule,
     CdkTableModule
   ],
   declarations: [

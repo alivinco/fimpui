@@ -5,13 +5,34 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
-
-import { MaterialModule } from '@angular/material';
+import { MatTableModule,
+  MatFormFieldModule,
+  MatButtonModule,
+  MatInputModule,
+  MatChipsModule,
+  MatIconModule,
+  MatSliderModule,
+  MatCheckboxModule,
+  MatListModule,
+  MatSelectModule, 
+  MatOptionModule,
+  MatDialogModule,
+  MatCardModule,
+  MatSidenavModule,
+  MatRadioModule,
+  MatExpansionModule,
+  MatMenuModule,
+  MatToolbarModule,
+  MatProgressBarModule,
+  MatTabsModule,
+  MatPaginatorModule,
+  MatCheckbox} from '@angular/material';
+import { CdkTableModule } from '@angular/cdk/table';
 import { ZwaveManComponent , AddDeviceDialog,RemoveDeviceDialog } from './zwave-man/zwave-man.component';
 import { TemplateEditorDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
 import { SystemsManComponent } from './systems-man/systems-man.component';
-import { TimelineComponent } from './timeline/timeline.component';
+import { TimelineComponent,MsgDetailsDialog } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
 import { FlightRecorderComponent } from './flight-recorder/flight-recorder.component';
 import { FimpService} from './fimp/fimp.service';
@@ -29,8 +50,8 @@ import { ThingViewComponent } from './thing-view/thing-view.component';
 import { ThingsTableComponent } from './things-table/things-table.component';
 import { SettingsComponent } from './settings/settings.component';
 import { FlowModule} from './flow/flow.module'
+import { StatsModule} from './stats/stats.module'
 import { RegistryModule} from './registry/registry.module'
-
 
 const appRoutes: Routes = [
   { path: 'settings', component: SettingsComponent },
@@ -90,6 +111,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     ReportComponent,
     FlightRecorderComponent,
     TemplateEditorDialog,
+    MsgDetailsDialog
     // ThingIntfUiComponent,
     // KeysPipe,
   ],
@@ -98,15 +120,38 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     FormsModule,
     HttpModule,
     BrowserAnimationsModule,
-    MaterialModule,
+    // MaterialModule,
     MqttModule.forRoot({
       provide: MqttService,
       useFactory: mqttServiceFactory
     }),
+    MatButtonModule,
+    MatPaginatorModule,
+    MatInputModule,
+    MatFormFieldModule, 
+    MatTableModule,
+    MatChipsModule,
+    MatOptionModule,
+    MatSelectModule,
+    MatListModule,
+    MatIconModule,
+    MatSliderModule,
+    MatCheckboxModule,
+    MatDialogModule,
+    MatCardModule,
+    MatSidenavModule,
+    MatRadioModule,
+    MatMenuModule,
+    MatExpansionModule,
+    MatToolbarModule,
+    MatProgressBarModule,
+    MatTabsModule,
     RouterModule.forRoot(appRoutes),
     NgxDatatableModule,
     FlowModule,
+    StatsModule,
     RegistryModule,
+    CdkTableModule
     
   ],
   providers: [FimpService,ThingsDbService,ConfigsService,{
@@ -116,7 +161,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     deps: [ConfigsService],
     multi: true
 }],
-  entryComponents:[AddDeviceDialog,RemoveDeviceDialog,TemplateEditorDialog], 
+  entryComponents:[AddDeviceDialog,RemoveDeviceDialog,TemplateEditorDialog,MsgDetailsDialog], 
   bootstrap: [AppComponent]
 })
 export class AppModule { }

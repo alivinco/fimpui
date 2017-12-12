@@ -1,28 +1,28 @@
 
 <div>
         <div #nodebody hidden> 
-            <md-input-container class="node-transition-field">
-                <input mdInput type="number" [(ngModel)]="node.Config.StartValue" placeholder="Start value">
-            </md-input-container>
-            <md-input-container class="node-transition-field">
-                    <input mdInput type="number" [(ngModel)]="node.Config.EndValue" placeholder="End value">
-            </md-input-container>
-            <md-input-container class="node-transition-field">
-                    <input mdInput type="number" [(ngModel)]="node.Config.Step" placeholder="Step">
-            </md-input-container>
-            <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="End value transition"[(ngModel)]="node.Config.EndValueTransition" >
-                    <md-option value = "" > End! </md-option>
-                    <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-            </md-select>    
+            <mat-input-container class="node-transition-field">
+                <input matInput type="number" [(ngModel)]="node.Config.StartValue" placeholder="Start value">
+            </mat-input-container>
+            <mat-input-container class="node-transition-field">
+                    <input matInput type="number" [(ngModel)]="node.Config.EndValue" placeholder="End value">
+            </mat-input-container>
+            <mat-input-container class="node-transition-field">
+                    <input matInput type="number" [(ngModel)]="node.Config.Step" placeholder="Step">
+            </mat-input-container>
+            <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="End value transition"[(ngModel)]="node.Config.EndValueTransition" >
+                    <mat-option value = "" > End! </mat-option>
+                    <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
+            </mat-select>    
         </div>
         <p>
-            <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
-                <md-option value = "" > End! </md-option>
-                <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-            </md-select>
-            <md-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
-                <md-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</md-option>
-            </md-select>
+            <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
+                <mat-option value = "" > End! </mat-option>
+                <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
+            </mat-select>
+            <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
+                <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
+            </mat-select>
         </p>
-        <p><button md-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
+        <p><button mat-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
 </div>

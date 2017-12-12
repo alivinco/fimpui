@@ -1,6 +1,6 @@
 import { Component, OnInit ,Input } from '@angular/core';
 import { MetaNode, ServiceLookupDialog } from "../flow-editor/flow-editor.component";
-import { MdDialog, MdDialogRef} from '@angular/material';
+import { MatDialog, MatDialogRef} from '@angular/material';
 import { msgTypeToValueTypeMap } from "app/things-db/mapping";
 import { FlowRunDialog } from "app/flow/flow-editor/flow-editor.component"
 import { Http, Response }  from '@angular/http';
@@ -33,7 +33,7 @@ export class ActionNodeComponent implements OnInit {
   globalVars:any;
   complexValueAsString:any; //string representation of node.Config.DefaultValue.Value
   propsAsString:any;
-  constructor(public dialog: MdDialog,private http : Http) { 
+  constructor(public dialog: MatDialog,private http : Http) { 
     this.loadContext();
    }
 
@@ -135,7 +135,7 @@ export class ActionNodeComponent implements OnInit {
 export class SetVariableNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
-  constructor(public dialog: MdDialog) { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit() { 
   }
@@ -150,7 +150,7 @@ export class SetVariableNodeComponent implements OnInit {
 export class ReceiveNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
-  constructor(public dialog: MdDialog) { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit() { 
   }
@@ -201,7 +201,7 @@ type TimeExpression struct {
 export class TimeTriggerNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
-  constructor(public dialog: MdDialog) { }
+  constructor(public dialog: MatDialog) { }
   ngOnInit() { 
   }
 }
@@ -214,7 +214,7 @@ export class TimeTriggerNodeComponent implements OnInit {
 export class CounterNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
-  constructor(public dialog: MdDialog) { }
+  constructor(public dialog: MatDialog) { }
   ngOnInit() { 
     
   }
@@ -232,7 +232,7 @@ export class TriggerNodeComponent implements OnInit {
   flowPublishService: string;
   flowPublishInterface : string;
   flowPublishAddress : string;
-  constructor(public dialog: MdDialog) { }
+  constructor(public dialog: MatDialog) { }
 
   ngOnInit() { 
     

@@ -1,5 +1,5 @@
 import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter} from '@angular/core';
-import {DataSource} from '@angular/cdk';
+import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
 import { Http, Response,URLSearchParams }  from '@angular/http';
@@ -12,7 +12,8 @@ import 'rxjs/add/observable/fromEvent';
 import {Location} from '../model';
 import { BACKEND_ROOT } from "app/globals";
 import { LocationEditorDialog} from 'app/registry/locations/location-editor.component'
-import {MdDialog, MdDialogRef,MdSnackBar} from '@angular/material';
+import {MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
+import {MatTableDataSource} from '@angular/material';
 
 @Component({
   selector: 'app-locations',
@@ -26,7 +27,7 @@ displayedColumns = ['id','type','alias','address','geo','action'];
 // 'serviceName','serviceAlias','intfMsgType'];
   dataSource: LocationsDataSource | null;
 
-  constructor(private http : Http,public dialog: MdDialog) { 
+  constructor(private http : Http,public dialog: MatDialog) { 
     
   }
 

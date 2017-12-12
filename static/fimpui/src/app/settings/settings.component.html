@@ -1,38 +1,38 @@
 <div class="settings">
- <md-card class="settings-card">
-    <md-card-header>
-     <md-card-title><h3>Settings</h3></md-card-title>
-    </md-card-header>
-    <md-card-content>
-    <md-input-container>
-        <input #host mdInput placeholder="Hostname" [value] = "fimpService.mqttSeviceOptions.hostname" >
-    </md-input-container>
-    <md-input-container>
-        <input #port mdInput type="number" placeholder="Port" [value] = "fimpService.mqttSeviceOptions.port" >
-    </md-input-container>
-    <md-input-container>
-      <input #port mdInput  placeholder="Username" [value] = "fimpService.mqttSeviceOptions.username" >
-    </md-input-container>
-    <md-input-container>
-      <input #port mdInput  placeholder="Password" [value] = "fimpService.mqttSeviceOptions.password" >
-    </md-input-container>
-    <md-input-container>
-      <input #port mdInput  placeholder="Global topic prefix" [value] = "fimpService.mqttSeviceOptions.gloabalTopicPrefix" >
-    </md-input-container>
+ <mat-card class="settings-card">
+    <mat-card-header>
+     <mat-card-title><h3>Settings</h3></mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+    <mat-input-container>
+        <input #host matInput placeholder="Hostname" [value] = "fimpService.mqttSeviceOptions.hostname" >
+    </mat-input-container>
+    <mat-input-container>
+        <input #port matInput type="number" placeholder="Port" [value] = "fimpService.mqttSeviceOptions.port" >
+    </mat-input-container>
+    <mat-input-container>
+      <input #port matInput  placeholder="Username" [value] = "fimpService.mqttSeviceOptions.username" >
+    </mat-input-container>
+    <mat-input-container>
+      <input #port matInput  placeholder="Password" [value] = "fimpService.mqttSeviceOptions.password" >
+    </mat-input-container>
+    <mat-input-container>
+      <input #port matInput  placeholder="Global topic prefix" [value] = "fimpService.mqttSeviceOptions.gloabalTopicPrefix" >
+    </mat-input-container>
    
-    </md-card-content>
-    <md-card-actions>
-      <button md-raised-button color="accent" (click)="save(host.value,port.value)">Save</button>
-    </md-card-actions>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="accent" (click)="save(host.value,port.value)">Save</button>
+    </mat-card-actions>
     <p>Connection status: {{connStatus}}</p>
  
-  </md-card>
+  </mat-card>
  </div> 
-  <md-card class="settings-card">
-    <md-card-header>
-     <md-card-title><h3>Api</h3></md-card-title>
-    </md-card-header>
-    <md-card-content>
+  <mat-card class="settings-card">
+    <mat-card-header>
+     <mat-card-title><h3>Api</h3></mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
       <p>Registry API :</p>
       <p><a href="/fimp/registry/things">GET /fimp/registry/things - List of things from regitry</a></p>
       <p><a href="/fimp/registry/services">GET /fimp/registry/services - List of services from regitry</a></p>
@@ -54,7 +54,7 @@
       <p><a href="/fimp/api/configs">GET /fimp/api/configs - Get global configs</a></p>
       <p><a href="/fimp/fr/upload-log-snapshot">GET /fimp/fr/upload-log-snapshot - Upload log snapshots to cloud storage </a></p>
      
-    </md-card-content>
+    </mat-card-content>
     
-  </md-card>
+  </mat-card>
 

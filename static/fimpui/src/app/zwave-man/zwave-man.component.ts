@@ -1,5 +1,5 @@
 import { Component, OnInit , OnDestroy ,Input ,ChangeDetectorRef,Inject} from '@angular/core';
-import { MdDialog, MdDialogRef,MD_DIALOG_DATA} from '@angular/material';
+import { MatDialog, MatDialogRef,MAT_DIALOG_DATA} from '@angular/material';
 import { FimpService} from 'app/fimp/fimp.service';
 import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
@@ -7,7 +7,7 @@ import {Router} from '@angular/router';
 import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
-import {MdSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material';
 import {
   MqttMessage,
   MqttModule,
@@ -32,11 +32,13 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   localTemplates : string[];
   localTemplatesCache : string[];
   pingResult :string;
-  constructor(public dialog: MdDialog,private fimp:FimpService,private router: Router,private http : Http) {
+  isReloadNodesEnabled:boolean;
+  constructor(public dialog: MatDialog,private fimp:FimpService,private router: Router,private http : Http) {
   }
 
   ngOnInit() {
     this.zwAdState = "UNKNOWN";
+    this.isReloadNodesEnabled = true;
     this.showProgress(false);
     this.getAdapterStates();
     this.loadLocalTemplates();
@@ -56,8 +58,12 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
           this.showProgress(false);
           localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
-            console.log("Reloading nodes 2");
-            this.reloadNodes();
+            console.log("New inclusion report");
+            if(this.isReloadNodesEnabled) {
+              console.log("Reloading nodes ");
+              this.reloadNodes();
+            }
+               
         }else if (fimpMsg.mtype == "evt.state.report"){
             this.zwAdState = fimpMsg.val;
             if (fimpMsg.val == "NET_UPDATED" || fimpMsg.val == "RUNNING") {
@@ -81,13 +87,13 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
     });
-
+    
     // Let's load nodes list from cache otherwise reload nodes from zwave-ad .
     if (localStorage.getItem("zwaveNodesList")==null){
-      this.reloadNodes();
+        this.reloadNodes();
     }else {
-      this.nodes = JSON.parse(localStorage.getItem("zwaveNodesList"));
-      this.loadThingsFromRegistry();
+        this.nodes = JSON.parse(localStorage.getItem("zwaveNodesList"));
+        this.loadThingsFromRegistry();
     }
     
   }
@@ -123,13 +129,22 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
          localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));         
       });
   }
+  requestAllInclusionReports(){
+    this.isReloadNodesEnabled = false;
+    for(let node of this.nodes) {
+      let msg  = new FimpMessage("zwave-ad","cmd.thing.get_inclusion_report_q","string",node.address ,null,null)
+      this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+    }
+  }
   pingNode(fromNode:string,toNode:string,level:string){
     this.pingResult = "working...";
-    let val = {"tx_level":level}
-    let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,null,null)
+    let props:Map<string,string>;
+    props.set("tx_level",level);
+    let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,props,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:dev_sys/ad:"+fromNode+"_0",msg.toString());
   }
   reloadNodes(){
+    this.isReloadNodesEnabled = true;
     this.getAdapterStates();
     let msg  = new FimpMessage("zwave-ad","cmd.network.get_all_nodes","null",null,null,null)
     this.showProgress(true);
@@ -270,7 +285,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   forceNonSecure : boolean;
   s2pin : string;
 
-  constructor(public dialogRef: MdDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MatDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MAT_DIALOG_DATA) public data: any) {
     
     console.log("Dialog constructor Opened");
   }
@@ -337,7 +352,7 @@ export class RemoveDeviceDialog implements OnInit, OnDestroy  {
   forceInterview : boolean;
   forceNonSecure : boolean;
 
-  constructor(public dialogRef: MdDialogRef<RemoveDeviceDialog>,private fimp:FimpService,@Inject(MD_DIALOG_DATA) public data: any) {
+  constructor(public dialogRef: MatDialogRef<RemoveDeviceDialog>,private fimp:FimpService,@Inject(MAT_DIALOG_DATA) public data: any) {
     
     console.log("Dialog constructor Opened");
   }
@@ -389,7 +404,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
   templateStr : string;
   templateName :string;
   templateType :string;
-  constructor(public dialogRef: MdDialogRef<TemplateEditorDialog>,@Inject(MD_DIALOG_DATA) public data: any,private http : Http) {
+  constructor(public dialogRef: MatDialogRef<TemplateEditorDialog>,@Inject(MAT_DIALOG_DATA) public data: any,private http : Http) {
     this.templateName = data["name"];
     this.templateType = data["type"]
     this.template = {};

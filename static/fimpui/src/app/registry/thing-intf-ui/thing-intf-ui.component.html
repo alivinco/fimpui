@@ -3,12 +3,12 @@
    <div *ngIf= "intf.lastValue">
       <div [ngSwitch]="msgType">
         <div *ngSwitchCase="'evt.sensor.report'">{{intf.lastValue.val}} {{intf.lastValue.props.unit}} </div>
-        <div *ngSwitchCase="'evt.binary.report'"> <md-chip-list> 
-          <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
-           </md-chip-list> </div>
-        <div *ngSwitchCase="'evt.open.report'"> <md-chip-list> 
-          <md-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </md-chip>
-           </md-chip-list> </div>
+        <div *ngSwitchCase="'evt.binary.report'"> <mat-chip-list> 
+          <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
+           </mat-chip-list> </div>
+        <div *ngSwitchCase="'evt.open.report'"> <mat-chip-list> 
+          <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
+           </mat-chip-list> </div>
         <div *ngSwitchCase="'evt.config.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
             {{item.key}} = {{item.value}} 
@@ -39,10 +39,10 @@
           {{ intf.lastValue.val.type}} {{ intf.lastValue.val.temp }}
         </div>
         <div *ngSwitchCase="'evt.lock.report'">
-          <p>Is secured      = <md-icon *ngIf="intf.lastValue.val.is_secured" >lock</md-icon> <md-icon *ngIf="!intf.lastValue.val.is_secured" >lock_open</md-icon>  </p>
-          <p>Door is closed  = <md-icon *ngIf="intf.lastValue.val.door_is_closed" >done</md-icon> <md-icon *ngIf="!intf.lastValue.val.door_is_closed" >close</md-icon>   </p>
-          <p>Bolt is locked  = <md-icon *ngIf="intf.lastValue.val.bolt_is_locked" >done</md-icon> <md-icon *ngIf="!intf.lastValue.val.bolt_is_locked" >close</md-icon>   </p>
-          <p>Latch is closed = <md-icon *ngIf="intf.lastValue.val.latch_is_closed" >done</md-icon> <md-icon *ngIf="!intf.lastValue.val.latch_is_closed" >close</md-icon>   </p>
+          <p>Is secured      = <mat-icon *ngIf="intf.lastValue.val.is_secured" >lock</mat-icon> <mat-icon *ngIf="!intf.lastValue.val.is_secured" >lock_open</mat-icon>  </p>
+          <p>Door is closed  = <mat-icon *ngIf="intf.lastValue.val.door_is_closed" >done</mat-icon> <mat-icon *ngIf="!intf.lastValue.val.door_is_closed" >close</mat-icon>   </p>
+          <p>Bolt is locked  = <mat-icon *ngIf="intf.lastValue.val.bolt_is_locked" >done</mat-icon> <mat-icon *ngIf="!intf.lastValue.val.bolt_is_locked" >close</mat-icon>   </p>
+          <p>Latch is closed = <mat-icon *ngIf="intf.lastValue.val.latch_is_closed" >done</mat-icon> <mat-icon *ngIf="!intf.lastValue.val.latch_is_closed" >close</mat-icon>   </p>
         </div>
         <div *ngSwitchDefault> {{intf.lastValue.val}}</div>
       </div>
@@ -52,8 +52,8 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdBinarySet(true)" >On</button>
-            <button md-raised-button (click)="cmdBinarySet(false)" >Off</button></td>
+            <td><button mat-raised-button (click)="cmdBinarySet(true)" >On</button>
+            <button mat-raised-button (click)="cmdBinarySet(false)" >Off</button></td>
           </tr>
           </table>
         </form>
@@ -63,12 +63,12 @@
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td>
-              <md-slider #colorLvlValue thumbLabel  min="0" max="255" step="1" value="0"></md-slider>
+              <mat-slider #colorLvlValue thumbLabel  min="0" max="255" step="1" value="0"></mat-slider>
             </td>
-            <td><md-input-container class="example-full-width">
-              <input #compNameValue mdInput placeholder="componnent" type="text" >
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdColorSet(compNameValue.value,colorLvlValue.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #compNameValue matInput placeholder="componnent" type="text" >
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdColorSet(compNameValue.value,colorLvlValue.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -78,12 +78,12 @@
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td>
-              <md-slider #lvlValue thumbLabel  min="0" max="100" step="1" value="0"></md-slider>
+              <mat-slider #lvlValue thumbLabel  min="0" max="100" step="1" value="0"></mat-slider>
             </td>
-            <td><md-input-container class="example-full-width">
-              <input #durationValue mdInput placeholder="Duration" type="number" value="0">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdLvlSet(lvlValue.value,durationValue.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #durationValue matInput placeholder="Duration" type="number" value="0">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdLvlSet(lvlValue.value,durationValue.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -92,12 +92,12 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdLevelStart('up',durationValue.value)" >Up</button>
-            <td><button md-raised-button (click)="cmdLevelStart('down',durationValue.value)" >Down</button>
-            <td><button md-raised-button (click)="cmdLevelStart('auto',durationValue.value)" >Auto</button>
-            <td><md-input-container class="example-full-width">
-              <input #durationValue mdInput placeholder="Duration" type="number" value="0">
-            </md-input-container></td>
+            <td><button mat-raised-button (click)="cmdLevelStart('up',durationValue.value)" >Up</button>
+            <td><button mat-raised-button (click)="cmdLevelStart('down',durationValue.value)" >Down</button>
+            <td><button mat-raised-button (click)="cmdLevelStart('auto',durationValue.value)" >Auto</button>
+            <td><mat-input-container class="example-full-width">
+              <input #durationValue matInput placeholder="Duration" type="number" value="0">
+            </mat-input-container></td>
           </tr>
           </table>
         </form>
@@ -106,7 +106,7 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdLevelStop()" >Stop</button>
+            <td><button mat-raised-button (click)="cmdLevelStop()" >Stop</button>
           </tr>
           </table>
         </form>
@@ -115,7 +115,7 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+            <td><button mat-raised-button (click)="cmdGetReportNull()" >Get report</button>
           </tr>
           </table>
         </form>
@@ -125,7 +125,7 @@
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td class="control-first-td">&nbsp;</td>
-            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+            <td><button mat-raised-button (click)="cmdGetReportNull()" >Get report</button>
           </tr>
           </table>
         </form>
@@ -134,10 +134,10 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-              <td class="control-first-td" ><md-input-container class="example-full-width">
-                  <input #targetState mdInput placeholder="mode">
-                </md-input-container></td>
-            <td><button md-raised-button (click)="cmdStateSet(targetState.value)" >Set target</button>
+              <td class="control-first-td" ><mat-input-container class="example-full-width">
+                  <input #targetState matInput placeholder="mode">
+                </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdStateSet(targetState.value)" >Set target</button>
           </tr>
           </table>
         </form>
@@ -146,15 +146,15 @@
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0">
             <tr>
-              <td><md-input-container class="example-full-width">
-                <input #notifTypeInput mdInput placeholder="Notification type">
-              </md-input-container></td>
+              <td><mat-input-container class="example-full-width">
+                <input #notifTypeInput matInput placeholder="Notification type">
+              </mat-input-container></td>
               <td>
                 <div style="margin-bottom: 15px;width:100px" >
-                    <md-checkbox #notifTypeStateInput  >State</md-checkbox>
+                    <mat-checkbox #notifTypeStateInput  >State</mat-checkbox>
                 </div>
                </td>
-              <td><button md-raised-button (click)="cmdSetBoolArrayOneItem(notifTypeInput.value,notifTypeStateInput.checked)" >Set</button></td>
+              <td><button mat-raised-button (click)="cmdSetBoolArrayOneItem(notifTypeInput.value,notifTypeStateInput.checked)" >Set</button></td>
             </tr>
             </table>
           </form>
@@ -163,7 +163,7 @@
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0">
             <tr>
-              <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+              <td><button mat-raised-button (click)="cmdGetReportNull()" >Get report</button>
             </tr>
             </table>
           </form>
@@ -172,8 +172,8 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdBinarySet(true)" >Lock</button>
-            <button md-raised-button (click)="cmdBinarySet(false)" >Unlock</button></td>
+            <td><button mat-raised-button (click)="cmdBinarySet(true)" >Lock</button>
+            <button mat-raised-button (click)="cmdBinarySet(false)" >Unlock</button></td>
           </tr>
           </table>
         </form>
@@ -182,7 +182,7 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><button md-raised-button (click)="cmdGetReportNull()" >Get report</button>
+            <td><button mat-raised-button (click)="cmdGetReportNull()" >Get report</button>
           </tr>
           </table>
         </form>
@@ -191,13 +191,13 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
-              <input #setpointType mdInput placeholder="type">
-            </md-input-container></td>
-            <td><md-input-container class="example-full-width">
-              <input #tempValue mdInput placeholder="temp">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdSetpointSet(setpointType.value,tempValue.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #setpointType matInput placeholder="type">
+            </mat-input-container></td>
+            <td><mat-input-container class="example-full-width">
+              <input #tempValue matInput placeholder="temp">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdSetpointSet(setpointType.value,tempValue.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -206,13 +206,13 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
-              <input #modeName mdInput placeholder="Mode name">
-            </md-input-container></td>
-            <td><md-input-container class="example-full-width">
-              <input type="number" #modeLevel mdInput placeholder="level">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdModeLvlSet(modeName.value,modeLevel.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #modeName matInput placeholder="Mode name">
+            </mat-input-container></td>
+            <td><mat-input-container class="example-full-width">
+              <input type="number" #modeLevel matInput placeholder="level">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdModeLvlSet(modeName.value,modeLevel.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -221,10 +221,10 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
-              <input #thermoMode mdInput placeholder="mode">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdModeSet(thermoMode.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #thermoMode matInput placeholder="mode">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdModeSet(thermoMode.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -232,7 +232,7 @@
       <div *ngSwitchCase="'cmd.mode.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><button md-raised-button (click)="cmdGetReportNull()" >Get</button></td>
+            <td><button mat-raised-button (click)="cmdGetReportNull()" >Get</button></td>
           </tr>
           </table>
         </form>
@@ -240,10 +240,10 @@
       <div *ngSwitchCase="'cmd.setpoint.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><md-input-container class="example-full-width">
-              <input #setpointType mdInput placeholder="setpoint type">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdSetpointReportGet(setpointType.value)" >Get</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #setpointType matInput placeholder="setpoint type">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdSetpointReportGet(setpointType.value)" >Get</button></td>
           </tr>
           </table>
         </form>
@@ -252,13 +252,13 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
-              <input #confName mdInput placeholder="name">
-            </md-input-container></td>
-            <td><md-input-container class="example-full-width">
-              <input #confValue mdInput placeholder="value">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdConfigSet(confName.value,confValue.value)" >Set</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #confName matInput placeholder="name">
+            </mat-input-container></td>
+            <td><mat-input-container class="example-full-width">
+              <input #confValue matInput placeholder="value">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdConfigSet(confName.value,confValue.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -266,10 +266,10 @@
       <div *ngSwitchCase="'cmd.config.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td class="control-first-td"><md-input-container class="example-full-width">
-              <input #confName mdInput placeholder="name">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdConfigReportGet(confName.value)" >Get</button></td>
+            <td class="control-first-td"><mat-input-container class="example-full-width">
+              <input #confName matInput placeholder="name">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdConfigReportGet(confName.value)" >Get</button></td>
           </tr>
           </table>
         </form>
@@ -278,13 +278,13 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td ><md-input-container class="example-full-width">
-              <input #group mdInput placeholder="group">
-            </md-input-container></td>
-            <td><md-input-container class="example-full-width">
-              <input #member mdInput placeholder="member">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdGroupSet(group.value,member.value)" >Set</button></td>
+            <td ><mat-input-container class="example-full-width">
+              <input #group matInput placeholder="group">
+            </mat-input-container></td>
+            <td><mat-input-container class="example-full-width">
+              <input #member matInput placeholder="member">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdGroupSet(group.value,member.value)" >Set</button></td>
           </tr>
           </table>
         </form>
@@ -293,13 +293,13 @@
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
-            <td><md-input-container class="example-full-width">
-              <input #group mdInput placeholder="group">
-            </md-input-container></td>
-            <td><md-input-container class="example-full-width">
-              <input #member mdInput placeholder="member">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdGroupSet(group.value,member.value)" >Delete</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #group matInput placeholder="group">
+            </mat-input-container></td>
+            <td><mat-input-container class="example-full-width">
+              <input #member matInput placeholder="member">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdGroupSet(group.value,member.value)" >Delete</button></td>
           </tr>
           </table>
         </form>
@@ -308,10 +308,10 @@
       <div *ngSwitchCase="'cmd.group.get_members'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td class="control-first-td"><md-input-container class="example-full-width">
-              <input #groupName mdInput placeholder="group">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdGroupReportGet(groupName.value)" >Get</button></td>
+            <td class="control-first-td"><mat-input-container class="example-full-width">
+              <input #groupName matInput placeholder="group">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdGroupReportGet(groupName.value)" >Get</button></td>
           </tr>
           </table>
         </form>
@@ -319,10 +319,10 @@
       <div *ngSwitchCase="'cmd.modelvl.get_report'"> 
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0"><tr>
-              <td><md-input-container class="example-full-width">
-                <input #modeName mdInput placeholder="Mode name">
-              </md-input-container></td>
-              <td><button md-raised-button (click)="cmdModeLvlReportGet(modeName.value)" >Get</button></td>
+              <td><mat-input-container class="example-full-width">
+                <input #modeName matInput placeholder="Mode name">
+              </mat-input-container></td>
+              <td><button mat-raised-button (click)="cmdModeLvlReportGet(modeName.value)" >Get</button></td>
             </tr>
             </table>
           </form>
@@ -331,10 +331,10 @@
       <div *ngSwitchCase="'cmd.meter.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><md-input-container class="example-full-width">
-              <input #meterUnit mdInput placeholder="unit">
-            </md-input-container></td>
-            <td><button md-raised-button (click)="cmdMeterReportGet(meterUnit.value)" >Get</button></td>
+            <td><mat-input-container class="example-full-width">
+              <input #meterUnit matInput placeholder="unit">
+            </mat-input-container></td>
+            <td><button mat-raised-button (click)="cmdMeterReportGet(meterUnit.value)" >Get</button></td>
           </tr>
           </table>
         </form>
@@ -343,7 +343,7 @@
       <div *ngSwitchCase="'cmd.sensor.get_report'"> 
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
-            <td><button md-raised-button (click)="cmdSensorReportGet('')" >Get</button></td>
+            <td><button mat-raised-button (click)="cmdSensorReportGet('')" >Get</button></td>
           </tr>
           </table>
         </form>

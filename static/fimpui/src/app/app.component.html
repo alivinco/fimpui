@@ -1,48 +1,49 @@
-<!--<md-menu #appMenu="mdMenu">
-  <button md-menu-item> Settings </button>
-  <button md-menu-item> Help </button>
-</md-menu>-->
-<md-toolbar color="primary">
+<!--<mat-menu #appMenu="matMenu">
+  <button mat-menu-item> Settings </button>
+  <button mat-menu-item> Help </button>
+</mat-menu>-->
+<mat-toolbar color="primary">
     <span>FIMP control center <small> v{{version}}</small></span>
     <span class="spacer"></span>
-    <button md-icon-button [mdMenuTriggerFor]="menu">
-      <md-icon>more_vert</md-icon>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+      <mat-icon>more_vert</mat-icon>
     </button>
-    <md-menu #menu="mdMenu">
-       <button md-menu-item [routerLink]="['zwave-man']">
-        <md-icon>network_check</md-icon>
+    <mat-menu #menu="matMenu">
+       <button mat-menu-item [routerLink]="['zwave-man']">
+        <mat-icon>network_check</mat-icon>
         <span>Z-Wave manager</span>
       </button>
-      <button md-menu-item [routerLink]="['settings']">
-        <md-icon>build</md-icon>
+      <button mat-menu-item [routerLink]="['settings']">
+        <mat-icon>build</mat-icon>
         <span>Settings</span>
       </button>
-      <button md-menu-item [routerLink]="['flight-recorder']">
-        <md-icon>build</md-icon>
+      <button mat-menu-item [routerLink]="['flight-recorder']">
+        <mat-icon>build</mat-icon>
         <span>Flight recorder</span>
       </button>
-      <button md-menu-item disabled>
-        <md-icon>devices_other</md-icon>
+      <button mat-menu-item disabled>
+        <mat-icon>devices_other</mat-icon>
         <span>Things browser</span>
       </button>
-    </md-menu>
-</md-toolbar>
+    </mat-menu>
+</mat-toolbar>
 
-<nav md-tab-nav-bar>
-<a md-tab-link [routerLink]="['/registry/things/*/*']" >Registry</a> 
-<a md-tab-link [routerLink]="['/flow/overview']" >Flow</a>
-<a md-tab-link [routerLink]="['/zwave-man']" >Adapters</a>
-<a md-tab-link [routerLink]="['timeline']" >Message stream</a>
+<nav mat-tab-nav-bar>
+<a mat-tab-link [routerLink]="['/registry/things/*/*']" >Registry</a> 
+<a mat-tab-link [routerLink]="['/flow/overview']" >Flow</a>
+<a mat-tab-link [routerLink]="['/zwave-man']" >Adapters</a>
+<a mat-tab-link [routerLink]="['/stats/event-log']" >Stats</a>
+<a mat-tab-link [routerLink]="['timeline']" >Message stream</a>
 </nav>
 
-<md-sidenav-container class="example-container">
+<mat-sidenav-container class="example-container">
 <router-outlet ></router-outlet>
 
- <md-sidenav #sidenav class="example-sidenav">
+ <mat-sidenav #sidenav class="example-sidenav">
    <timeline></timeline>
-</md-sidenav>
+</mat-sidenav>
 
   
 
-</md-sidenav-container>
+</mat-sidenav-container>
 

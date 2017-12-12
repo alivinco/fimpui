@@ -1,15 +1,15 @@
-<nav md-tab-nav-bar>
-    <a md-tab-link [routerLink]="['/flow/overview']" >Flows</a>
-    <a md-tab-link [routerLink]="['/flow/context']" >Context</a>
+<nav mat-tab-nav-bar>
+    <a mat-tab-link [routerLink]="['/flow/overview']" >Flows</a>
+    <a mat-tab-link [routerLink]="['/flow/context']" >Context</a>
 </nav>
 <div class="flow">
-  <md-card class="example-card">
-    <md-card-header>
-      <!--<div md-card-avatar class="example-header-image"></div>-->
-      <md-card-title><h3>Flow editor</h3></md-card-title>
-      <!--<md-card-subtitle>Dog Breed</md-card-subtitle>-->
-    </md-card-header>
-    <md-card-content>
+  <mat-card class="example-card">
+    <mat-card-header>
+      <!--<div mat-card-avatar class="example-header-image"></div>-->
+      <mat-card-title><h3>Flow editor</h3></mat-card-title>
+      <!--<mat-card-subtitle>Dog Breed</mat-card-subtitle>-->
+    </mat-card-header>
+    <mat-card-content>
          
    <table>
       <thead><tr><th style="width: 300px">Name</th><th style="width: 50px">Ok</th><th style="width: 50px">Err</th>
@@ -27,20 +27,20 @@
           <td> {{flow.Stats.LastExecutionTime }} </td>
           <td> {{flow.Description}}</td> <td>
              
-             <md-chip-list>
-             <md-chip class="open-chip" [routerLink]="['/flow/editor',flow.Id]">Open</md-chip>
-             <md-chip color="warn" (click)="deleteFlow(flow.Id)">Delete</md-chip>
-             </md-chip-list>
+             <mat-chip-list>
+             <mat-chip class="open-chip" [routerLink]="['/flow/editor',flow.Id]">Open</mat-chip>
+             <mat-chip color="warn" (click)="deleteFlow(flow.Id)">Delete</mat-chip>
+             </mat-chip-list>
           </td>
           </tr>
           </tbody> 
     </table>
 
-    </md-card-content>
-    <md-card-actions>
-      <button md-raised-button [routerLink]="['/flow/editor','-']" color="primary" > Add new flow</button>
-      <button md-raised-button (click)="loadListOfFlows()">Refresh</button>
-    </md-card-actions>
-  </md-card>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button [routerLink]="['/flow/editor','-']" color="primary" > Add new flow</button>
+      <button mat-raised-button (click)="loadListOfFlows()">Refresh</button>
+    </mat-card-actions>
+  </mat-card>
 
 </div>

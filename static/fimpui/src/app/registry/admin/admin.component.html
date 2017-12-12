@@ -1,12 +1,12 @@
-<nav md-tab-nav-bar>
-  <a md-tab-link [routerLink]="['/registry/locations']" >Locations</a>
-  <a md-tab-link active [routerLink]="['/registry/things/*/*']" >Things</a>
-  <a md-tab-link [routerLink]="['/registry/services/*/*']" >Services</a>
-  <a md-tab-link [routerLink]="['/registry/admin']" >Admin</a>
+<nav mat-tab-nav-bar>
+  <a mat-tab-link [routerLink]="['/registry/locations']" >Locations</a>
+  <a mat-tab-link active [routerLink]="['/registry/things/*/*']" >Things</a>
+  <a mat-tab-link [routerLink]="['/registry/services/*/*']" >Services</a>
+  <a mat-tab-link [routerLink]="['/registry/admin']" >Admin</a>
 </nav>
 <h3> Registry administration </h3>
-<md-list>
-  <md-list-item> <button md-raised-button (click)="vinculumSync()">Vinculum sync</button> </md-list-item>
-  <md-list-item> <button md-raised-button (click)="reindexRegistry()">Reindex registry</button>  </md-list-item>
-  <md-list-item> <button md-raised-button (click)="clearRegistry()">Clear registry</button>  </md-list-item>
-</md-list>
+<mat-list>
+  <mat-list-item> <button mat-raised-button (click)="vinculumSync()">Vinculum sync</button> </mat-list-item>
+  <mat-list-item> <button mat-raised-button (click)="reindexRegistry()">Reindex registry</button>  </mat-list-item>
+  <mat-list-item> <button mat-raised-button (click)="clearRegistry()">Clear registry</button>  </mat-list-item>
+</mat-list>

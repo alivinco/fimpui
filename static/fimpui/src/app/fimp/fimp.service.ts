@@ -133,7 +133,8 @@ export class FimpService{
       fimpMsg.topic = this.detachGlobalPrefix(msg.topic);
       fimpMsg.raw = msg.payload.toString();
       fimpMsg.localTs =  Date.now();
-      this.messages.push(fimpMsg);
+      fimpMsg.localId = this.messages.length+1;
+      this.messages.unshift(fimpMsg);
       this.saveFilteredMessage(fimpMsg);
  }
  
@@ -142,11 +143,11 @@ export class FimpService{
     if ( ( (this.fimpFilter.topicFilter== undefined || this.fimpFilter.topicFilter == "") || this.fimpFilter.topicFilter == fimpMsg.topic) && 
         ( (this.fimpFilter.serviceFilter== undefined || this.fimpFilter.serviceFilter == "") || this.fimpFilter.serviceFilter == fimpMsg.service) &&
         ( (this.fimpFilter.msgTypeFilter== undefined || this.fimpFilter.msgTypeFilter == "") || this.fimpFilter.msgTypeFilter == fimpMsg.mtype)  ) {
-      this.filteredMessages.push(fimpMsg);
+      this.filteredMessages.unshift(fimpMsg);
     }
   }else {
     console.log("Adding message to filtered list")
-    this.filteredMessages.push(fimpMsg);
+    this.filteredMessages.unshift(fimpMsg);
   }    
   
 }
