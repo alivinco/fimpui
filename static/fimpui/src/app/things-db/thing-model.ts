@@ -14,6 +14,8 @@ export class Thing {
     services:Service[]=[];
     category:string;
     security:string;
+    locationId:number;
+    locationAlias:string;
     propertySets : Map<string,Map<string,any>>;
     techSpecificProps : Map<string,string>;
 

@@ -136,10 +136,32 @@ export class SetVariableNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
-
   ngOnInit() { 
   }
-  
+}
+
+@Component({
+  selector: 'if-node',
+  templateUrl: './if-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class IfNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MatDialog) { }
+  ngOnInit() { 
+  }
+  addIfExpression(node:MetaNode){ 
+    let rightVariable = {};
+    let expr = {};
+    expr["Operand"] = "eq";
+    expr["LeftVariableName"] = "";
+    rightVariable["Value"] = 100;
+    rightVariable["ValueType"] = "int";
+    expr["RightVariable"] = rightVariable
+    expr["BooleanOperator"] = "";
+    node.Config["Expression"].push(expr);
+  } 
 }
 
 @Component({
@@ -217,6 +239,19 @@ export class CounterNodeComponent implements OnInit {
   constructor(public dialog: MatDialog) { }
   ngOnInit() { 
     
+  }
+}
+
+@Component({
+  selector: 'wait-node',
+  templateUrl: './wait-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class WaitNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  constructor(public dialog: MatDialog) { }
+  ngOnInit() { 
   }
 }
 

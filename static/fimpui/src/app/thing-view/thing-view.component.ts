@@ -32,6 +32,11 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   ngOnInit() {
     let techAdapterName  = this.route.snapshot.params['ad'];
     let address  = this.route.snapshot.params['id'];
+    if (!techAdapterName){
+      techAdapterName = address.split(":")[0];
+      address = address.split(":")[1];
+    }
+    address = address.split("_")[0];
     //this.getReport(techAdapterName,serviceName,id);
     this.loadThingFromRegistry(techAdapterName,address);
  }

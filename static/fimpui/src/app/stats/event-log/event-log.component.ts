@@ -31,15 +31,42 @@ export class EventLogComponent implements OnInit {
 export class EventLogDataSource extends DataSource<any> {
   events : any[] = [];
   eventsObs = new BehaviorSubject<any[]>([]);
-  
+  aggrErrorsByDevice : any[] = [];
+
   constructor(private http : Http) {
     super();
     this.getData();
   }
 
+  aggregatedErrorsByDevice(events:any[]):any[]{
+    var resultTmp = {};
+    for(let i in events) {
+        // console.dir(events[i]["ThingAddress"]);
+
+        if (events[i]["Value"]=="TX_ERROR")
+        {
+          if (resultTmp[events[i]["ThingAddress"]]== undefined)
+            resultTmp[events[i]["ThingAddress"]] = 1;
+          else   
+            resultTmp[events[i]["ThingAddress"]] = resultTmp[events[i]["ThingAddress"]]+1;
+        }  
+    }
+    var resultArray = [];
+    for(let thingAddr in resultTmp) {
+      resultArray.push({"address":thingAddr,"count":resultTmp[thingAddr]})
+    }
+    return resultArray.sort(function(a,b){ 
+      if(a.count<b.count) 
+         return 1;
+      if(a.count>b.count) 
+         return -1;
+      return 0;   
+    })
+  }
+
   getData() {
     let params: URLSearchParams = new URLSearchParams();
-    params.set('pageSize', '100');
+    params.set('pageSize', '500');
     params.set('page', '0');
     this.http
         .get(BACKEND_ROOT+'/fimp/api/stats/event-log',{search:params})
@@ -47,6 +74,8 @@ export class EventLogDataSource extends DataSource<any> {
           let result = res.json();
           return result;
         }).subscribe(result=>{
+          this.aggrErrorsByDevice = this.aggregatedErrorsByDevice(result);
+          console.dir(this.aggrErrorsByDevice);
           this.eventsObs.next(result);
         });
 
@@ -60,3 +89,43 @@ export class EventLogDataSource extends DataSource<any> {
   
 }
 
+@Component({
+  selector: 'events-per-device-chart',
+  templateUrl: './events-per-device-chart.html'
+})
+export class EventsPerDeviceChart implements OnInit  {
+  @Input() events: any[];
+  public barChartOptions:any = {
+    scaleShowVerticalLines: false,
+    responsive: true
+  };
+  public barChartLabels:string[] = [];
+  public barChartType:string = 'bar';
+  public barChartLegend:boolean = true;
+ 
+  public barChartData:any[] = [
+    {data: [], label: 'ERRORs'},
+    // {data: [28, 48, 40, 19, 86, 27, 90], label: 'Series B'}
+  ];
+  
+
+  ngOnInit() {
+
+    this.loadData();
+  }
+   
+  loadData(){
+    console.log("Loading data");
+    console.dir(this.events);
+    this.barChartLabels = [];
+    for(let i in this.events) {
+      this.barChartLabels.push(this.events[i].address)
+    }
+    this.barChartData[0]["data"] = [];
+    for(let i in this.events) {
+      this.barChartData[0]["data"].push(this.events[i].count)
+    }
+  }
+ 
+  
+}

@@ -17,7 +17,13 @@
     </mat-form-field>
     <button mat-raised-button (click)="filter()" >Filter</button>
     <button mat-raised-button (click)="resetFilter()" >Reset</button>
-    <button style="margin: 10px" mat-raised-button (click)="settings.hidden = !settings.hidden" >Mqtt client</button>
+   
+    <p>
+       <mat-form-field style="width:250px ">
+          <input matInput #maxLogSizeInput type="number" [(ngModel)] = "fimpService.maxLogSize"  placeholder="Max log size" >
+       </mat-form-field>
+       <button style="margin: 10px" mat-raised-button (click)="settings.hidden = !settings.hidden" >Open mqtt client</button>
+    </p>
 </div>
 <br/>
  <div #settings hidden > 

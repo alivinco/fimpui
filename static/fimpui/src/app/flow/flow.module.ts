@@ -2,9 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowContextComponent } from './flow-context/flow-context.component';
-import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog } from './flow-editor/flow-editor.component';
+import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
-import { TriggerNodeComponent ,CounterNodeComponent} from './flow-nodes/flow-nodes.component';
+import { TriggerNodeComponent ,CounterNodeComponent,IfNodeComponent,WaitNodeComponent} from './flow-nodes/flow-nodes.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { FormsModule } from '@angular/forms';
@@ -64,6 +64,7 @@ import { MatTableModule,
      FlowEditorComponent,
      FlowSourceDialog,
      FlowRunDialog,
+     NodeEditorDialog,
      FlowNodesComponent,
      ActionNodeComponent,
      TriggerNodeComponent,
@@ -73,8 +74,10 @@ import { MatTableModule,
      ContextDialog,
      VariableElementComponent,
      TimeTriggerNodeComponent,
-     CounterNodeComponent
+     CounterNodeComponent,
+     IfNodeComponent,
+     WaitNodeComponent
   ],
-  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog]  
+  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog]  
 })
 export class FlowModule { }

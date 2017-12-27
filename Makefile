@@ -1,4 +1,4 @@
-version="0.2.7"
+version="0.3.3"
 version_file=VERSION
 working_dir=$(shell pwd)
 arch="armhf"
@@ -46,12 +46,13 @@ package-deb-doc:
 tar-arm: build-js build-go-arm package-deb-doc
 	@echo "The application was packaged into tar archive "
 
-deb-arm : configure-arm build-js build-go-arm package-deb-doc
+deb-arm : clean configure-arm build-js build-go-arm package-deb-doc
 	mv debian.deb fimpui_$(version)_armhf.deb
 
 deb-amd : configure-amd64 build-js build-go-amd package-deb-doc
 	mv debian.deb fimpui_$(version)_amd64.deb
 
+set-dev : configure-dev-js build-go
 
 build-mac : build-js build-go
 

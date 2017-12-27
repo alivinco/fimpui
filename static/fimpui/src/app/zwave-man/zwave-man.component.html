@@ -15,10 +15,12 @@
     <mat-card-content>
           <table>
            
-          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th><th style="width: 150px">Alias</th><th style="width: 70px">Status</th><th >Actions</th></tr> </thead>
+          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th>
+            <th style="width: 150px">Alias</th><th style="width: 75px">Power</th><th style="width: 70px">Status</th><th >Actions</th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td> <td> {{node.alias}}</td> <td> {{node.status}} </td>
+          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td> 
+          <td> {{node.alias}}</td><td> {{node.power_source}}</td>  <td> {{node.status}} </td>
            <td  >
              <mat-chip-list>
              <mat-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]">Services</mat-chip>

@@ -1,8 +1,12 @@
 <nav mat-tab-nav-bar>
-   
-  </nav>
+    <a mat-tab-link active [routerLink]="['/stats/event-log']" >System events</a>
+    <a mat-tab-link [routerLink]="['/stats/system-metrics']" >System metrics</a>
+</nav>
   
   <br/>
+
+  <events-per-device-chart *ngIf = "dataSource.aggrErrorsByDevice.length>0" [events] = "dataSource.aggrErrorsByDevice"></events-per-device-chart>
+
   <div class="table-container mat-elevation-z8">
     <div class="example-header">
       
@@ -30,7 +34,7 @@
       <!-- Name Column -->
       <ng-container cdkColumnDef="address">
         <mat-header-cell *cdkHeaderCellDef> Address </mat-header-cell>
-        <mat-cell *cdkCellDef="let row"> {{row.ThingAddress}} </mat-cell>
+        <mat-cell *cdkCellDef="let row"> <a routerLink="/fimp/thing-view-addr/{{row.ThingAddress}}"> {{row.ThingAddress}}</a> </mat-cell>
       </ng-container>
       <ng-container cdkColumnDef="code">
         <mat-header-cell *cdkHeaderCellDef> Code </mat-header-cell>

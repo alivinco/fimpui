@@ -23,6 +23,8 @@ export function MapJsonToThingObject(val:any):Thing {
     thing.category = val.category;
     thing.security = val.security
     thing.wakeupInterval = val.wakeup_interval;
+    thing.locationId = val.location_id;
+    thing.locationAlias = val.location_alias;
     for (let fimpService of val.services ) {
         let service = new Service();
         service.name = fimpService.name;

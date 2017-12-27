@@ -138,8 +138,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   pingNode(fromNode:string,toNode:string,level:string){
     this.pingResult = "working...";
-    let props:Map<string,string>;
-    props.set("tx_level",level);
+    let props:Map<string,string> = new Map();
+    props["tx_level"] = level;
     let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,props,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:dev_sys/ad:"+fromNode+"_0",msg.toString());
   }

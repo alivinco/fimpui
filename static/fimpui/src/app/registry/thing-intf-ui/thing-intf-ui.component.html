@@ -2,13 +2,20 @@
 <div style = "width:250px">
    <div *ngIf= "intf.lastValue">
       <div [ngSwitch]="msgType">
-        <div *ngSwitchCase="'evt.sensor.report'">{{intf.lastValue.val}} {{intf.lastValue.props.unit}} </div>
+        <div *ngSwitchCase="'evt.sensor.report'"> <h3> {{intf.lastValue.val}} </h3> {{intf.lastValue.props.unit}} </div>
         <div *ngSwitchCase="'evt.binary.report'"> <mat-chip-list> 
           <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
            </mat-chip-list> </div>
-        <div *ngSwitchCase="'evt.open.report'"> <mat-chip-list> 
-          <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
-           </mat-chip-list> </div>
+        <div *ngSwitchCase="'evt.open.report'"> 
+          <mat-chip-list> 
+              <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"><h4>  {{intf.lastValue.val}}</h4> </mat-chip>
+           </mat-chip-list> 
+        </div>
+        <div *ngSwitchCase="'evt.presence.report'"> 
+            <mat-chip-list> 
+                <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"><h4>  {{intf.lastValue.val}}</h4> </mat-chip>
+             </mat-chip-list> 
+          </div>
         <div *ngSwitchCase="'evt.config.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
             {{item.key}} = {{item.value}} 
@@ -28,8 +35,8 @@
           </p>   
         </div>
         <div *ngSwitchCase="'evt.alarm.report'">
-          <p>Event  = {{ intf.lastValue.val.event }} </p>
-          <p>Status = {{ intf.lastValue.val.status }} </p>
+          <div>Event  = <b>{{ intf.lastValue.val.event }}</b> </div>
+          <div>Status = <b>{{ intf.lastValue.val.status }}</b> </div>
         </div>
         <div *ngSwitchCase="'evt.state.report'"> <h3> {{ intf.lastValue.val }} </h3> </div>
         <div *ngSwitchCase="'evt.meter.report'">

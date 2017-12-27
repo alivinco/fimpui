@@ -20,7 +20,13 @@ export class MetaNode {
 	Address           :string;
 	Service           :string;
 	ServiceInterface  :string;
-	Config            :any;
+  Config            :any;
+  Ui                :Ui;
+}
+
+export class Ui {
+  x:number;
+  y:number;
 }
 
 export class Variable {
@@ -38,7 +44,13 @@ export class FlowEditorComponent implements OnInit {
   selectedNewNodeType:string;
   localVars:any;
   globalVars:any;
-  
+  // properties for drag-and-drop
+  currentDraggableNode:any;
+  dragStartPosX:number;
+  dragStartPosY:number;
+  currentDraggableNodeId:string;
+  isDraggableLine:boolean;
+
   constructor(private route: ActivatedRoute,private http : Http,public dialog: MatDialog) {
     this.flow = new Flow();
    }
@@ -58,6 +70,7 @@ export class FlowEditorComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
          this.flow = result;
+         this.enhanceNodes();
         //  console.dir(this.flow)
         //  console.log(this.flow.Name)
          this.loadContext();
@@ -134,28 +147,117 @@ export class FlowEditorComponent implements OnInit {
    var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
    this.flow.Nodes.push(cloneNode);
  }
- addIfExpression(node:MetaNode){ 
-     let rightVariable = {};
-     let expr = {};
-     expr["Operand"] = "eq";
-     expr["LeftVariableName"] = "";
-     rightVariable["Value"] = 100;
-     rightVariable["ValueType"] = "int";
-     expr["RightVariable"] = rightVariable
-     expr["BooleanOperator"] = "";
-     node.Config["Expression"].push(expr);
- } 
+   
+ allowNodeDrop(event:any) {
+   if (!this.isDraggableLine){
+     console.log("allow node drop");
+     event.preventDefault();
+    }
+  } 
   
+ nodeDrop(event:any) {
+   if (!this.isDraggableLine){
+      console.log("node dropped");
+      console.dir(event);
+      var offsetX = event.clientX - this.dragStartPosX ;
+      var offsetY = event.clientY - this.dragStartPosY ;
+      var nodeStartPositionX = 20;
+      var nodeStartPositionY = 20;
+
+      if (this.currentDraggableNode.style.left)
+        nodeStartPositionX = Number(this.currentDraggableNode.style.left.replace("px",""));
+      if (this.currentDraggableNode.style.top)
+        nodeStartPositionY = Number(this.currentDraggableNode.style.top.replace("px",""));
+      var xPos = nodeStartPositionX + offsetX;
+      var yPos = nodeStartPositionY + offsetY
+      this.currentDraggableNode.style.left = (xPos)+"px";
+      this.currentDraggableNode.style.top = (yPos)+"px";
+
+      var node = this.getNodeById(this.currentDraggableNodeId)
+      if(node.Ui == undefined) {
+        node.Ui = new Ui();
+      }
+      node.Ui.x = xPos;
+      node.Ui.y = yPos;
+
+      event.preventDefault();
+  }
+ }
+ nodeDragStart(event:any){
+  this.currentDraggableNode = event.srcElement;
+  this.dragStartPosX = event.clientX;
+  this.dragStartPosY = event.clientY;
+  if (event.srcElement.className.includes("socket")){
+    console.log("Line drag start");
+    this.isDraggableLine = true  
+  } else {
+    console.log("Node drag start");
+    this.isDraggableLine = false;
+    console.dir(event);
+    this.currentDraggableNodeId = event.srcElement.id.replace("nodeId_","")
+    console.log("active node id = "+this.currentDraggableNodeId);
+  }
+ }
+ //////////////////////////
+ allowLineDrop(event:any) {
+  console.log("allow line drop");
+  event.preventDefault();
+ }
+ lineDrop(event:any) {
+    console.log("line dropped");
+    console.dir(event);
+    var newCord =  this.findAbsolutePosition(this.currentDraggableNode);
+    this.drawCurvedLine(newCord.x,newCord.y,event.clientX,event.clientY,"black",0.5);
+    event.preventDefault();
+ }
+ 
+ //////////////////////////
+
+ drawCurvedLine(x1, y1, x2, y2, color, tension) {
+  var svg = document.getElementById("flow-connections"); 
+  var shape = document.createElementNS("http://www.w3.org/2000/svg","path");
+  var delta = (x2-x1)*tension;
+  var hx1=x1+delta;
+  var hy1=y1;
+  var hx2=x2-delta;
+  var hy2=y2;
+  var path = "M "  + x1 + " " + y1 + 
+             " C " + hx1 + " " + hy1 
+                   + " "  + hx2 + " " + hy2 
+             + " " + x2 + " " + y2;
+  shape.setAttributeNS(null, "d", path);
+  shape.setAttributeNS(null, "fill", "none");
+  shape.setAttributeNS(null, "stroke", color);
+  svg.appendChild(shape);
+}
+
+findAbsolutePosition(htmlElement):any {
+  var x = htmlElement.offsetLeft;
+  var y = htmlElement.offsetTop;
+  for (var el=htmlElement;el != null;el = el.offsetParent) {
+         x += el.offsetLeft;
+         y += el.offsetTop;
+  }
+  return {
+      "x": x,
+      "y": y
+  };
+}
+
+/////////////////////////// 
  addNode(nodeType:string){
     console.dir(this.selectedNewNodeType)
     let node  = new MetaNode()
     node.Id = this.getNewNodeId();
     node.Type = nodeType;
-    node.Address = ""
-    node.Service = ""
-    node.ServiceInterface = ""
-    node.SuccessTransition = ""
-    node.Config = null
+    node.Address = "";
+    node.Service = "";
+    node.ServiceInterface = "";
+    node.SuccessTransition = "";
+    node.Config = null;
+    node.Ui = new Ui();
+    node.Ui.x = 70;
+    node.Ui.y = 170;
 
     switch (node.Type){
       case "trigger":
@@ -237,6 +339,17 @@ export class FlowEditorComponent implements OnInit {
     });      
   }
   
+  showNodeEditorDialog(flow:Flow,node:MetaNode) {
+    let dialogRef = this.dialog.open(NodeEditorDialog,{
+      // height: '95%',
+      width: '95%',
+      data:{"flow":flow,"node":node}
+    });
+    dialogRef.afterClosed().subscribe(result => {
+    
+    });  
+  }
+
   showContextDialog() {
     let dialogRef = this.dialog.open(ContextDialog,{
             width: '95%',
@@ -246,7 +359,31 @@ export class FlowEditorComponent implements OnInit {
       
     });      
   }
- 
+  
+  getNodeById(nodeId:string):MetaNode {
+    console.log("GEtting node for id = "+nodeId);
+    var node:MetaNode;
+    this.flow.Nodes.forEach(element => {
+        console.dir(element)
+        if (element.Id==nodeId) {
+          node = element;
+          return ;
+        }
+    });
+    return node;
+  }
+
+  enhanceNodes() {
+    this.flow.Nodes.forEach(node => {
+      if(node.Ui == undefined) {
+        node.Ui = new Ui()
+        node.Ui.x = 70;
+        node.Ui.y = 170;
+      }
+      
+  });
+  }
+
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
             width: '95%'
@@ -290,6 +427,21 @@ export class FlowSourceDialog {
     this.dialogRef.close(this.data);
     
   }
+}
+
+@Component({
+  selector: 'node-editor-dialog',
+  templateUrl: 'node-editor-dialog.html',
+  styleUrls: ['flow-editor.component.css']
+})
+export class NodeEditorDialog {
+  flow :Flow;
+  node :MetaNode;
+  constructor(public dialogRef: MatDialogRef<NodeEditorDialog>,@Inject(MAT_DIALOG_DATA) public data:any) {
+    this.flow = data.flow;
+    this.node = data.node;
+   }
+  
 }
 
 @Component({

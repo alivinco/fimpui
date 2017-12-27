@@ -47,12 +47,14 @@ export class TimelineComponent implements OnInit {
   
   filter() {
     this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);  
+    this.dataSource.setFilter();
   } 
   resetFilter(){
     this.topicFilter = "";
     this.serviceFilter = "";
     this.msgTypeFilter = "";
     this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);  
+    this.dataSource.resetFilter();
   }
   copyToMqttClient(topic:string ,payload:string) {
     this.topic = topic ;
@@ -86,6 +88,14 @@ export class TimelineDataSource extends DataSource<any> {
     this.fimp.getGlobalObservable().subscribe((msg) => {
        this.eventsObs.next(this.events);
     });
+  }
+  setFilter(){
+    this.events = this.fimp.getFilteredMessagLog()
+    this.eventsObs.next(this.events);
+  }
+  resetFilter(){
+    this.events = this.fimp.getMessagLog();
+    this.eventsObs.next(this.events);
   }
    
   connect(): Observable<FimpMessage[]> {

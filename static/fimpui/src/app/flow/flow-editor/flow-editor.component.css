@@ -1,17 +1,65 @@
 .flow-editor{
   padding: 20px;
+  min-height: 100%;
 }
   
 
 .example-card {
   width: 700px;
 }
+.flow-editor-main-card {
+  width: 100%;
+}
+.drag-area {
+  width:100%;
+  min-height:50vh;
+  border-color: gainsboro;
+}
+
+.socket {
+  display: inline-block;
+  cursor: pointer;
+  border: 2px solid white;
+  border-radius: 14px;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  z-index: 2;
+  background: #96b38a;
+  position: absolute;
+  left: 30px;
+  bottom: -12px;
+  }
+.socket:hover {
+    border-color: coral;
+  }
+
+.socket-input {
+  background: #199ac2;
+  top:-15px;
+  left:70px;
+  bottom:inherit;
+}  
+
+.socket-error {
+  background: #e62727;
+  left:100px;
+
+}
+
+.connections {
+  position: absolute;
+  overflow: visible;
+  pointer-events: none;
+}
 
 .node-card {
-  /*padding: 0px;*/
   margin-bottom: 20px;
   background-color: lightgoldenrodyellow;
-  
+  padding: 10px;
+  width: 150px;
+  position: absolute;
+  border-radius:15px;
 }
 .value-selector {
   /*padding: 0px;*/

@@ -315,6 +315,36 @@ func main() {
 
 	})
 
+	e.GET("/fimp/api/stats/metrics/counters", func(c echo.Context) error {
+
+		result := make(map[string]interface{})
+		result["restart_time"] = statsStore.GetResetTime()
+		result["metrics"] = statsStore.GetCounterMetrics()
+
+		if err == nil {
+			return c.JSON(http.StatusOK, result)
+		} else {
+			log.Error("Faild to fetch errors ",err)
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+	})
+
+	e.GET("/fimp/api/stats/metrics/meters", func(c echo.Context) error {
+
+		result := make(map[string]interface{})
+		result["restart_time"] = statsStore.GetResetTime()
+		result["metrics"] = statsStore.GetMeterMetrics()
+
+		if err == nil {
+			return c.JSON(http.StatusOK, result)
+		} else {
+			log.Error("Faild to fetch errors ",err)
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+	})
+
 	e.GET("/fimp/api/registry/things", func(c echo.Context) error {
 
 		var things []registry.Thing

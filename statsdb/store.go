@@ -9,17 +9,21 @@ import (
 )
 
 type StatsStore struct {
-	db              *storm.DB
-	dbFileName      string
-	metricsRegistry metrics.Registry
-	maxEventLogSize int
-	eventLogSize    int
+	db                     *storm.DB
+	dbFileName             string
+	metricsCounterRegistry metrics.Registry
+	metricsMeterRegistry   metrics.Registry
+	metricsResetTime       time.Time
+	maxEventLogSize        int
+	eventLogSize           int
 }
 
 func NewStatsStore(storeFile string) *StatsStore {
 	store := StatsStore{dbFileName: storeFile}
 	store.Init()
-	store.metricsRegistry = metrics.NewRegistry()
+	store.metricsCounterRegistry = metrics.NewRegistry()
+	store.metricsMeterRegistry = metrics.NewRegistry()
+	store.metricsResetTime = time.Now()
 	return &store
 }
 
@@ -67,6 +71,27 @@ func (st *StatsStore) GetAllEvents() ([]EventRec, error) {
 	var fimpErrors []EventRec
 	err := st.db.Select().Find(&fimpErrors)
 	return fimpErrors, err
+}
+
+func (st *StatsStore) CountEvent(name string) {
+	metrics.GetOrRegisterCounter(name,st.metricsCounterRegistry).Inc(1)
+}
+
+func (st *StatsStore) MeterEvent(name string) {
+	metrics.GetOrRegisterMeter("total",st.metricsMeterRegistry).Mark(1)
+	metrics.GetOrRegisterMeter(name,st.metricsMeterRegistry).Mark(1)
+}
+
+func (st *StatsStore) GetResetTime() time.Time {
+	return st.metricsResetTime
+}
+
+func (st *StatsStore) GetCounterMetrics() map[string]map[string]interface{} {
+	return st.metricsCounterRegistry.GetAll()
+}
+
+func (st *StatsStore) GetMeterMetrics() map[string]map[string]interface{} {
+	return st.metricsMeterRegistry.GetAll()
 }
 
 func (st *StatsStore) ApplyRetentionPolicy() {

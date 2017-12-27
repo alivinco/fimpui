@@ -22,7 +22,7 @@ export class FimpService{
   private messages:FimpMessage[]=[];
   private filteredMessages:FimpMessage[]=[];
   public observable: Observable<MqttMessage> = null;
-  
+  public maxLogSize:number = 100;
   private fimpFilter : FimpFilter;
   private isFilteringEnabled:boolean;
   private globalTopicPrefix:string;
@@ -127,6 +127,12 @@ export class FimpService{
       console.log(err);
     });
   }
+ private rotateMessages(msgLog:FimpMessage[]) {
+    if(msgLog.length>this.maxLogSize) {
+      msgLog.pop();
+    }
+ }
+
  private saveMessage(msg:MqttMessage){
       console.log("Saving new message to log")
       let fimpMsg  = NewFimpMessageFromString(msg.payload.toString());
@@ -135,7 +141,9 @@ export class FimpService{
       fimpMsg.localTs =  Date.now();
       fimpMsg.localId = this.messages.length+1;
       this.messages.unshift(fimpMsg);
+      this.rotateMessages(this.messages);
       this.saveFilteredMessage(fimpMsg);
+      this.rotateMessages(this.filteredMessages);
  }
  
  private saveFilteredMessage(fimpMsg : FimpMessage){

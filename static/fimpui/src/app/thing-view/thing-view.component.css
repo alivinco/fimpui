@@ -1,6 +1,6 @@
 .thing-view {
-  padding: 20px;
-  
+  padding: 5px;
+  min-width: 850px;
 }
 
 .example-header-image {
