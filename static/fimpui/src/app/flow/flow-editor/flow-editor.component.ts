@@ -179,7 +179,7 @@ export class FlowEditorComponent implements OnInit {
       }
       node.Ui.x = xPos;
       node.Ui.y = yPos;
-
+      this.redrawNodeLines(this.currentDraggableNodeId);  
       event.preventDefault();
   }
  }
@@ -187,13 +187,14 @@ export class FlowEditorComponent implements OnInit {
   this.currentDraggableNode = event.srcElement;
   this.dragStartPosX = event.clientX;
   this.dragStartPosY = event.clientY;
+  console.dir(event);
   if (event.srcElement.className.includes("socket")){
     console.log("Line drag start");
     this.isDraggableLine = true  
   } else {
     console.log("Node drag start");
     this.isDraggableLine = false;
-    console.dir(event);
+    
     this.currentDraggableNodeId = event.srcElement.id.replace("nodeId_","")
     console.log("active node id = "+this.currentDraggableNodeId);
   }
@@ -203,41 +204,149 @@ export class FlowEditorComponent implements OnInit {
   console.log("allow line drop");
   event.preventDefault();
  }
+ // invoked when drag operation is finished
  lineDrop(event:any) {
     console.log("line dropped");
+    console.dir(this.currentDraggableNode);
+    console.log("dropp event");
     console.dir(event);
-    var newCord =  this.findAbsolutePosition(this.currentDraggableNode);
-    this.drawCurvedLine(newCord.x,newCord.y,event.clientX,event.clientY,"black",0.5);
+    var offsetX = event.clientX - this.dragStartPosX ;
+    var offsetY = event.clientY - this.dragStartPosY ;
+    console.log("offset x = "+offsetX);
+    console.log("offset y = "+offsetY);
+ 
+    // var outSockCord =  this.findOutputSocketPosition(this.currentDraggableNode);
+    // var inSockCord =  this.findInputSocketPosition(event.srcElement);
+    var srcNodeIdWithType = this.currentDraggableNode.id.replace("out_socket_nodeid_",""); 
+    var srcSocketType = srcNodeIdWithType.split("_")[0];
+    var srcNodeId = srcNodeIdWithType.split("_")[1];
+    var targetNodeId = event.srcElement.id.replace("in_socket_nodeid_","");
+    var srcNode = this.getNodeById(srcNodeId);
+    if (srcNode.Type == "if") {
+      if (srcSocketType == "iftrue")
+        srcNode.Config.TrueTransition = targetNodeId;
+      else 
+        srcNode.Config.FalseTransition = targetNodeId;  
+    }else {
+      if (srcSocketType == "succ")
+        srcNode.SuccessTransition = targetNodeId;
+      if (srcSocketType == "err")
+        srcNode.ErrorTransition = targetNodeId;  
+    }
+    
+
+    // this.drawCurvedLine(srcNodeId+"_"+targetNodeId,outSockCord.x,outSockCord.y,inSockCord.x,inSockCord.y,"black",0.4);
+    
+    this.drawLineBetweenNodes(srcNodeId,targetNodeId,srcSocketType);
+
     event.preventDefault();
  }
  
- //////////////////////////
+ redrawNodeLines(nodeId:string) {
+   // inbound lines 
+   
+   var parentNode = this.getParentNodeById(nodeId);
+   if (parentNode != null) {
+      if (parentNode.Type == "if") {
+        if (parentNode.Config.TrueTransition == nodeId)
+          this.drawLineBetweenNodes(parentNode.Id,nodeId,"iftrue");
+        if (parentNode.Config.FalseTransition == nodeId)  
+          this.drawLineBetweenNodes(parentNode.Id,nodeId,"iffalse");
+      }else {
+        if (parentNode.SuccessTransition == nodeId)
+            this.drawLineBetweenNodes(parentNode.Id,nodeId,"succ");
+        if (parentNode.ErrorTransition == nodeId)
+            this.drawLineBetweenNodes(parentNode.Id,nodeId,"err");
+      }
+      
+   }else {
+      console.log("Node doesn't have inbound lines");
+   } 
+   //out bound lines 
+   var node = this.getNodeById(nodeId);
+   if(node.Type == "if"){
+    if (node.Config.TrueTransition.length > 0)
+        this.drawLineBetweenNodes(nodeId,node.Config.TrueTransition,"iftrue");
+    if (node.Config.FalseTransition.length > 0)
+        this.drawLineBetweenNodes(nodeId,node.Config.FalseTransition,"iffalse");
+   }else {
+     if (node.SuccessTransition.length > 0)
+        this.drawLineBetweenNodes(nodeId,node.SuccessTransition,"succ");
+     if (node.ErrorTransition.length > 0)
+        this.drawLineBetweenNodes(nodeId,node.ErrorTransition,"err");
+     
+   }
+      
+ };
 
- drawCurvedLine(x1, y1, x2, y2, color, tension) {
-  var svg = document.getElementById("flow-connections"); 
-  var shape = document.createElementNS("http://www.w3.org/2000/svg","path");
-  var delta = (x2-x1)*tension;
-  var hx1=x1+delta;
-  var hy1=y1;
-  var hx2=x2-delta;
-  var hy2=y2;
-  var path = "M "  + x1 + " " + y1 + 
-             " C " + hx1 + " " + hy1 
-                   + " "  + hx2 + " " + hy2 
-             + " " + x2 + " " + y2;
-  shape.setAttributeNS(null, "d", path);
-  shape.setAttributeNS(null, "fill", "none");
-  shape.setAttributeNS(null, "stroke", color);
-  svg.appendChild(shape);
+ recalculateCanvasSize() {
+   var canvas = document.getElementById("flowEditorCanvasId");
+   console.dir(canvas);
+   document.getElementById("flowEditorCanvasId").style.height = (canvas.scrollHeight+100)+"px";
+
+ }
+ 
+ //////////////////////////
+ 
+ drawLineBetweenNodes(sourceNodeId,targetNodeId,type) {
+  var outSocketElement = document.getElementById("out_socket_nodeid_"+type+"_"+sourceNodeId);
+  var inSocketElement = document.getElementById("in_socket_nodeid_"+targetNodeId);
+  if (outSocketElement && inSocketElement){
+    var outSockCord =  this.findOutputSocketPosition(outSocketElement);
+    var inSockCord =  this.findInputSocketPosition(inSocketElement);
+    this.drawCurvedLine(sourceNodeId+"_"+targetNodeId+"_"+type,outSockCord.x,outSockCord.y,inSockCord.x,inSockCord.y,"black",0.4);
+  }
+  
+ }
+ 
+ drawCurvedLine(id,x1, y1, x2, y2, color, tension) {
+    var svg = document.getElementById("flow-connections"); 
+    
+    var existingLine = document.getElementById(id); 
+    if (existingLine != undefined) {
+      svg.removeChild(existingLine);
+    }
+ 
+    var shape = document.createElementNS("http://www.w3.org/2000/svg","path");
+    var delta = (x2-x1)*tension;
+    var hx1=x1+delta;
+    var hy1=y1;
+    var hx2=x2-delta;
+    var hy2=y2;
+    var path = "M "  + x1 + " " + y1 + 
+              " C " + hx1 + " " + hy1 
+                    + " "  + hx2 + " " + hy2 
+              + " " + x2 + " " + y2;
+    shape.setAttributeNS(null, "d", path);
+    shape.setAttributeNS(null, "id", id);
+    shape.setAttributeNS(null, "fill", "none");
+    shape.setAttributeNS(null, "stroke", color);
+    shape.setAttributeNS(null, "stroke-width", "5px");
+    svg.appendChild(shape);
 }
 
-findAbsolutePosition(htmlElement):any {
+findOutputSocketPosition(htmlElement):any {
   var x = htmlElement.offsetLeft;
   var y = htmlElement.offsetTop;
-  for (var el=htmlElement;el != null;el = el.offsetParent) {
-         x += el.offsetLeft;
-         y += el.offsetTop;
-  }
+  var parentX = Number(htmlElement.offsetParent.style.left.replace("px",""));
+  var parentY = Number(htmlElement.offsetParent.style.top.replace("px",""));
+
+  x = (x+parentX)-(htmlElement.clientWidth/2);
+  y = (y+parentY+(htmlElement.clientHeight/2))-htmlElement.offsetParent.clientHeight;
+  return {
+      "x": x,
+      "y": y
+  };
+}
+
+findInputSocketPosition(htmlElement):any {
+  var x = htmlElement.offsetLeft;
+  var y = htmlElement.offsetTop;
+  var parentX = Number(htmlElement.offsetParent.style.left.replace("px",""));
+  var parentY = Number(htmlElement.offsetParent.style.top.replace("px",""));
+
+  x = (x+parentX)-(htmlElement.clientWidth/2);
+  y = (parentY-(htmlElement.offsetParent.clientHeight+htmlElement.clientHeight/2));
   return {
       "x": x,
       "y": y
@@ -247,6 +356,7 @@ findAbsolutePosition(htmlElement):any {
 /////////////////////////// 
  addNode(nodeType:string){
     console.dir(this.selectedNewNodeType)
+    this.recalculateCanvasSize();
     let node  = new MetaNode()
     node.Id = this.getNewNodeId();
     node.Type = nodeType;
@@ -254,6 +364,7 @@ findAbsolutePosition(htmlElement):any {
     node.Service = "";
     node.ServiceInterface = "";
     node.SuccessTransition = "";
+    node.ErrorTransition = "";
     node.Config = null;
     node.Ui = new Ui();
     node.Ui.x = 70;
@@ -364,8 +475,19 @@ findAbsolutePosition(htmlElement):any {
     console.log("GEtting node for id = "+nodeId);
     var node:MetaNode;
     this.flow.Nodes.forEach(element => {
-        console.dir(element)
         if (element.Id==nodeId) {
+          node = element;
+          return ;
+        }
+    });
+    return node;
+  }
+
+  getParentNodeById(nodeId:string):MetaNode {
+    var node:MetaNode;
+    this.flow.Nodes.forEach(element => {
+        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || 
+            element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
           node = element;
           return ;
         }

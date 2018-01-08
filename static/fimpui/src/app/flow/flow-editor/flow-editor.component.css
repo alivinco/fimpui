@@ -14,6 +14,7 @@
   width:100%;
   min-height:50vh;
   border-color: gainsboro;
+  overflow: auto;
 }
 
 .socket {
@@ -43,6 +44,11 @@
 
 .socket-error {
   background: #e62727;
+  left:100px;
+}
+
+.socket-iffalse {
+  background: #f1f521;
   left:100px;
 
 }
