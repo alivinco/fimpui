@@ -117,15 +117,6 @@
           </p>
    </div>
          <p>
-           <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
-               <mat-option value = "" > End! </mat-option>
-               <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-           </mat-select>
-           <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Timeout node"[(ngModel)]="node.TimeoutTransition" >
-               <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-           </mat-select>
-         </p>
-         <p>
            <button mat-raised-button (click)="runFlow(node)" >Run</button>
          </p>
 </div>

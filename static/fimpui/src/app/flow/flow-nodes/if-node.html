@@ -1,4 +1,4 @@
-<div #nodebody hidden>
+<div #nodebody >
     <div *ngFor="let exp of node.Config.Expression;let index2 = index;trackBy:trackByIndex;">
       
       <div style="margin-top: 10px;">
@@ -61,14 +61,4 @@
 
     </div>
  </div>   
- <p>
-      <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="True node"[(ngModel)]="node.Config.TrueTransition" >
-          <mat-option value = "" > End! </mat-option>
-          <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-      </mat-select>
-       <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="False node"[(ngModel)]="node.Config.FalseTransition" >
-          <mat-option value = "" > End! </mat-option>
-          <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-      </mat-select>
- </p>
- <p><button mat-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
+ 

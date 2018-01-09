@@ -67,6 +67,15 @@
   position: absolute;
   border-radius:15px;
 }
+
+.node-card mat-card-content {
+  margin-bottom: 5px;
+}
+.node-card mat-card-subtitle {
+  height: 30px;
+  overflow: auto;
+}
+
 .value-selector {
   /*padding: 0px;*/
   margin-bottom: 10px;
@@ -96,7 +105,7 @@
     width: 270px;
 }
 .node-transition-field {
-    width: 100x;
+    width: 100px;
 }
 
 .source-editor {
@@ -108,4 +117,8 @@
 
 md-chip {
   cursor: pointer;
+}
+
+.node-editor-dialog {
+  max-width: 700px;
 }

@@ -50,6 +50,8 @@ export class FlowEditorComponent implements OnInit {
   dragStartPosY:number;
   currentDraggableNodeId:string;
   isDraggableLine:boolean;
+  canvasHeight:number;
+  canvasInitHeight:number;
 
   constructor(private route: ActivatedRoute,private http : Http,public dialog: MatDialog) {
     this.flow = new Flow();
@@ -57,6 +59,7 @@ export class FlowEditorComponent implements OnInit {
 
   ngOnInit() {
     let id  = this.route.snapshot.params['id'];
+    this.canvasHeight = 0;
     this.loadFlow(id);
     
   }
@@ -71,6 +74,8 @@ export class FlowEditorComponent implements OnInit {
       }).subscribe ((result) => {
          this.flow = result;
          this.enhanceNodes();
+         var canvas = document.getElementById("flowEditorCanvasId");
+         this.canvasInitHeight = canvas.clientHeight;
         //  console.dir(this.flow)
         //  console.log(this.flow.Name)
          this.loadContext();
@@ -132,21 +137,6 @@ export class FlowEditorComponent implements OnInit {
    maxId++;
    return maxId+"";
  } 
- deleteNode(node:MetaNode){
-   let index: number = this.flow.Nodes.indexOf(node);
-    if (index !== -1) {
-        this.flow.Nodes.splice(index, 1);
-    }  
- } 
- cloneNode(node:MetaNode){
-  //  let cloneNode = new MetaNode();
-   
-  //  Object.assign(cloneNode,node);
-  //  cloneNode.Id = this.getNewNodeId();
-  // temp quick dirty way how to clone nested objects;
-   var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
-   this.flow.Nodes.push(cloneNode);
- }
    
  allowNodeDrop(event:any) {
    if (!this.isDraggableLine){
@@ -245,23 +235,25 @@ export class FlowEditorComponent implements OnInit {
  redrawNodeLines(nodeId:string) {
    // inbound lines 
    
-   var parentNode = this.getParentNodeById(nodeId);
-   if (parentNode != null) {
-      if (parentNode.Type == "if") {
-        if (parentNode.Config.TrueTransition == nodeId)
-          this.drawLineBetweenNodes(parentNode.Id,nodeId,"iftrue");
-        if (parentNode.Config.FalseTransition == nodeId)  
-          this.drawLineBetweenNodes(parentNode.Id,nodeId,"iffalse");
-      }else {
-        if (parentNode.SuccessTransition == nodeId)
-            this.drawLineBetweenNodes(parentNode.Id,nodeId,"succ");
-        if (parentNode.ErrorTransition == nodeId)
-            this.drawLineBetweenNodes(parentNode.Id,nodeId,"err");
+   var parentNodes = this.getParentNodesById(nodeId);
+   if (parentNodes != null) {
+      for (let parentNode of parentNodes) {
+        
+          if (parentNode.Type == "if") {
+            if (parentNode.Config.TrueTransition == nodeId)
+              this.drawLineBetweenNodes(parentNode.Id,nodeId,"iftrue");
+            if (parentNode.Config.FalseTransition == nodeId)  
+              this.drawLineBetweenNodes(parentNode.Id,nodeId,"iffalse");
+          }else {
+            if (parentNode.SuccessTransition == nodeId)
+                this.drawLineBetweenNodes(parentNode.Id,nodeId,"succ");
+            if (parentNode.ErrorTransition == nodeId)
+                this.drawLineBetweenNodes(parentNode.Id,nodeId,"err");
+          }
       }
-      
    }else {
-      console.log("Node doesn't have inbound lines");
-   } 
+        console.log("Node doesn't have inbound lines");
+    } 
    //out bound lines 
    var node = this.getNodeById(nodeId);
    if(node.Type == "if"){
@@ -280,10 +272,14 @@ export class FlowEditorComponent implements OnInit {
  };
 
  recalculateCanvasSize() {
-   var canvas = document.getElementById("flowEditorCanvasId");
-   console.dir(canvas);
-   document.getElementById("flowEditorCanvasId").style.height = (canvas.scrollHeight+100)+"px";
+  //  var canvas = document.getElementById("flowEditorCanvasId");
+  //  console.dir(canvas);
+  //  document.getElementById("flowEditorCanvasId").style.height = (canvas.scrollHeight+100)+"px";
 
+ }
+ onCanvasSizeChange(){
+    console.log("On canvas size change . value ="+this.canvasHeight);
+    document.getElementById("flowEditorCanvasId").style.height = (this.canvasInitHeight+this.canvasHeight)+"px";
  }
  
  //////////////////////////
@@ -294,7 +290,8 @@ export class FlowEditorComponent implements OnInit {
   if (outSocketElement && inSocketElement){
     var outSockCord =  this.findOutputSocketPosition(outSocketElement);
     var inSockCord =  this.findInputSocketPosition(inSocketElement);
-    this.drawCurvedLine(sourceNodeId+"_"+targetNodeId+"_"+type,outSockCord.x,outSockCord.y,inSockCord.x,inSockCord.y,"black",0.4);
+    var yOffset = 14;
+    this.drawCurvedLine(sourceNodeId+"_"+targetNodeId+"_"+type,outSockCord.x,outSockCord.y-yOffset,inSockCord.x,inSockCord.y-yOffset,"#afe0aa",0.1);
   }
   
  }
@@ -321,7 +318,7 @@ export class FlowEditorComponent implements OnInit {
     shape.setAttributeNS(null, "id", id);
     shape.setAttributeNS(null, "fill", "none");
     shape.setAttributeNS(null, "stroke", color);
-    shape.setAttributeNS(null, "stroke-width", "5px");
+    shape.setAttributeNS(null, "stroke-width", "4px");
     svg.appendChild(shape);
 }
 
@@ -453,7 +450,7 @@ findInputSocketPosition(htmlElement):any {
   showNodeEditorDialog(flow:Flow,node:MetaNode) {
     let dialogRef = this.dialog.open(NodeEditorDialog,{
       // height: '95%',
-      width: '95%',
+      //width: '95%',
       data:{"flow":flow,"node":node}
     });
     dialogRef.afterClosed().subscribe(result => {
@@ -483,16 +480,16 @@ findInputSocketPosition(htmlElement):any {
     return node;
   }
 
-  getParentNodeById(nodeId:string):MetaNode {
-    var node:MetaNode;
+  getParentNodesById(nodeId:string):MetaNode[] {
+    var nodes:MetaNode[] = [];
     this.flow.Nodes.forEach(element => {
         if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || 
             element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
-          node = element;
+          nodes.push(element);
           return ;
         }
     });
-    return node;
+    return nodes;
   }
 
   enhanceNodes() {
@@ -563,6 +560,19 @@ export class NodeEditorDialog {
     this.flow = data.flow;
     this.node = data.node;
    }
+   deleteNode(node:MetaNode){
+    let index: number = this.flow.Nodes.indexOf(node);
+     if (index !== -1) {
+         this.flow.Nodes.splice(index, 1);
+     }  
+  } 
+  cloneNode(node:MetaNode){
+   //  Object.assign(cloneNode,node);
+   //  cloneNode.Id = this.getNewNodeId();
+   // temp quick dirty way how to clone nested objects;
+    var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
+    this.flow.Nodes.push(cloneNode);
+  } 
   
 }
 

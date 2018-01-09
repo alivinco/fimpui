@@ -1,5 +1,5 @@
 <div>
-    <div #nodebody hidden> 
+    <div #nodebody > 
     <mat-input-container class="node-transition-field">
         <input matInput [(ngModel)]="node.Config.Name" placeholder="Name">
     </mat-input-container>
@@ -100,15 +100,6 @@
      <mat-checkbox [(ngModel)]="node.Config.UpdateGlobal" > Share between flows </mat-checkbox>
     </div> 
     </div>
-    <p>
-        <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Success node"[(ngModel)]="node.SuccessTransition" >
-            <mat-option value = "" > End! </mat-option>
-            <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-        </mat-select>
-        <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="Error node"[(ngModel)]="node.ErrorTransition" >
-            <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-        </mat-select>
-    </p>
-    <p><button mat-raised-button (click)="nodebody.hidden = !nodebody.hidden" >Edit</button> </p>
+   
  
 </div>
