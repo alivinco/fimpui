@@ -4,7 +4,7 @@ import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowContextComponent } from './flow-context/flow-context.component';
 import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
-import { TriggerNodeComponent ,CounterNodeComponent,IfNodeComponent,WaitNodeComponent} from './flow-nodes/flow-nodes.component';
+import { TriggerNodeComponent ,LoopNodeComponent,IfNodeComponent,WaitNodeComponent} from './flow-nodes/flow-nodes.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { FormsModule } from '@angular/forms';
@@ -12,6 +12,7 @@ import { HttpModule } from '@angular/http';
 import { RegistryModule} from 'app/registry/registry.module'
 import { VariableElementComponent} from 'app/flow/flow-nodes/ui-elements/ui-elements.component'
 import { CdkTableModule } from '@angular/cdk/table';
+
 import { MatTableModule,
   MatFormFieldModule,
   MatInputModule,
@@ -74,7 +75,7 @@ import { MatTableModule,
      ContextDialog,
      VariableElementComponent,
      TimeTriggerNodeComponent,
-     CounterNodeComponent,
+     LoopNodeComponent,
      IfNodeComponent,
      WaitNodeComponent
   ],

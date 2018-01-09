@@ -47,6 +47,11 @@
   left:100px;
 }
 
+.socket-timeout {
+  background:rgb(255, 173, 65);
+  left:65px;
+}
+
 .socket-iffalse {
   background: #f1f521;
   left:100px;
@@ -120,5 +125,5 @@ md-chip {
 }
 
 .node-editor-dialog {
-  max-width: 700px;
+  max-width: 600px;
 }

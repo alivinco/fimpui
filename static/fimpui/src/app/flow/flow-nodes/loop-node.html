@@ -10,10 +10,6 @@
             <mat-input-container class="node-transition-field">
                     <input matInput type="number" [(ngModel)]="node.Config.Step" placeholder="Step">
             </mat-input-container>
-            <mat-select #nodeIdInput style="width: 250px" class="value-selector" placeholder="End value transition"[(ngModel)]="node.Config.EndValueTransition" >
-                    <mat-option value = "" > End! </mat-option>
-                    <mat-option *ngFor="let nod of nodes" [value]="nod.Id" >{{nod.Label}}</mat-option>
-            </mat-select>    
         </div>
        
 </div>

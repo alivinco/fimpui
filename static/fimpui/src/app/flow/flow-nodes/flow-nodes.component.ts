@@ -229,11 +229,11 @@ export class TimeTriggerNodeComponent implements OnInit {
 }
 
 @Component({
-  selector: 'counter-node',
-  templateUrl: './counter-node.html',
+  selector: 'loop-node',
+  templateUrl: './loop-node.html',
   styleUrls: ['./flow-nodes.component.css']
 })
-export class CounterNodeComponent implements OnInit {
+export class LoopNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }

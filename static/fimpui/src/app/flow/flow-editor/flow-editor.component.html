@@ -10,7 +10,9 @@
     <mat-list-item><h3> Nodes </h3></mat-list-item> 
     <mat-list-item> <button mat-raised-button (click)="addNode('trigger')"  >
         <mat-icon aria-label="Edit node">input</mat-icon> Trigger</button> </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('time_trigger')"  >Time trigger</button> </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('time_trigger')" > 
+        <mat-icon aria-label="Edit node">schedule</mat-icon> Time trigger</button> 
+    </mat-list-item>
     <mat-list-item> <button mat-raised-button (click)="addNode('action')" >
         <mat-icon  aria-label="Edit node">send</mat-icon> Action</button> 
     </mat-list-item>
@@ -20,9 +22,15 @@
     <mat-list-item> <button mat-raised-button (click)="addNode('if')" > 
       <mat-icon  aria-label="Edit node">call_split</mat-icon> If</button>
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('counter')" >Counter</button> </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('wait')" >Wait</button> </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('set_variable')" >Set variable</button> </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('loop')" > 
+        <mat-icon  aria-label="Edit node">loop</mat-icon> Loop</button> 
+    </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('wait')" >
+      <mat-icon aria-label="Edit node">update</mat-icon> Wait</button>
+    </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('set_variable')" >
+      <mat-icon aria-label="Edit node">edit</mat-icon> Set variable</button> 
+    </mat-list-item>
     </mat-list>
   </mat-sidenav>
 
@@ -48,14 +56,15 @@
                     <mat-icon *ngSwitchCase="'trigger'" aria-label="Edit node">input</mat-icon>
                     <mat-icon *ngSwitchCase="'receive'" aria-label="Edit node">input</mat-icon>
                     <mat-icon *ngSwitchCase="'time_trigger'" aria-label="Edit node">schedule</mat-icon>
+                    <mat-icon *ngSwitchCase="'wait'" aria-label="Edit node">update</mat-icon>
                     <mat-icon *ngSwitchCase="'action'" aria-label="Edit node">send</mat-icon>
                     <mat-icon *ngSwitchCase="'if'" aria-label="Edit node">call_split</mat-icon>
-                    <mat-icon *ngSwitchCase="'counter'" aria-label="Edit node">loop</mat-icon>
+                    <mat-icon *ngSwitchCase="'loop'" aria-label="Edit node">loop</mat-icon>
                     <mat-icon *ngSwitchCase="'set_variable'" aria-label="Edit node">edit</mat-icon>
                     <mat-icon *ngSwitchDefault aria-label="Edit node">build</mat-icon>
                   </button> 
                   {{ node.Type }} 
-                </mat-card-title> 
+                </mat-card-title>  
                 <mat-card-subtitle> {{ node.Label }} </mat-card-subtitle>
               </mat-card-header>  
               <mat-card-content>
@@ -65,7 +74,9 @@
                 
               <div id = "out_socket_nodeid_succ_{{node.Id}}" *ngIf="node.Type!='if'" class="socket" draggable="true"></div> 
               <div id = "out_socket_nodeid_err_{{node.Id}}" *ngIf="node.Type!='if'" class="socket socket-error" draggable="true"></div> 
-              
+              <div id = "out_socket_nodeid_timeout_{{node.Id}}" *ngIf="node.Type=='trigger'" class="socket socket-timeout" draggable="true"></div>
+              <div id = "out_socket_nodeid_timeout_{{node.Id}}" *ngIf="node.Type=='receive'" class="socket socket-timeout" draggable="true"></div>
+
               <div id = "out_socket_nodeid_iftrue_{{node.Id}}" *ngIf="node.Type=='if'" class="socket" draggable="true"></div> 
               <div id = "out_socket_nodeid_iffalse_{{node.Id}}" *ngIf="node.Type=='if'" class="socket socket-iffalse" draggable="true" ></div> 
               

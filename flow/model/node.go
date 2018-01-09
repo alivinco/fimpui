@@ -13,6 +13,7 @@ type MetaNode struct {
 	Service           string
 	ServiceInterface  string
 	Config            interface{}
+	Ui                interface{}
 }
 
 type Node interface {

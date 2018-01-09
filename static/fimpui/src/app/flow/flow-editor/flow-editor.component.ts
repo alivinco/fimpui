@@ -9,6 +9,7 @@ import { msgTypeToValueTypeMap } from "app/things-db/mapping";
 import { BACKEND_ROOT } from "app/globals";
 import { RegistryModule} from 'app/registry/registry.module'
 import { ServiceInterface } from "app/registry/model";
+import { setTimeout } from 'timers';
 
 export class MetaNode {
   Id               :string;
@@ -74,6 +75,7 @@ export class FlowEditorComponent implements OnInit {
       }).subscribe ((result) => {
          this.flow = result;
          this.enhanceNodes();
+         setTimeout(()=>{this.redrawAllLines()},100);
          var canvas = document.getElementById("flowEditorCanvasId");
          this.canvasInitHeight = canvas.clientHeight;
         //  console.dir(this.flow)
@@ -222,13 +224,12 @@ export class FlowEditorComponent implements OnInit {
         srcNode.SuccessTransition = targetNodeId;
       if (srcSocketType == "err")
         srcNode.ErrorTransition = targetNodeId;  
+      if (srcSocketType == "timeout")
+        srcNode.TimeoutTransition = targetNodeId;    
+
     }
-    
-
-    // this.drawCurvedLine(srcNodeId+"_"+targetNodeId,outSockCord.x,outSockCord.y,inSockCord.x,inSockCord.y,"black",0.4);
-    
-    this.drawLineBetweenNodes(srcNodeId,targetNodeId,srcSocketType);
-
+    // this.drawLineBetweenNodes(srcNodeId,targetNodeId,srcSocketType);
+    this.redrawAllLines();
     event.preventDefault();
  }
  
@@ -249,6 +250,8 @@ export class FlowEditorComponent implements OnInit {
                 this.drawLineBetweenNodes(parentNode.Id,nodeId,"succ");
             if (parentNode.ErrorTransition == nodeId)
                 this.drawLineBetweenNodes(parentNode.Id,nodeId,"err");
+            if (parentNode.TimeoutTransition == nodeId)
+                this.drawLineBetweenNodes(parentNode.Id,nodeId,"timeout");    
           }
       }
    }else {
@@ -266,6 +269,9 @@ export class FlowEditorComponent implements OnInit {
         this.drawLineBetweenNodes(nodeId,node.SuccessTransition,"succ");
      if (node.ErrorTransition.length > 0)
         this.drawLineBetweenNodes(nodeId,node.ErrorTransition,"err");
+     if(node.TimeoutTransition)
+      if (node.TimeoutTransition.length > 0)
+          this.drawLineBetweenNodes(nodeId,node.TimeoutTransition,"timeout");
      
    }
       
@@ -310,10 +316,20 @@ export class FlowEditorComponent implements OnInit {
     var hy1=y1;
     var hx2=x2-delta;
     var hy2=y2;
-    var path = "M "  + x1 + " " + y1 + 
-              " C " + hx1 + " " + hy1 
-                    + " "  + hx2 + " " + hy2 
-              + " " + x2 + " " + y2;
+    var path = "";
+    if (y2>y1) {
+        path = "M "  + x1 + " " + y1 + 
+                  " C " + hx1 + " " + hy1 
+                        + " "  + hx2 + " " + hy2 
+                  + " " + x2 + " " + y2;
+    }else {
+       var leftx = x1
+       if (x2<x1)
+         leftx = x2;
+       leftx = leftx-130; 
+       path = "M "  + x1 + " " + y1 + " L "+x1+" "+(y1+30)+ " L "+leftx+" "+(y1+30) +
+                  "L "+leftx+" "+(y2-30) + "L "+x2+" "+(y2-30)+ "L "+x2+" "+y2;       
+    }
     shape.setAttributeNS(null, "d", path);
     shape.setAttributeNS(null, "id", id);
     shape.setAttributeNS(null, "fill", "none");
@@ -378,14 +394,12 @@ findInputSocketPosition(htmlElement):any {
         node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}}; 
         node.Config["DefaultValue"] = {"Value":"","ValueType":""};
         break;
-      case "counter":
+      case "loop":
         node.Config = {}; 
         node.Config["StartValue"] = 0;
         node.Config["EndValue"] = 5;
         node.Config["Step"] = 1;
-        node.Config["EndValueTransition"] = "";
         node.Config["SaveToVariable"] = false;
-
         break;  
       case "receive":
         node.Config = {}; 
@@ -454,7 +468,9 @@ findInputSocketPosition(htmlElement):any {
       data:{"flow":flow,"node":node}
     });
     dialogRef.afterClosed().subscribe(result => {
-    
+      if(result=="deleted") {
+        this.redrawAllLines();
+      }
     });  
   }
 
@@ -483,7 +499,7 @@ findInputSocketPosition(htmlElement):any {
   getParentNodesById(nodeId:string):MetaNode[] {
     var nodes:MetaNode[] = [];
     this.flow.Nodes.forEach(element => {
-        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || 
+        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || element.TimeoutTransition==nodeId || 
             element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
           nodes.push(element);
           return ;
@@ -499,8 +515,22 @@ findInputSocketPosition(htmlElement):any {
         node.Ui.x = 70;
         node.Ui.y = 170;
       }
-      
   });
+  }
+  redrawAllLines() {
+    var svg = document.getElementById("flow-connections"); 
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
+     }
+    var maxY = 0;
+    this.flow.Nodes.forEach(node => {
+      this.redrawNodeLines(node.Id)
+      if (node.Ui.y>maxY)
+          maxY = node.Ui.y;
+    });
+    document.getElementById("flowEditorCanvasId").style.height = (maxY+100)+"px";
+    this.canvasInitHeight = maxY+100;
+
   }
 
   serviceLookupDialog(nodeId:string) {
@@ -561,17 +591,47 @@ export class NodeEditorDialog {
     this.node = data.node;
    }
    deleteNode(node:MetaNode){
-    let index: number = this.flow.Nodes.indexOf(node);
-     if (index !== -1) {
-         this.flow.Nodes.splice(index, 1);
-     }  
+      var nodeId = node.Id; 
+      let index: number = this.flow.Nodes.indexOf(node);
+      if (index !== -1) {
+          this.flow.Nodes.splice(index, 1);
+      }
+      this.flow.Nodes.forEach(element => {
+        if (element.SuccessTransition==nodeId) {
+          element.SuccessTransition = "";
+        }
+        if (element.ErrorTransition==nodeId) {
+          element.ErrorTransition = "";
+        }
+        if (element.Type == "if")
+          if (element.Config.TrueTransition ==nodeId) {
+            element.Config.TrueTransition = "";
+          }
+          if (element.Config.FalseTransition ==nodeId) {
+            element.Config.FalseTransition = "";
+          }
+      });
+      this.dialogRef.close("deleted");
   } 
   cloneNode(node:MetaNode){
    //  Object.assign(cloneNode,node);
    //  cloneNode.Id = this.getNewNodeId();
    // temp quick dirty way how to clone nested objects;
     var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
+    cloneNode.Id = this.getNewNodeId();
     this.flow.Nodes.push(cloneNode);
+  } 
+  getNewNodeId():string {
+    let id = 0;
+    let maxId = 0;
+    this.flow.Nodes.forEach(element => {
+      id = parseInt(element.Id);
+      if (id > maxId) {
+        maxId = id ;
+      }
+    });
+    maxId++;
+    return maxId+"";
   } 
   
 }
