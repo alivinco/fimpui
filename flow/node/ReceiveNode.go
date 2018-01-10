@@ -70,9 +70,9 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 	node.isReactorRunning = true
 	defer func() {
 		node.isReactorRunning = false
-		log.Debug("<ReceiveNode> WaitForEvent is stopped ")
+		log.Debug("<ReceiveNode> Reactor-WaitForEvent is stopped ")
 	}()
-	log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Waiting for event .chan size = ",len(node.msgInStream))
+	log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Reactor-Waiting for event .chan size = ",len(node.msgInStream))
 	start := time.Now()
 	timeout := node.config.Timeout
 	if timeout == 0 {

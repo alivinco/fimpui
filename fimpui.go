@@ -27,6 +27,7 @@ import (
 	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 	"github.com/alivinco/fimpui/integr/zwave"
 	"github.com/alivinco/fimpui/statsdb"
+	//_ "net/http/pprof"
 )
 
 type SystemInfo struct {
@@ -66,6 +67,10 @@ func startWsCoreProxy(backendUrl string) {
 }
 
 func main() {
+	// pprof server
+	//go func() {
+	//	log.Println(http.ListenAndServe("localhost:6060", nil))
+	//}()
 	configs := &model.FimpUiConfigs{}
 	var configFile string
 	flag.StringVar(&configFile, "c", "", "Config file")
@@ -572,6 +577,16 @@ func main() {
 		flowManager.UpdateFlowFromJsonAndSaveToStorage(id, body)
 		return c.NoContent(http.StatusOK)
 	})
+
+	e.POST("/fimp/flow/ctrl/:id/:op", func(c echo.Context) error {
+		id := c.Param("id")
+		op := c.Param("op")
+		if  op == "send-inclusion-report" {
+			flowManager.SendInclusionReport(id)
+		}
+		return c.NoContent(http.StatusOK)
+	})
+
 	e.DELETE("/fimp/flow/definition/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		flowManager.DeleteFlow(id)
@@ -603,4 +618,6 @@ func main() {
 	e.Static("/fimp/static", "static/fimpui/dist/")
 	e.Logger.Debug(e.Start(":8081"))
 	log.Info("Exiting the app")
+
+
 }

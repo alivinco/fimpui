@@ -3,6 +3,7 @@ package flow
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
+	"github.com/alivinco/fimpgo/fimptype"
 	//"github.com/alivinco/fimpui/flow/node"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/flow/utils"
@@ -217,4 +218,52 @@ func (mg *Manager) DeleteFlow(id string) {
 
 	os.Remove(mg.GetFlowFileNameById(id))
 }
+
+func (mg *Manager) SendInclusionReport(id string) {
+	flow := mg.GetFlowById(id)
+	report := fimptype.ThingInclusionReport{}
+	report.Type = "flow"
+	report.Address = "flow"+id
+	report.Alias = flow.FlowMeta.Name
+	report.CommTechnology = "flow"
+	report.PowerSource = "ac"
+	report.ProductName = "Flow rule engine"
+	report.ProductHash = "flow_"+id
+	report.SwVersion = "1.0"
+
+
+	var services []fimptype.Service
+
+	for i := range flow.Nodes {
+		if flow.Nodes[i].IsStartNode() {
+			service := fimptype.Service{}
+			service.Name = flow.Nodes[i].GetMetaNode().Service
+			service.Alias = flow.Nodes[i].GetMetaNode().Label
+			service.Enabled = true
+			address := strings.Replace( flow.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
+			address = strings.Replace( address,"pt:j1/mt:evt","",-1)
+			service.Address = address
+			service.Groups = []string{string(flow.Nodes[i].GetMetaNode().Id)}
+			intf := fimptype.Interface{}
+			intf.Type = "in"
+			intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
+			intf.ValueType = "bool"
+			service.Interfaces = []fimptype.Interface{intf}
+			service.Props = map[string]interface{}{}
+			service.Tags = []string{}
+			services = append(services,service)
+		}
+
+	}
+	report.Services = services
+	msg := fimpgo.NewMessage("evt.thing.inclusion_report", "flow","object", report, nil,nil,nil)
+	addrString := "pt:j1/mt:evt/rt:app/rn:flow/ad:1"
+	addr, _ := fimpgo.NewAddressFromString(addrString)
+	mg.msgTransport.Publish(addr,msg)
+}
+
+func (mg *Manager) SendExclusionReport(id string) {
+
+}
+
 

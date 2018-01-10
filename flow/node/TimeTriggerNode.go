@@ -16,6 +16,7 @@ type TimeTriggerNode struct {
 	config              TimeTriggerConfig
 	cron 	*cron.Cron
 	cronMessageCh model.MsgPipeline
+	msgInStream model.MsgPipeline
 }
 
 type TimeTriggerConfig struct {
@@ -35,6 +36,7 @@ type TimeExpression struct {
 func NewTimeTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode, ctx *model.Context, transport *fimpgo.MqttTransport) model.Node {
 	node := TimeTriggerNode{ctx: ctx}
 	node.isStartNode = true
+	node.isMsgReactor = true
 	node.flowOpCtx = flowOpCtx
 	node.meta = meta
 	node.config = TimeTriggerConfig{}
@@ -73,6 +75,10 @@ func (node *TimeTriggerNode) Init() error {
 	return nil
 }
 
+func (node *TimeTriggerNode) ConfigureInStream(activeSubscriptions *[]string,msgInStream model.MsgPipeline) {
+	node.msgInStream = msgInStream
+}
+
 // is invoked when node flow is stopped
 func (node *TimeTriggerNode) Cleanup() error {
 	node.cron.Stop()
@@ -87,7 +93,7 @@ func (node *TimeTriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEven
 	node.isReactorRunning = true
 	defer func() {
 		node.isReactorRunning = false
-		log.Debug("<TimeTriggerNode> WaitForEvent is stopped ")
+		log.Debug("<TimeTriggerNode> Reactor-WaitForEvent is stopped ")
 	}()
 	newMsg :=<- node.cronMessageCh
 
@@ -95,6 +101,10 @@ func (node *TimeTriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEven
 	select {
 	case nodeEventStream <- newEvent:
 		return
+	case msg := <- node.msgInStream:
+		if msg.CancelOp {
+			return
+		}
 	default:
 		log.Debug("<TimeTriggerNode> Message is dropped (no listeners) ")
 	}

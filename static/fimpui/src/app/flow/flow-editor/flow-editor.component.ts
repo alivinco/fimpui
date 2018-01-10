@@ -116,7 +116,7 @@ export class FlowEditorComponent implements OnInit {
     }
   }
 
-  saveFlow() {
+ saveFlow() {
     console.dir(this.flow)
     let headers = new Headers({ 'Content-Type': 'application/json' });
     let options = new RequestOptions({headers:headers});
@@ -125,8 +125,17 @@ export class FlowEditorComponent implements OnInit {
       .subscribe ((result) => {
          console.log("Flow was saved");
       });
+  }
+ 
+  sendFlowControllCommands() {
+    this.http
+      .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+this.flow.Id+'/send-inclusion-report',null,  {} )
+      .subscribe ((result) => {
+         console.log("Cmd was sent");
+      });
+  } 
 
- }
+
  getNewNodeId():string {
    let id = 0;
    let maxId = 0;
