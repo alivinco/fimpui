@@ -50,6 +50,10 @@ func (node *IfNode) LoadNodeConfig() error {
 	return nil
 }
 
+func (node *IfNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
+
+}
+
 func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	var leftNumericValue , rightNumericValue float64
 	var err error

@@ -38,6 +38,10 @@ func (node *ActionNode) LoadNodeConfig() error {
 	return err
 }
 
+func (node *ActionNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
+
+}
+
 func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	log.Info(node.flowOpCtx.FlowId+"<ActionNode> Executing ActionNode . Name = ", node.meta.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.meta.ServiceInterface, Service: node.meta.Service,Properties:node.config.Props}

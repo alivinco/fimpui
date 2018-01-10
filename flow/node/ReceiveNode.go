@@ -66,32 +66,46 @@ func (node *ReceiveNode) LoadNodeConfig() error {
 	return err
 }
 
-func (node *ReceiveNode) SignalNodeIsReadyForNextMessage(){
-	//select {
-	//case node.flowOpCtx.NodeIsReady <- true:
-	//default:
-	//}
-}
-
-func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
+func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
+	node.isReactorRunning = true
+	defer func() {
+		node.isReactorRunning = false
+		log.Debug("<ReceiveNode> WaitForEvent is stopped ")
+	}()
 	log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Waiting for event .chan size = ",len(node.msgInStream))
 	start := time.Now()
 	timeout := node.config.Timeout
 	if timeout == 0 {
 		timeout = 86400 // 24 hours
 	}
+
 	for {
 		select {
 		case newMsg := <-node.msgInStream:
 			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> New message :")
+			if newMsg.CancelOp {
+				return
+			}
 			if utils.RouteIncludesTopic(node.meta.Address,newMsg.AddressStr) &&
 				(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
 				(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
-				*msg = newMsg
 				if !node.config.IsValueFilterEnabled {
-					return []model.NodeID{node.meta.SuccessTransition}, nil
+					newEvent := model.ReactorEvent{Msg:newMsg,TransitionNodeId:node.meta.SuccessTransition}
+					select {
+					case nodeEventStream <- newEvent:
+						return
+					default:
+							log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+					}
+
 				} else if newMsg.Payload.Value == node.config.ValueFilter.Value {
-					return []model.NodeID{node.meta.SuccessTransition}, nil
+					newEvent := model.ReactorEvent{Msg:newMsg,TransitionNodeId:node.meta.SuccessTransition}
+					select {
+					case nodeEventStream <- newEvent:
+						return
+					default:
+						log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+					}
 				}
 			}
 			if node.config.Timeout > 0 {
@@ -102,13 +116,23 @@ func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 		case <-time.After(time.Second * time.Duration(timeout)):
 			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Timeout ")
-			return []model.NodeID{node.meta.TimeoutTransition}, nil
+			newEvent := model.ReactorEvent{}
+			newEvent.TransitionNodeId = node.meta.TimeoutTransition
+			select {
+			case nodeEventStream <- newEvent:
+				return
+			default:
+				log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+			}
 		case signal := <-node.flowOpCtx.NodeControlSignalChannel:
 			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Control signal ")
 			if signal == model.SIGNAL_STOP {
-				return nil,nil
+				return
 			}
 		}
 	}
+}
 
+func (node *ReceiveNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
+	return nil,nil
 }

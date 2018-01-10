@@ -80,7 +80,23 @@ func (node *TimeTriggerNode) Cleanup() error {
 }
 
 func (node *TimeTriggerNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
+	return nil,nil
+}
+
+func (node *TimeTriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
+	node.isReactorRunning = true
+	defer func() {
+		node.isReactorRunning = false
+		log.Debug("<TimeTriggerNode> WaitForEvent is stopped ")
+	}()
 	newMsg :=<- node.cronMessageCh
-	msg = &newMsg
-	return []model.NodeID{node.meta.SuccessTransition}, nil
+
+	newEvent := model.ReactorEvent{Msg:newMsg,TransitionNodeId:node.meta.SuccessTransition}
+	select {
+	case nodeEventStream <- newEvent:
+		return
+	default:
+		log.Debug("<TimeTriggerNode> Message is dropped (no listeners) ")
+	}
+
 }

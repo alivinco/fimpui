@@ -12,6 +12,7 @@ type BaseNode struct {
 	flowOpCtx *model.FlowOperationalContext
 	isStartNode bool   // true - if node is first in a flow
 	isMsgReactor bool  // true - node reacts on messages and requires input stream .
+	isReactorRunning bool
 	transport *fimpgo.MqttTransport
 
 }
@@ -38,6 +39,11 @@ func (node *BaseNode) IsStartNode() bool {
 func (node *BaseNode) IsMsgReactorNode() bool {
 	return node.isMsgReactor
 }
+
+func (node *BaseNode) IsReactorRunning() bool {
+	return node.isReactorRunning
+}
+
 // is invoked when node is started
 func (node *BaseNode) Init() error {
 	return nil

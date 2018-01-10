@@ -18,6 +18,8 @@ type MetaNode struct {
 
 type Node interface {
 	OnInput( msg *Message) ([]NodeID,error)
+	// reactor nodes should publish events into the channel
+	WaitForEvent(responseChannel chan ReactorEvent)
 	GetMetaNode()*MetaNode
 	GetNextSuccessNodes()[]NodeID
 	GetNextErrorNode()NodeID
@@ -25,6 +27,7 @@ type Node interface {
 	LoadNodeConfig() error
 	IsStartNode() bool
 	IsMsgReactorNode() bool
+	IsReactorRunning() bool
     ConfigureInStream(activeSubscriptions *[]string,msgInStream MsgPipeline)
     // Invoked when node is started
 	Init() error

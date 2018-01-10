@@ -141,7 +141,9 @@ func (ctx *Context) GetRecords(flowId string) []ContextRecord  {
 	ctx.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
 		b := tx.Bucket([]byte(flowId))
-
+		if b == nil {
+			return nil
+		}
 		c := b.Cursor()
 
 		for k, v := c.First(); k != nil; k, v = c.Next() {

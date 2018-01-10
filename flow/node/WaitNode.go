@@ -31,6 +31,10 @@ func (node *WaitNode) LoadNodeConfig() error {
 	return nil
 }
 
+func (node *WaitNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
+
+}
+
 func (node *WaitNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	delayMilisec, ok := node.meta.Config.(int)
 	if ok {

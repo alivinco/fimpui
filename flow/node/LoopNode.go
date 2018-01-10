@@ -54,6 +54,10 @@ func (node *LoopNode) LoadNodeConfig() error {
 	return nil
 }
 
+func (node *LoopNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
+
+}
+
 func (node *LoopNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
 	log.Debug(node.flowOpCtx.FlowId+"<LoopNode> Executing LoopNode . Name = ", node.meta.Label)
 	if node.countUp {

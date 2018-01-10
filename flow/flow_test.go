@@ -85,6 +85,8 @@ func TestIfFlow(t *testing.T) {
 
 	node := model.MetaNode{Id: "1", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:199_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	node = model.MetaNode{Id: "1.2", Label: "Button trigger 1", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_lumin/ad:300_0", Service: "sensor_lumin", ServiceInterface: "evt.sensor.report", SuccessTransition: "1.1"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "1.1", Label: "IF node", Type: "if", Config: flownode.IFExpressions{TrueTransition: "2", FalseTransition: "3", Expression: []flownode.IFExpression{
 		{RightVariable: model.Variable{Value: int64(100), ValueType: "int"}, Operand: "gt", BooleanOperator: "and"},
@@ -312,7 +314,7 @@ func TestReceiveFlow(t *testing.T) {
 
 }
 
-func TestCounterFlow(t *testing.T) {
+func TestLoopFlow(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
 	err := mqtt.Start()
@@ -324,15 +326,15 @@ func TestCounterFlow(t *testing.T) {
 	mqtt.SetMessageHandler(onMsg)
 	time.Sleep(time.Second * 1)
 
-	ctx, err := model.NewContextDB("TestCounterFlow.db")
-	flowMeta := model.FlowMeta{Id: "TestCounterFlow"}
+	ctx, err := model.NewContextDB("TestLoopFlow.db")
+	flowMeta := model.FlowMeta{Id: "TestLoopFlow"}
 
 	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report",
 		SuccessTransition: "2"}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
-	node = model.MetaNode{Id: "2", Label: "Counter", Type: "counter", SuccessTransition: "4",
-		Config: flownode.CounterNodeConfig{StartValue:0,EndValue:4,EndValueTransition:"5"}}
+	node = model.MetaNode{Id: "2", Label: "Loop", Type: "loop", SuccessTransition: "4",ErrorTransition:"5",
+		Config: flownode.LoopNodeConfig{StartValue:0,EndValue:4}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",
@@ -364,7 +366,7 @@ func TestCounterFlow(t *testing.T) {
 
 
 	time.Sleep(time.Second * 1)
-	variable, err := flow.GetContext().GetVariable("status", "TestCounterFlow")
+	variable, err := flow.GetContext().GetVariable("status", "TestLoopFlow")
 	if err != nil {
 		t.Error("Variable is not set", err)
 	}else if variable.Value.(string) == "reset" {
@@ -375,7 +377,7 @@ func TestCounterFlow(t *testing.T) {
 	flow.Stop()
 	// end
 	time.Sleep(time.Second * 2)
-	os.Remove("TestCounterFlow.db")
+	os.Remove("TestLoopFlow.db")
 
 }
 
@@ -398,8 +400,8 @@ func TestTimeTriggerFlow(t *testing.T) {
 		SuccessTransition: "2", Config:flownode.TimeTriggerConfig{Expressions:[]flownode.TimeExpression{ {Name:"every second",Expression:"@every 1s"} } }}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
-	node = model.MetaNode{Id: "2", Label: "Counter", Type: "counter", SuccessTransition: "4",
-		Config: flownode.CounterNodeConfig{StartValue:0,EndValue:3,EndValueTransition:"5"}}
+	node = model.MetaNode{Id: "2", Label: "Loop", Type: "loop", SuccessTransition: "4",ErrorTransition:"5",
+		Config: flownode.LoopNodeConfig{StartValue:0,EndValue:3}}
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 
 	node = model.MetaNode{Id: "4", Label: "Set variable", Type: "set_variable", SuccessTransition: "",

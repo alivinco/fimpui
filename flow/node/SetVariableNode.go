@@ -69,3 +69,6 @@ func (node *SetVariableNode) OnInput( msg *model.Message) ([]model.NodeID,error)
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }
 
+func (node *SetVariableNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
+
+}

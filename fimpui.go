@@ -553,8 +553,14 @@ func main() {
 
 	e.GET("/fimp/flow/context/:flowid", func(c echo.Context) error {
 		id := c.Param("flowid")
-		ctx := flowManager.GetGlobalContext().GetRecords(id)
+		if id != "-"{
+			ctx := flowManager.GetGlobalContext().GetRecords(id)
+			return c.JSON(http.StatusOK, ctx)
+		}
+		var ctx []flowmodel.ContextRecord
 		return c.JSON(http.StatusOK, ctx)
+
+
 	})
 
 	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {

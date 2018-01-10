@@ -12,6 +12,13 @@ type Message struct {
 	Address    fimpgo.Address
 	Payload    fimpgo.FimpMessage
 	Header     map[string]string
+	CancelOp   bool // if true , listening end should close all operations
+}
+
+type ReactorEvent struct {
+	Msg Message
+	Err error
+	TransitionNodeId NodeID
 }
 
 type FlowMeta struct {
