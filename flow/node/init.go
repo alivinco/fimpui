@@ -16,4 +16,5 @@ var Registry = map[string]Constructor{
 	"set_variable": NewSetVariableNode,
 	"loop":         NewLoopNode,
 	"time_trigger": NewTimeTriggerNode,
+	"transform":    NewTransformNode,
 }

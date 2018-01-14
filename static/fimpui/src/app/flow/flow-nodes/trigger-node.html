@@ -22,7 +22,7 @@
         <mat-expansion-panel>
                 <mat-expansion-panel-header>
                         <mat-panel-title>
-                          Publish the flow as virtual device.
+                          Configure flow as virtual device
                         </mat-panel-title>
                 </mat-expansion-panel-header>
                    <mat-input-container style="width: 130px">
@@ -32,7 +32,7 @@
                         <input matInput [(ngModel)]="flowPublishInterface" placeholder="Interface" (change)="onPublishServiceChange()" >
                    </mat-input-container>
                    <p>Address: {{ flowPublishAddress }}</p>
-                   <button mat-raised-button (click)="publishFlowAsVirtualDevice()" >Publish</button>
+                   <button mat-raised-button (click)="publishFlowAsVirtualDevice()" >Copy to service binding</button>
         </mat-expansion-panel>
         <mat-expansion-panel>
            <mat-expansion-panel-header>

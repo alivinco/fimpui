@@ -18,7 +18,7 @@ type Flow struct {
 	globalContext       *model.Context
 	opContext           model.FlowOperationalContext
 	currentNodeIds      [] model.NodeID
-	currentMsg          *model.Message
+	currentMsg          model.Message
 	Nodes               []model.Node
 	nodeInboundStreams  map[model.NodeID]model.MsgPipeline
 	nodeOutboundStream  chan model.ReactorEvent
@@ -89,6 +89,10 @@ func (fl *Flow) InitAllNodes() {
 
 func (fl*Flow) GetContext()*model.Context {
 	return fl.globalContext
+}
+
+func (fl*Flow) GetCurrentMessage()*model.Message {
+	return &fl.currentMsg
 }
 
 func (fl *Flow) SetNodes(nodes []model.Node) {
@@ -186,7 +190,8 @@ func (fl *Flow) Run() {
 				log.Debug(fl.Id+"<Flow> New event from reactor node.")
 				fl.LastExecutionTime = time.Since(fl.StartedAt)
 				fl.StartedAt = time.Now()
-				fl.currentMsg = &reactorEvent.Msg
+				fl.currentMsg = reactorEvent.Msg
+				//log.Debug("<Flow> msg.payload : ",fl.currentMsg)
 				if reactorEvent.Err != nil {
 					log.Error(fl.Id+"<Flow> TriggerNode failed with error :", reactorEvent.Err)
 					fl.currentNodeIds[0] = ""
@@ -212,12 +217,14 @@ func (fl *Flow) Run() {
 					}
 					// Blocking wait
 					reactorEvent :=<- fl.nodeOutboundStream
-					fl.currentMsg = &reactorEvent.Msg
+					fl.currentMsg = reactorEvent.Msg
 					transitionNodeId = reactorEvent.TransitionNodeId
 					err = reactorEvent.Err
 					log.Debug(fl.Id+"<Flow> New event from reactor node.")
+					//log.Debug("<Flow> msg.payload : ",fl.currentMsg)
+
 				}else {
-					nextNodes, err = fl.Nodes[i].OnInput(fl.currentMsg)
+					nextNodes, err = fl.Nodes[i].OnInput(&fl.currentMsg)
 					if len(nextNodes)>0 {
 						transitionNodeId = nextNodes[0]
 					}else {

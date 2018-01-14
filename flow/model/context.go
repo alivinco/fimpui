@@ -17,6 +17,32 @@ type Variable struct {
 	ValueType string
 }
 
+func (vrbl * Variable) IsNumber() bool {
+	if vrbl.ValueType == "int" || vrbl.ValueType == "float" {
+		return true
+	}else {
+		return false
+	}
+}
+
+func (vrbl * Variable)ToNumber()(float64,error) {
+	switch v := vrbl.Value.(type) {
+	case int :
+		return float64(v),nil
+	case int32 :
+		return float64(v),nil
+	case int64 :
+		return float64(v),nil
+	case float32 :
+		return float64(v),nil
+	case float64 :
+		return float64(v),nil
+	default:
+		return 0 , errors.New("Can't convert into float")
+	}
+	return 0 , errors.New("Not numeric value type")
+}
+
 type ContextRecord struct {
 	Name string
 	Description string

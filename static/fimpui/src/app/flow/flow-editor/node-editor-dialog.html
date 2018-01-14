@@ -6,7 +6,8 @@
           <input matInput [(ngModel)]="node.Label" placeholder="Label" >
     </mat-input-container>
     <div *ngSwitchCase="'trigger'">  
-        <trigger-node [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" ></trigger-node>
+        <trigger-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" ></trigger-node>
+        <vinc-trigger-node *ngIf="node.Ui.nodeType=='vinc_trigger'" [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" ></vinc-trigger-node>
     </div>
     <div *ngSwitchCase="'wait'"> 
       <wait-node [node]="node" [nodes]="flow.Nodes" > </wait-node>

@@ -4,7 +4,7 @@ import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowContextComponent } from './flow-context/flow-context.component';
 import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
-import { TriggerNodeComponent ,LoopNodeComponent,IfNodeComponent,WaitNodeComponent} from './flow-nodes/flow-nodes.component';
+import { TriggerNodeComponent ,LoopNodeComponent,IfNodeComponent,WaitNodeComponent,VincTriggerNodeComponent} from './flow-nodes/flow-nodes.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { FormsModule } from '@angular/forms';
@@ -77,7 +77,8 @@ import { MatTableModule,
      TimeTriggerNodeComponent,
      LoopNodeComponent,
      IfNodeComponent,
-     WaitNodeComponent
+     WaitNodeComponent,
+     VincTriggerNodeComponent
   ],
   entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog]  
 })

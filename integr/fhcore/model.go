@@ -5,17 +5,20 @@ import "time"
 type Data struct {
 	Errors    interface{} `json:"errors"`
 	Cmd       string      `json:"cmd"`
-	Component interface{} `json:"component"`
+	Component string `json:"component"`
 	Param     Param       `json:"param"`
 	RequestID int         `json:"requestId"`
 	Success   bool        `json:"success"`
+	Id        interface{}       `json:"id,omitempty"`
 }
 
 type Param struct {
+	Mode       string   `json:"mode"`
 	Components []string `json:"components"`
 	Device     []Device `json:"device,omitempty"`
-	Room	   []Room  	`json:"room,omitempty"`
+	Room       []Room   `json:"room,omitempty"`
 	House      House    `json:"house,omitempty"`
+	Shortcut   []Shortcut `json:"shortcut,omitempty"`
 }
 
 type Msg struct {
@@ -41,15 +44,15 @@ type Client struct {
 }
 
 type Device struct {
-	Fimp          Fimp        `json:"_fimp"`
-	Client        Client      `json:"client"`
-	Functionality string      `json:"functionality"`
-	ID            int         `json:"id"`
-	Lrn           bool        `json:"lrn"`
-	Model         string      `json:"model"`
+	Fimp          Fimp                   `json:"_fimp"`
+	Client        Client                 `json:"client"`
+	Functionality string                 `json:"functionality"`
+	ID            int                    `json:"id"`
+	Lrn           bool                   `json:"lrn"`
+	Model         string                 `json:"model"`
 	Param         map[string]interface{} `json:"param"`
-	Problem       bool        `json:"problem"`
-	Room          int         `json:"room"`
+	Problem       bool                   `json:"problem"`
+	Room          int                    `json:"room"`
 }
 
 type House struct {
@@ -60,9 +63,13 @@ type House struct {
 }
 
 type Room struct {
-	ID            int         `json:"id"`
-	Param         interface{} `json:"param"`
-	Client        Client      `json:"client"`
-	Type          string      `json:"type"`
+	ID     int         `json:"id"`
+	Param  interface{} `json:"param"`
+	Client Client      `json:"client"`
+	Type   string      `json:"type"`
+}
 
+type Shortcut struct {
+	ID     int    `json:"id"`
+	Client Client `json:"client"`
 }

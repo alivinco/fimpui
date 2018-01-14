@@ -102,23 +102,23 @@ func main() {
 	log.Info("<main> Started")
 	//-------------------------------------
 	//---------THINGS REGISTRY-------------
-	log.Info("<main> Starting Things registry ")
+	log.Info("<main>-------------- Starting Things registry ")
 	thingRegistryStore := registry.NewThingRegistryStore(configs.RegistryDbFile)
 	log.Info("<main> Started ")
 	//-------------------------------------
 	//---------REGISTRY INTEGRATION--------
-	log.Info("<main> Starting MqttIntegration ")
+	log.Info("<main>-------------- Starting MqttIntegration ")
 	mqttRegInt := registry.NewMqttIntegration(configs, thingRegistryStore)
 	mqttRegInt.InitMessagingTransport()
 	log.Info("<main> Started ")
 	//---------STATS STORE-----------------
-	log.Info("<main> Stats store ")
+	log.Info("<main>-------------- Stats store ")
 	statsStore := statsdb.NewStatsStore("stats.db")
 	streamProcessor := statsdb.NewStreamProcessor(configs,statsStore)
 	streamProcessor.InitMessagingTransport()
 	log.Info("<main> Started ")
 	//----------VINCULUM CLIENT------------
-	log.Info("<main> Starting VinculumClient ")
+	log.Info("<main>-------------- Starting VinculumClient ")
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
 	err = vinculumClient.Connect()
 	if err != nil {
@@ -126,9 +126,13 @@ func main() {
 	} else {
 		log.Info("<main> Started ")
 	}
+    // --------VINCULUM ADAPTER------------
+	log.Info("<main>-------------- Starting VinculumAdapter ")
+	vinculumAd := fhcore.NewVinculumAdapter(configs,vinculumClient)
+	vinculumAd.InitMessagingTransport()
 
 	//---------GOOGLE OBJECT STORE---------
-	log.Info("<main> Initializing Google Object Store ")
+	log.Info("<main>-------------- Initializing Google Object Store ")
 	objectStorage, _ := logexport.NewGcpObjectStorage("fh-cube-log")
 	log.Info("<main> Done ")
 	//-------------------------------------
@@ -534,6 +538,11 @@ func main() {
 		return c.JSON(http.StatusOK, resp.Msg.Data.Param.Device)
 	})
 
+	e.GET("/fimp/vinculum/shortcuts", func(c echo.Context) error {
+		resp, _ := vinculumClient.GetShortcuts()
+		return c.JSON(http.StatusOK, resp)
+	})
+
 	e.GET("/fimp/vinculum/import_to_registry", func(c echo.Context) error {
 		process.LoadVinculumDeviceInfoToStore(thingRegistryStore, vinculumClient)
 		return c.NoContent(http.StatusOK)
@@ -581,9 +590,14 @@ func main() {
 	e.POST("/fimp/flow/ctrl/:id/:op", func(c echo.Context) error {
 		id := c.Param("id")
 		op := c.Param("op")
-		if  op == "send-inclusion-report" {
+
+		switch op {
+		case "send-inclusion-report" :
 			flowManager.SendInclusionReport(id)
+		case "send-exclusion-report" :
+			flowManager.SendExclusionReport(id)
 		}
+
 		return c.NoContent(http.StatusOK)
 	})
 

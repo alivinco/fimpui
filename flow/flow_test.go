@@ -241,6 +241,91 @@ func TestSetVariableFlow(t *testing.T) {
 
 }
 
+func TestTransformFlipFlow(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB("TestTransform.db")
+	flowMeta := model.FlowMeta{Id: "TestTransformFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Set variable", Type: "transform", SuccessTransition: "",
+		Config:flownode.TransformNodeConfig{Operation:"flip"}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", false, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+	time.Sleep(time.Second * 1)
+	//variable, err := flow.GetContext().GetVariable("volume", "TestSetVariableFlow")
+	inputMessage := flow.GetCurrentMessage()
+	if inputMessage.Payload.Value.(bool) != true {
+		t.Error("Wrong value " )
+	}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove("TestTransform.db")
+
+}
+
+func TestTransformAddFlow(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB("TestTransform.db")
+	flowMeta := model.FlowMeta{Id: "TestTransformFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Sensor trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:sensor_temp/ad:199_0", Service: "sensor_temp", ServiceInterface: "evt.sensor.report", SuccessTransition: "2"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	node = model.MetaNode{Id: "2", Label: "Add transform", Type: "transform", SuccessTransition: "",
+		Config:flownode.TransformNodeConfig{Operation:"add",RValue:model.Variable{ValueType:"int",Value:int(2)}}}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	msg := fimpgo.NewFloatMessage("evt.sensor.report", "sensor_temp", 12.5, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "sensor_temp", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+	time.Sleep(time.Second * 1)
+	//variable, err := flow.GetContext().GetVariable("volume", "TestSetVariableFlow")
+	inputMessage := flow.GetCurrentMessage()
+	t.Log("Result = ",inputMessage.Payload.Value)
+	if inputMessage.Payload.Value.(float64) != 14.5 {
+		t.Error("Wrong value " )
+	}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove("TestTransform.db")
+
+}
+
 func TestReceiveFlow(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)

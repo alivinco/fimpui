@@ -28,6 +28,7 @@ export class MetaNode {
 export class Ui {
   x:number;
   y:number;
+  nodeType:string;  // the same node can have different UI nodes 
 }
 
 export class Variable {
@@ -127,9 +128,9 @@ export class FlowEditorComponent implements OnInit {
       });
   }
  
-  sendFlowControllCommands() {
+  sendFlowControllCommands(command:string) {
     this.http
-      .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+this.flow.Id+'/send-inclusion-report',null,  {} )
+      .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+this.flow.Id+'/'+command,null,  {} )
       .subscribe ((result) => {
          console.log("Cmd was sent");
       });
@@ -376,7 +377,7 @@ findInputSocketPosition(htmlElement):any {
 }
 
 /////////////////////////// 
- addNode(nodeType:string){
+ addNode(nodeType:string,uiNodeType:string){
     console.dir(this.selectedNewNodeType)
     this.recalculateCanvasSize();
     let node  = new MetaNode()
@@ -391,6 +392,8 @@ findInputSocketPosition(htmlElement):any {
     node.Ui = new Ui();
     node.Ui.x = 70;
     node.Ui.y = 170;
+    node.Ui.nodeType = uiNodeType;
+    
 
     switch (node.Type){
       case "trigger":
@@ -398,6 +401,17 @@ findInputSocketPosition(htmlElement):any {
         node.Config["Timeout"] = 0;
         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
         node.Config["IsValueFilterEnabled"] = false;
+        if (node.Ui.nodeType) {
+          switch (node.Ui.nodeType) {
+            case "vinc_trigger":
+              node.Address = "pt:j1/mt:evt/rt:app/rn:vinculum/ad:1"
+              node.ServiceInterface = "evt.mode.report"
+              node.Service = "home_mode"
+              node.Label = "Home mode trigger"
+              node.Config.ValueFilter.ValueType = "string"
+              break;
+          }
+        }
         break;
       case "action":
         node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}}; 
@@ -441,8 +455,8 @@ findInputSocketPosition(htmlElement):any {
         node.Config["UpdateGlobal"] = false
         node.Config["UpdateInputMsg"] = false
         let variable = {};
-        variable["Value"] = 100;
-        variable["ValueType"] = "int";
+        variable["Value"] = 0;
+        variable["ValueType"] = "";
         node.Config["DefaultValue"] = variable
         break; 
       case "time_trigger":
@@ -455,6 +469,7 @@ findInputSocketPosition(htmlElement):any {
         node.Config["Latitude"] = 0.0;
         node.Config["Longitude"] = 0.0;
         break;
+        
     }
     this.flow.Nodes.push(node) 
   }
@@ -523,6 +538,7 @@ findInputSocketPosition(htmlElement):any {
         node.Ui = new Ui()
         node.Ui.x = 70;
         node.Ui.y = 170;
+        node.Ui.nodeType = "";
       }
   });
   }

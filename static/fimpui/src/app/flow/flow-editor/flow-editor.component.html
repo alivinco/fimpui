@@ -8,27 +8,31 @@
     <!-- sidenav content -->
     <mat-list>
     <mat-list-item><h3> Nodes </h3></mat-list-item> 
-    <mat-list-item> <button mat-raised-button (click)="addNode('trigger')"  >
-        <mat-icon aria-label="Edit node">input</mat-icon> Trigger</button> </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('time_trigger')" > 
+    <mat-list-item> <button mat-raised-button (click)="addNode('trigger','')"  >
+        <mat-icon aria-label="Edit node">input</mat-icon> Trigger</button> 
+    </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('trigger','vinc_trigger')"  >
+        <mat-icon aria-label="Edit node">input</mat-icon> Home mode trigger</button> 
+    </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('time_trigger','')" > 
         <mat-icon aria-label="Edit node">schedule</mat-icon> Time trigger</button> 
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('action')" >
+    <mat-list-item> <button mat-raised-button (click)="addNode('action','')" >
         <mat-icon  aria-label="Edit node">send</mat-icon> Action</button> 
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('receive')" >
+    <mat-list-item> <button mat-raised-button (click)="addNode('receive','')" >
       <mat-icon aria-label="Edit node">input</mat-icon> Receive</button> 
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('if')" > 
+    <mat-list-item> <button mat-raised-button (click)="addNode('if','')" > 
       <mat-icon  aria-label="Edit node">call_split</mat-icon> If</button>
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('loop')" > 
+    <mat-list-item> <button mat-raised-button (click)="addNode('loop','')" > 
         <mat-icon  aria-label="Edit node">loop</mat-icon> Loop</button> 
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('wait')" >
+    <mat-list-item> <button mat-raised-button (click)="addNode('wait','')" >
       <mat-icon aria-label="Edit node">update</mat-icon> Wait</button>
     </mat-list-item>
-    <mat-list-item> <button mat-raised-button (click)="addNode('set_variable')" >
+    <mat-list-item> <button mat-raised-button (click)="addNode('set_variable','')" >
       <mat-icon aria-label="Edit node">edit</mat-icon> Set variable</button> 
     </mat-list-item>
     </mat-list>
@@ -91,7 +95,8 @@
       <button mat-raised-button (click)="saveFlow()" color="primary" >Save</button>
       <button mat-raised-button (click)="showSource()" color="primary" >Show source</button>
       <button mat-raised-button (click)="showContextDialog()" color="primary" >Show variables</button>
-      <button mat-raised-button (click)="sendFlowControllCommands()" color="primary" >Publish</button>
+      <button mat-raised-button (click)="sendFlowControllCommands('send-inclusion-report')" color="accent" >Register as device</button>
+      <button mat-raised-button (click)="sendFlowControllCommands('send-exclusion-report')" color="accent" >Unregister</button>
       <mat-slider
         max="5000"
         min="0"

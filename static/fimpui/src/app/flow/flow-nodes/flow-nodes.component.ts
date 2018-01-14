@@ -229,6 +229,21 @@ export class TimeTriggerNodeComponent implements OnInit {
 }
 
 @Component({
+  selector: 'vinc-trigger-node',
+  templateUrl: './vinc-trigger-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class VincTriggerNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  @Input() flowId:string;
+  constructor(public dialog: MatDialog) { }
+  ngOnInit() { 
+  }
+}
+
+
+@Component({
   selector: 'loop-node',
   templateUrl: './loop-node.html',
   styleUrls: ['./flow-nodes.component.css']

@@ -44,26 +44,26 @@ func (node *SetVariableNode) LoadNodeConfig() error {
 
 func (node *SetVariableNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	log.Info(node.flowOpCtx.FlowId+"<Node> Executing SetVariableNode . Name = ", node.meta.Label)
-	// set input message value to variable value
-	if node.nodeConfig.DefaultValue.ValueType == "" {
-		if node.nodeConfig.UpdateInputMsg {
-			msg.Payload.Value = msg.Payload.Value
-			msg.Payload.ValueType = msg.Payload.ValueType
-		}else {
-			if node.nodeConfig.UpdateGlobal {
-				node.ctx.SetVariable(node.nodeConfig.Name,msg.Payload.ValueType,msg.Payload.Value,node.nodeConfig.Description,"global",false)
-			}else {
-				node.ctx.SetVariable(node.nodeConfig.Name,msg.Payload.ValueType,msg.Payload.Value,node.nodeConfig.Description,node.flowOpCtx.FlowId,false)
 
-			}
-		}
-
+	if node.nodeConfig.UpdateInputMsg {
+		// Update input value with value from node config .
+		msg.Payload.Value = node.nodeConfig.DefaultValue.Value
+		msg.Payload.ValueType = node.nodeConfig.DefaultValue.ValueType
 	}else {
-		// set variable value to default value
-		if node.nodeConfig.UpdateGlobal {
-			node.ctx.SetVariable(node.nodeConfig.Name,node.nodeConfig.DefaultValue.ValueType,node.nodeConfig.DefaultValue.Value,node.nodeConfig.Description,"global",false)
-		}else {
-			node.ctx.SetVariable(node.nodeConfig.Name,node.nodeConfig.DefaultValue.ValueType,node.nodeConfig.DefaultValue.Value,node.nodeConfig.Description,node.flowOpCtx.FlowId,false)
+		// Save input value to variable
+		if node.nodeConfig.DefaultValue.ValueType == "" {
+			if node.nodeConfig.UpdateGlobal {
+				node.ctx.SetVariable(node.nodeConfig.Name, msg.Payload.ValueType, msg.Payload.Value, node.nodeConfig.Description, "global", false)
+			} else {
+				node.ctx.SetVariable(node.nodeConfig.Name, msg.Payload.ValueType, msg.Payload.Value, node.nodeConfig.Description, node.flowOpCtx.FlowId, false)
+			}
+		} else {
+			// Save default value from node config to variable
+			if node.nodeConfig.UpdateGlobal {
+				node.ctx.SetVariable(node.nodeConfig.Name, node.nodeConfig.DefaultValue.ValueType, node.nodeConfig.DefaultValue.Value, node.nodeConfig.Description, "global", false)
+			} else {
+				node.ctx.SetVariable(node.nodeConfig.Name, node.nodeConfig.DefaultValue.ValueType, node.nodeConfig.DefaultValue.Value, node.nodeConfig.Description, node.flowOpCtx.FlowId, false)
+			}
 		}
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil

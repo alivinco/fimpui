@@ -52,7 +52,6 @@ func MsgValueToNumber(msg *model.Message)(float64,error) {
 	return 0 , errors.New("Not numeric value type")
 }
 
-
 func match(route []string, topic []string) bool {
 	if len(route) == 0 {
 		if len(topic) == 0 {

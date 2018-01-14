@@ -223,16 +223,19 @@ func (mg *Manager) SendInclusionReport(id string) {
 	flow := mg.GetFlowById(id)
 	report := fimptype.ThingInclusionReport{}
 	report.Type = "flow"
-	report.Address = "flow"+id
+	report.Address = id
 	report.Alias = flow.FlowMeta.Name
 	report.CommTechnology = "flow"
 	report.PowerSource = "ac"
-	report.ProductName = "Flow rule engine"
+	report.ProductName = flow.FlowMeta.Name
 	report.ProductHash = "flow_"+id
 	report.SwVersion = "1.0"
+	report.Groups = []string{}
+	report.ProductId = "flow_1"
+	report.ManufacturerId = "fh"
+	report.Security = "tls"
 
-
-	var services []fimptype.Service
+   var services []fimptype.Service
 
 	for i := range flow.Nodes {
 		if flow.Nodes[i].IsStartNode() {
@@ -244,10 +247,12 @@ func (mg *Manager) SendInclusionReport(id string) {
 			address = strings.Replace( address,"pt:j1/mt:evt","",-1)
 			service.Address = address
 			service.Groups = []string{string(flow.Nodes[i].GetMetaNode().Id)}
+			report.Groups = append(report.Groups,string(flow.Nodes[i].GetMetaNode().Id))
 			intf := fimptype.Interface{}
 			intf.Type = "in"
 			intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
 			intf.ValueType = "bool"
+			intf.Version = "1"
 			service.Interfaces = []fimptype.Interface{intf}
 			service.Props = map[string]interface{}{}
 			service.Tags = []string{}
@@ -257,13 +262,17 @@ func (mg *Manager) SendInclusionReport(id string) {
 	}
 	report.Services = services
 	msg := fimpgo.NewMessage("evt.thing.inclusion_report", "flow","object", report, nil,nil,nil)
-	addrString := "pt:j1/mt:evt/rt:app/rn:flow/ad:1"
+	addrString := "pt:j1/mt:evt/rt:ad/rn:flow/ad:1"
 	addr, _ := fimpgo.NewAddressFromString(addrString)
 	mg.msgTransport.Publish(addr,msg)
 }
 
 func (mg *Manager) SendExclusionReport(id string) {
-
+	report := fimptype.ThingExclusionReport{Address:id}
+	msg := fimpgo.NewMessage("evt.thing.exclusion_report", "flow","object", report, nil,nil,nil)
+	addrString := "pt:j1/mt:evt/rt:ad/rn:flow/ad:1"
+	addr, _ := fimpgo.NewAddressFromString(addrString)
+	mg.msgTransport.Publish(addr,msg)
 }
 
 
