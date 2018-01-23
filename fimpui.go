@@ -538,7 +538,7 @@ func main() {
 		return c.JSON(http.StatusOK, resp.Msg.Data.Param.Device)
 	})
 
-	e.GET("/fimp/vinculum/shortcuts", func(c echo.Context) error {
+	e.GET("/fimp/api/vinculum/shortcuts", func(c echo.Context) error {
 		resp, _ := vinculumClient.GetShortcuts()
 		return c.JSON(http.StatusOK, resp)
 	})

@@ -36,7 +36,7 @@
       </ng-container>
       <ng-container cdkColumnDef="updatedAt">
           <mat-header-cell *cdkHeaderCellDef> Updated At </mat-header-cell>
-          <mat-cell *cdkCellDef="let row">{{row.UpdatedAt| date:'yMMMdjms'}}  </mat-cell>
+          <mat-cell *cdkCellDef="let row">{{row.UpdatedAt| date:'yyyy-MM-dd H:mm:ss'}}  </mat-cell>
         </ng-container>
       <ng-container cdkColumnDef="action">
         <mat-header-cell *cdkHeaderCellDef> Action </mat-header-cell>

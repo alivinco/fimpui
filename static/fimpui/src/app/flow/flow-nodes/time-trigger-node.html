@@ -16,11 +16,19 @@
                 <mat-checkbox [(ngModel)]="node.Config.GenerateAstroTimeEvents" > Generate Astro time events </mat-checkbox>
        </div> 
         <mat-input-container style="width: 150px">
-            <input matInput [(ngModel)]="node.Config.Latitude" placeholder="Latitude">
+            <input matInput [(ngModel)]="node.Config.Latitude" type="number" placeholder="Latitude">
         </mat-input-container>
         <mat-input-container style="width: 150px">
-            <input matInput [(ngModel)]="node.Config.Longitude" placeholder="Longitude">
+            <input matInput [(ngModel)]="node.Config.Longitude" type="number" placeholder="Longitude">
         </mat-input-container>
+        <div>
+        <mat-input-container style="width: 150px">
+                <input matInput [(ngModel)]="node.Config.SunriseTimeOffset" type="number" placeholder="Sunrise Offset in minutes">
+        </mat-input-container>
+        <mat-input-container style="width: 150px">
+                <input matInput [(ngModel)]="node.Config.SunsetTimeOffset" type="number" placeholder="Sunset Offset in minutes">
+        </mat-input-container>
+        </div>
     </div>
    
  

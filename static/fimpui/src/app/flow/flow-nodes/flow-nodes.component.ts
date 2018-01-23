@@ -242,6 +242,32 @@ export class VincTriggerNodeComponent implements OnInit {
   }
 }
 
+@Component({
+  selector: 'vinc-action-node',
+  templateUrl: './vinc-action-node.html',
+  styleUrls: ['./flow-nodes.component.css']
+})
+export class VincActionNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  shortcuts:any[];
+  constructor(public dialog: MatDialog , private http : Http) { }
+  ngOnInit() { 
+    this.loadShortcuts()
+  }
+  loadShortcuts() {
+    this.http
+      .get(BACKEND_ROOT+'/fimp/api/vinculum/shortcuts')
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+        this.shortcuts = result
+      });  
+  } 
+
+}
+
 
 @Component({
   selector: 'loop-node',

@@ -18,7 +18,7 @@ import (
 )
 
 type Manager struct {
-	flowRegistry  map[string]*Flow
+	flowRegistry  []*Flow
 	msgStreams    map[string]model.MsgPipeline
 	msgTransport  *fimpgo.MqttTransport
 	globalContext *model.Context
@@ -39,7 +39,7 @@ func NewManager(config *fimpuimodel.FimpUiConfigs) (*Manager,error) {
 	var err error
 	man := Manager{config:config}
 	man.msgStreams = make(map[string]model.MsgPipeline)
-	man.flowRegistry = make(map[string]*Flow)
+	man.flowRegistry = make([]*Flow,0)
 	man.globalContext,err = model.NewContextDB(config.ContextStorageDir)
 	man.globalContext.RegisterFlow("global")
 	return &man,err
@@ -129,8 +129,9 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 
 	flow := NewFlow(flowMeta, mg.globalContext, mg.msgTransport)
 	flow.SetMessageStream(mg.GetNewStream(flow.Id))
+
 	flow.InitAllNodes()
-	mg.flowRegistry[flow.Id] = flow
+	mg.flowRegistry = append(mg.flowRegistry,flow)
 	flow.Start()
 	return nil
 }
@@ -201,8 +202,13 @@ func (mg *Manager) UnloadFlow(id string) {
 	if mg.GetFlowById(id) == nil {
 		return
 	}
-	mg.flowRegistry[id].Stop()
-	delete(mg.flowRegistry, id)
+	mg.GetFlowById(id).Stop()
+	for i :=range mg.flowRegistry {
+		if mg.flowRegistry[i].Id == id {
+			mg.flowRegistry = append(mg.flowRegistry[:i], mg.flowRegistry[i+1:]...)
+			break
+		}
+	}
 	close(mg.msgStreams[id])
 	delete(mg.msgStreams,id)
 	log.Infof("Flow with Id = %s is unloaded",id)

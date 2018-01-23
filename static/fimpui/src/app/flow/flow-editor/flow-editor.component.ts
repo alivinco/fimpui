@@ -416,7 +416,18 @@ findInputSocketPosition(htmlElement):any {
       case "action":
         node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}}; 
         node.Config["DefaultValue"] = {"Value":"","ValueType":""};
-        break;
+        if (node.Ui.nodeType) {
+          switch (node.Ui.nodeType) {
+            case "vinc_action":
+              node.Address = "pt:j1/mt:cmd/rt:app/rn:vinculum/ad:1"
+              node.ServiceInterface = "cmd.mode.set"
+              node.Service = "home_mode"
+              node.Label = "Home action"
+              node.Config.DefaultValue.ValueType = "string"
+              break;
+          }
+        }
+        break;  
       case "loop":
         node.Config = {}; 
         node.Config["StartValue"] = 0;
@@ -468,6 +479,9 @@ findInputSocketPosition(htmlElement):any {
         node.Config["GenerateAstroTimeEvents"] = false;
         node.Config["Latitude"] = 0.0;
         node.Config["Longitude"] = 0.0;
+        node.Config["SunriseTimeOffset"] = 0;
+        node.Config["SunsetTimeOffset"] = 0;
+
         break;
         
     }
@@ -531,7 +545,7 @@ findInputSocketPosition(htmlElement):any {
     });
     return nodes;
   }
-
+  // for back compatability 
   enhanceNodes() {
     this.flow.Nodes.forEach(node => {
       if(node.Ui == undefined) {
@@ -539,6 +553,9 @@ findInputSocketPosition(htmlElement):any {
         node.Ui.x = 70;
         node.Ui.y = 170;
         node.Ui.nodeType = "";
+      }
+      if (node.Ui.nodeType==undefined) {
+        node.Ui["nodeType"] = "";
       }
   });
   }

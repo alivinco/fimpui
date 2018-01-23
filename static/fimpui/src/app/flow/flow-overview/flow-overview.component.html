@@ -17,14 +17,16 @@
         <th style="width: 70px">At start </th>
         <th style="width: 330px">Last start  </th>
         <th style="width: 150px">Last exec time (milisec) </th>
+        <th style="width: 150px">State </th>
         <th style="width: 350px">Description</th><th style="width: 250px">Actions</th></tr> </thead>
       <tbody>
       <tr *ngFor="let flow of flows">
           <td> {{flow.Name}}</td><td> {{flow.TriggerCounter}}</td> <td> {{flow.ErrorCounter}}</td>
           <td> {{flow.Stats.CurrentNodeLabel}} ({{flow.Stats.CurrentNodeId}}) </td>
           <td> {{flow.Stats.IsAtStartingPoint}} </td>
-          <td> {{flow.Stats.StartedAt | date:'yMMMdjms'}} </td>
+          <td> {{flow.Stats.StartedAt | date:'yyyy-MM-dd H:mm:ss'}} </td>
           <td> {{flow.Stats.LastExecutionTime }} </td>
+          <td> {{flow.State }} </td>
           <td> {{flow.Description}}</td> <td>
              
              <mat-chip-list>

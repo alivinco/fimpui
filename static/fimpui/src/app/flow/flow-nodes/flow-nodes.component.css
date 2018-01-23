@@ -8,6 +8,12 @@ node-card {
   margin-bottom: 10px;
   width:250px;
 }
+
+.radio-selector {
+    /*padding: 0px;*/
+    margin-bottom: 10px;
+    width:250px;
+  }
 .example-header-image {
   background-size: cover;
 }

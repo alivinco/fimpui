@@ -94,7 +94,7 @@ func (vc *VinculumClient) GetMessage(components []string) (VinculumMsg, error) {
 		}
 	}
 	reqId := rand.Intn(1000)
-	msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "get", RequestID: reqId, Param: Param{Components: components}}}}
+	msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "get",RequestID: reqId, Param: Param{Components: components}}}}
 	vc.client.WriteJSON(msg)
 	vc.runningRequests[reqId] = make(chan VinculumMsg)
 	select {

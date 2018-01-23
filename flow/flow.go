@@ -60,6 +60,7 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 }
 
 func (fl *Flow) InitAllNodes() {
+
 	log.Infof("<Flow> ---------Initializing Flow Id = %s , Name = %s -----------",fl.Id,fl.Name)
 	for _,metaNode := range fl.FlowMeta.Nodes {
 		var newNode model.Node
@@ -152,6 +153,26 @@ func (fl *Flow) IsNodeIdValid(currentNodeId model.NodeID, transitionNodeId model
 	return false
 }
 
+func (fl *Flow) IsFlowValid() bool {
+	var flowHasStartNode bool
+	for i := range fl.Nodes {
+		node := fl.Nodes[i].GetMetaNode()
+		if node.Type == "trigger" || node.Type == "action" {
+			if node.Address == "" ||  node.ServiceInterface == "" || node.Service == ""	{
+				log.Error(fl.Id+"<Flow> Flow is not valid , node is not configured . Node ",node.Label)
+				return false
+			}
+		}
+		if fl.Nodes[i].IsStartNode() {
+			flowHasStartNode = true
+		}
+	}
+	if !flowHasStartNode {
+		log.Error(fl.Id+"<Flow> Flow is not valid, start node not found")
+		return false
+	}
+	return true
+}
 
 func (fl *Flow) Run() {
 	var transitionNodeId model.NodeID
@@ -172,6 +193,7 @@ func (fl *Flow) Run() {
 				break
 			}
 			if fl.currentNodeIds[0] == "" && fl.Nodes[i].IsStartNode() {
+				fl.LastExecutionTime = time.Since(fl.StartedAt)
 				log.Infof(fl.Id+"<Flow> ------Flow %s is waiting for triggering event----------- ",fl.Name)
 				// Initial message received by trigger , which is passed further throughout the flow.
 				fl.WaitingSince = time.Now()
@@ -182,13 +204,13 @@ func (fl *Flow) Run() {
 						if ! fl.Nodes[si].IsReactorRunning(){
 							go fl.Nodes[si].WaitForEvent(fl.nodeOutboundStream)
 						}
+						fl.currentNodeIds = append(fl.currentNodeIds,fl.Nodes[si].GetMetaNode().Id )
 					}
-					fl.currentNodeIds = append(fl.currentNodeIds,fl.Nodes[si].GetMetaNode().Id )
+
 				}
 				// Blocking wait
 				reactorEvent :=<- fl.nodeOutboundStream
 				log.Debug(fl.Id+"<Flow> New event from reactor node.")
-				fl.LastExecutionTime = time.Since(fl.StartedAt)
 				fl.StartedAt = time.Now()
 				fl.currentMsg = reactorEvent.Msg
 				//log.Debug("<Flow> msg.payload : ",fl.currentMsg)
@@ -202,8 +224,10 @@ func (fl *Flow) Run() {
 				fl.TriggerCounter++
 				//fl.currentNodeId = fl.Nodes[i].GetMetaNode().Id
 				transitionNodeId = reactorEvent.TransitionNodeId
+				log.Debug(fl.Id+"<Flow> Transition node id = ",transitionNodeId)
+				log.Debug(fl.Id+"<Flow> Current nodes = ",fl.currentNodeIds)
 				if !fl.IsNodeIdValid(fl.currentNodeIds[0], transitionNodeId) {
-					log.Errorf(fl.Id+"<Flow> Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					log.Errorf(fl.Id+"<Flow> Unknown transition node %s from first node.Switching back to first node", transitionNodeId)
 					transitionNodeId = ""
 				}
 				log.Debug("<Flow> Transition from Trigger to node = ", transitionNodeId)
@@ -238,7 +262,7 @@ func (fl *Flow) Run() {
 				}
 
 				if !fl.IsNodeIdValid(fl.currentNodeIds[0], transitionNodeId) {
-					log.Errorf(fl.Id+"<FLow> Unknown transition mode %s.Switching back to first node", transitionNodeId)
+					log.Errorf(fl.Id+"<FLow> Unknown transition node %s.Switching back to first node", transitionNodeId)
 					transitionNodeId = ""
 				}
 				log.Debug(fl.Id+"<FLow> Transition to node = ",transitionNodeId)
@@ -271,25 +295,18 @@ func (fl *Flow) Start() error {
 	log.Info(fl.Id+"<Flow> Starting flow : ", fl.Name)
 	fl.opContext.State = "STARTING"
 	fl.opContext.IsFlowRunning = true
-	isFlowValid := false
-	// Init all nodes
-	for i := range fl.Nodes{
-		fl.Nodes[i].Init()
-	}
-
-	// Validating flow is it has at least one start node .
-	for i := range fl.Nodes {
-		if fl.Nodes[i].IsStartNode() {
-			isFlowValid = true
-			fl.opContext.State = "RUNNING"
-			log.Infof(fl.Id+"<Flow> Flow %s is running", fl.Name)
-		}
-	}
+	isFlowValid := fl.IsFlowValid()
 
 	if isFlowValid{
+		// Init all nodes
+		for i := range fl.Nodes{
+			fl.Nodes[i].Init()
+		}
+		fl.opContext.State = "RUNNING"
+		log.Infof(fl.Id+"<Flow> Flow %s is running", fl.Name)
 		go fl.Run()
 	}else {
-		fl.opContext.State = "STOPPED"
+		fl.opContext.State = "NOTCONFIGURED"
 		log.Errorf(fl.Id+"<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
 		return errors.New("Flow should have at least one trigger or wait node")
 	}

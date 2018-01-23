@@ -6,9 +6,6 @@
  <mat-card-content >
     
   <h3>Thing:</h3>
- 
-       
-
        <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>
@@ -40,6 +37,8 @@
               <tr><td><b>Wakeup interval:</b></td><td> {{ thing.wakeupInterval }} </td> </tr>
               <tr><td><b>Security:</b></td><td> {{ thing.security }} </td> </tr>
           </table>
+           
+          <button mat-raised-button style="margin-top: 15px;" (click)="getReport(thing.commTech,thing.address)">Sync with adapter</button>
         </mat-expansion-panel>
   
   <h3>Services:</h3>

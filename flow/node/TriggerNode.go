@@ -52,9 +52,14 @@ func (node *TriggerNode) initSubscriptions() {
 			}
 		}
 		if needToSubscribe {
-			log.Info(node.flowOpCtx.FlowId+"<TrigNode> Subscribing for service by address :", node.meta.Address)
-			node.transport.Subscribe(node.meta.Address)
-			*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
+			if node.meta.Address != ""{
+				log.Info(node.flowOpCtx.FlowId+"<TrigNode> Subscribing for service by address :", node.meta.Address)
+				node.transport.Subscribe(node.meta.Address)
+				*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
+			}else {
+				log.Error(node.flowOpCtx.FlowId+"<TrigNode> Can't subscribe to service with empty address")
+			}
+
 		}
 	}
 }

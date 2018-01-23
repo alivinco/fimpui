@@ -1,9 +1,7 @@
 <div>
         <div #nodebody> 
-                 <mat-panel-title>
-                             Message filtering
-                  </mat-panel-title>
-               <div style="margin-bottom: 30px;margin-top:5px" >
+                
+               <div style="margin-bottom: 30px;margin-top:10px" >
                        <mat-checkbox [(ngModel)]="node.Config.IsValueFilterEnabled" > Enable mode filter </mat-checkbox>
                </div>
                <mat-select #nodeTypeInput class="value-selector" placeholder="Mode filter" [(ngModel)]="node.Config.ValueFilter.Value">

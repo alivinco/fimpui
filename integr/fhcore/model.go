@@ -5,7 +5,7 @@ import "time"
 type Data struct {
 	Errors    interface{} `json:"errors"`
 	Cmd       string      `json:"cmd"`
-	Component string `json:"component"`
+	Component interface{} `json:"component"`
 	Param     Param       `json:"param"`
 	RequestID int         `json:"requestId"`
 	Success   bool        `json:"success"`
