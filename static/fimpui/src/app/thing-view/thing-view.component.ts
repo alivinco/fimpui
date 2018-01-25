@@ -83,11 +83,10 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   }
 
   getServiceName(techAdapterName:string):string{
-    let serviceName = "zwave-ad";
-    if (techAdapterName == "ikea"){
-      serviceName = "ikea";
+    if (techAdapterName == "zw"){
+      techAdapterName = "zwave-ad";
     }
-    return serviceName;
+    return techAdapterName;
   }
 
   getReport(techAdapterName:string, nodeId:string){

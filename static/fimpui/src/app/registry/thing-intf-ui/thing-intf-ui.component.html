@@ -1,8 +1,9 @@
 
-<div style = "width:250px">
+<div style = "width:270px">
    <div *ngIf= "intf.lastValue">
       <div [ngSwitch]="msgType">
-        <div *ngSwitchCase="'evt.sensor.report'"> <h3> {{intf.lastValue.val}} </h3> {{intf.lastValue.props.unit}} </div>
+        <div *ngSwitchCase="'evt.sensor.report'"> <h3> {{intf.lastValue.val}} {{intf.lastValue.props.unit}}</h3>  </div>
+        <div *ngSwitchCase="'evt.scene.report'"> <h3> {{intf.lastValue.val}} </h3>  </div>
         <div *ngSwitchCase="'evt.binary.report'"> <mat-chip-list> 
           <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
            </mat-chip-list> </div>

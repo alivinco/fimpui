@@ -31,6 +31,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { ZwaveManComponent , AddDeviceDialog,RemoveDeviceDialog } from './zwave-man/zwave-man.component';
 import { TemplateEditorDialog } from './zwave-man/zwave-man.component';
 import { IkeaManComponent } from './ikea-man/ikea-man.component';
+import { ZigbeeManComponent } from './zigbee-man/zigbee-man.component';
 import { SystemsManComponent } from './systems-man/systems-man.component';
 import { TimelineComponent,MsgDetailsDialog } from './timeline/timeline.component';
 import { ReportComponent } from './report/report.component';
@@ -57,6 +58,7 @@ const appRoutes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'zwave-man', component: ZwaveManComponent },
   { path: 'ikea-man', component: IkeaManComponent },
+  { path: 'zigbee-man', component: ZigbeeManComponent },
   { path: 'systems-man', component: SystemsManComponent },
   { path: 'timeline', component: TimelineComponent },
   { path: 'report', component: ReportComponent },
@@ -102,6 +104,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     AppComponent,
     ZwaveManComponent,
     IkeaManComponent,
+    ZigbeeManComponent,
     SystemsManComponent,
     AddDeviceDialog,
     RemoveDeviceDialog,

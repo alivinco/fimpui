@@ -149,7 +149,7 @@ func (node *TimeTriggerNode) scheduleNextAstroEvent() {
 
 	node.astroTimer = time.AfterFunc(timeUntilEvent, func() {
 		log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> Astro time event.Event type = ",node.nextAstroEvent)
-		msg := model.Message{Payload:fimpgo.FimpMessage{Value:node.config.DefaultMsg.Value,ValueType:node.config.DefaultMsg.ValueType},
+		msg := model.Message{Payload:fimpgo.FimpMessage{Value:node.nextAstroEvent,ValueType:fimpgo.VTypeString},
 			Header:map[string]string{"astroEvent":node.nextAstroEvent}}
 		node.cronMessageCh <- msg
 

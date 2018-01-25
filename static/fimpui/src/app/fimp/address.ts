@@ -14,7 +14,7 @@ export function NewFimpAddressFromString(topicString:string):FimpAddress{
     let tokens = topicString.split("/");
     for (let token in tokens) {
         let tokenName = token.split(":")[0];
-        let tokenValue = token.split(":")[0]
+        let tokenValue = token.split(":")[1]
         switch(tokenName) {
             case "pt":
                 addr.payloadType = tokenValue;
