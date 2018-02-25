@@ -13,6 +13,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type GcpObjectStorage struct {
@@ -65,14 +66,15 @@ func (ost *GcpObjectStorage) UploadLogSnapshot(files []string, username string, 
 				return statusReport
 			}
 			for _, dirFile := range dirFiles {
-				err := ost.UploadTextFile(snapshotName, dirFile.Name(), metadata, sizeLimit)
+				fullPath := filepath.Join(files[i],dirFile.Name())
+				err := ost.UploadTextFile(snapshotName,  fullPath, metadata, sizeLimit)
 				uploadStatus := "OK"
 				if err != nil {
 					uploadStatus = err.Error()
 					log.Error("Error while uploading file :", err)
 				}
 
-				statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", files[i], uploadStatus))
+				statusReport = append(statusReport, fmt.Sprintf("File: %s , upload status = %s ", fullPath, uploadStatus))
 			}
 		case mode.IsRegular():
 			// do file stuff
