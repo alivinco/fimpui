@@ -15,6 +15,23 @@
   version = "v0.18.0"
 
 [[projects]]
+  name = "github.com/ChrisTrenkamp/goxpath"
+  packages = [
+    ".",
+    "internal/execxp",
+    "internal/lexer",
+    "internal/parser",
+    "internal/parser/findutil",
+    "internal/parser/intfns",
+    "internal/parser/pathexpr",
+    "internal/xconst",
+    "internal/xsort",
+    "tree"
+  ]
+  revision = "2ad3b31cf4a21db70fc0cacd0e0120eaae566f98"
+  version = "v1.0-alpha3"
+
+[[projects]]
   name = "github.com/Sirupsen/logrus"
   packages = ["."]
   revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
@@ -351,6 +368,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9c1e7393b95100f88cda9903d926dd1b01fc7395b4ba3f9017b29dbe7a9e333c"
+  inputs-digest = "ee21f8e76dc1c525befe1c70da84bb0e022d3ab84fd5b37e1b52ea95b9a648a0"
   solver-name = "gps-cdcl"
   solver-version = 1

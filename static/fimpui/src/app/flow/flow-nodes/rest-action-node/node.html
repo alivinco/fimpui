@@ -1,0 +1,35 @@
+<div>
+  <div #nodebody >
+
+    <mat-form-field  style="width: 70px">
+      <mat-select #nodeTypeInput placeholder="Method" [(ngModel)]="node.Config.Method">
+        <mat-option value="GET">GET</mat-option>
+        <mat-option value="POST">POST</mat-option>
+        <mat-option value="PUT">PUT</mat-option>
+        <mat-option value="DELETE">DELETE</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field style="width: 400px">
+      <input matInput [(ngModel)]="node.Config.Url" type="text" placeholder="URL">
+    </mat-form-field>
+    <div>
+    <mat-form-field style="width: 100px">
+      <mat-select #nodeTypeInput placeholder="Payload type" [(ngModel)]="node.Config.RequestPayloadType">
+        <mat-option value="json">json</mat-option>
+        <mat-option value="xml">xml</mat-option>
+      </mat-select>
+    </mat-form-field>
+    </div>
+    <div>
+    <mat-input-container   style="width: 100%">
+        <textarea mat-autosize  minRows="4" matInput placeholder="Template" [(ngModel)]="node.Config.RequestTemplate" > </textarea>
+    </mat-input-container>
+    </div>
+    <div style="margin-bottom: 30px" >
+      <mat-checkbox [(ngModel)]="node.Config.LogResponse" > Log response </mat-checkbox>
+    </div>
+  </div>
+
+
+</div>

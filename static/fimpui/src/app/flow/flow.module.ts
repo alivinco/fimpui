@@ -5,6 +5,7 @@ import { FlowContextComponent } from './flow-context/flow-context.component';
 import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,ActionNodeComponent,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
 import { TriggerNodeComponent ,LoopNodeComponent,IfNodeComponent,WaitNodeComponent,VincTriggerNodeComponent,VincActionNodeComponent} from './flow-nodes/flow-nodes.component';
+import { RestActionNodeComponent } from './flow-nodes/rest-action-node/node.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { FormsModule } from '@angular/forms';
@@ -22,7 +23,7 @@ import { MatTableModule,
   MatSliderModule,
   MatCheckboxModule,
   MatListModule,
-  MatSelectModule, 
+  MatSelectModule,
   MatOptionModule,
   MatDialogModule,
   MatCardModule,
@@ -39,7 +40,7 @@ import { MatTableModule,
     FlowRoutingModule,
     MatInputModule,
     MatButtonModule,
-    MatFormFieldModule, 
+    MatFormFieldModule,
     MatTableModule,
     MatChipsModule,
     MatOptionModule,
@@ -68,10 +69,11 @@ import { MatTableModule,
      NodeEditorDialog,
      FlowNodesComponent,
      ActionNodeComponent,
+     RestActionNodeComponent,
      TriggerNodeComponent,
      ReceiveNodeComponent,
      SetVariableNodeComponent,
-     ServiceLookupDialog, 
+     ServiceLookupDialog,
      ContextDialog,
      VariableElementComponent,
      TimeTriggerNodeComponent,
@@ -81,6 +83,6 @@ import { MatTableModule,
      VincTriggerNodeComponent,
      VincActionNodeComponent
   ],
-  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog]  
+  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog]
 })
 export class FlowModule { }

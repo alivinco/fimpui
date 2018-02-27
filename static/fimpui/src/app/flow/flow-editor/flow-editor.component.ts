@@ -28,7 +28,7 @@ export class MetaNode {
 export class Ui {
   x:number;
   y:number;
-  nodeType:string;  // the same node can have different UI nodes 
+  nodeType:string;  // the same node can have different UI nodes
 }
 
 export class Variable {
@@ -63,9 +63,9 @@ export class FlowEditorComponent implements OnInit {
     let id  = this.route.snapshot.params['id'];
     this.canvasHeight = 0;
     this.loadFlow(id);
-    
+
   }
- 
+
   loadFlow(id:string) {
      this.http
       .get(BACKEND_ROOT+'/fimp/flow/definition/'+id)
@@ -95,9 +95,9 @@ export class FlowEditorComponent implements OnInit {
          for (var key in result){
             this.localVars.push(result[key].Name);
          }
-         
+
       });
-    
+
     this.http
       .get(BACKEND_ROOT+'/fimp/flow/context/global')
       .map(function(res: Response){
@@ -108,8 +108,8 @@ export class FlowEditorComponent implements OnInit {
         for (var key in result){
             this.globalVars.push(result[key].Name);
          }
-      });  
-  }  
+      });
+  }
   variableSelected(event:any,config:any){
     if (config.LeftVariableName.indexOf("__global__")!=-1) {
       config.LeftVariableName = config.LeftVariableName.replace("__global__","");
@@ -127,14 +127,14 @@ export class FlowEditorComponent implements OnInit {
          console.log("Flow was saved");
       });
   }
- 
+
   sendFlowControllCommands(command:string) {
     this.http
       .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+this.flow.Id+'/'+command,null,  {} )
       .subscribe ((result) => {
          console.log("Cmd was sent");
       });
-  } 
+  }
 
 
  getNewNodeId():string {
@@ -148,15 +148,15 @@ export class FlowEditorComponent implements OnInit {
    });
    maxId++;
    return maxId+"";
- } 
-   
+ }
+
  allowNodeDrop(event:any) {
    if (!this.isDraggableLine){
      console.log("allow node drop");
      event.preventDefault();
     }
-  } 
-  
+  }
+
  nodeDrop(event:any) {
    if (!this.isDraggableLine){
       console.log("node dropped");
@@ -181,7 +181,7 @@ export class FlowEditorComponent implements OnInit {
       }
       node.Ui.x = xPos;
       node.Ui.y = yPos;
-      this.redrawNodeLines(this.currentDraggableNodeId);  
+      this.redrawNodeLines(this.currentDraggableNodeId);
       event.preventDefault();
   }
  }
@@ -192,11 +192,11 @@ export class FlowEditorComponent implements OnInit {
   console.dir(event);
   if (event.srcElement.className.includes("socket")){
     console.log("Line drag start");
-    this.isDraggableLine = true  
+    this.isDraggableLine = true
   } else {
     console.log("Node drag start");
     this.isDraggableLine = false;
-    
+
     this.currentDraggableNodeId = event.srcElement.id.replace("nodeId_","")
     console.log("active node id = "+this.currentDraggableNodeId);
   }
@@ -216,10 +216,10 @@ export class FlowEditorComponent implements OnInit {
     var offsetY = event.clientY - this.dragStartPosY ;
     console.log("offset x = "+offsetX);
     console.log("offset y = "+offsetY);
- 
+
     // var outSockCord =  this.findOutputSocketPosition(this.currentDraggableNode);
     // var inSockCord =  this.findInputSocketPosition(event.srcElement);
-    var srcNodeIdWithType = this.currentDraggableNode.id.replace("out_socket_nodeid_",""); 
+    var srcNodeIdWithType = this.currentDraggableNode.id.replace("out_socket_nodeid_","");
     var srcSocketType = srcNodeIdWithType.split("_")[0];
     var srcNodeId = srcNodeIdWithType.split("_")[1];
     var targetNodeId = event.srcElement.id.replace("in_socket_nodeid_","");
@@ -227,33 +227,33 @@ export class FlowEditorComponent implements OnInit {
     if (srcNode.Type == "if") {
       if (srcSocketType == "iftrue")
         srcNode.Config.TrueTransition = targetNodeId;
-      else 
-        srcNode.Config.FalseTransition = targetNodeId;  
+      else
+        srcNode.Config.FalseTransition = targetNodeId;
     }else {
       if (srcSocketType == "succ")
         srcNode.SuccessTransition = targetNodeId;
       if (srcSocketType == "err")
-        srcNode.ErrorTransition = targetNodeId;  
+        srcNode.ErrorTransition = targetNodeId;
       if (srcSocketType == "timeout")
-        srcNode.TimeoutTransition = targetNodeId;    
+        srcNode.TimeoutTransition = targetNodeId;
 
     }
     // this.drawLineBetweenNodes(srcNodeId,targetNodeId,srcSocketType);
     this.redrawAllLines();
     event.preventDefault();
  }
- 
+
  redrawNodeLines(nodeId:string) {
-   // inbound lines 
-   
+   // inbound lines
+
    var parentNodes = this.getParentNodesById(nodeId);
    if (parentNodes != null) {
       for (let parentNode of parentNodes) {
-        
+
           if (parentNode.Type == "if") {
             if (parentNode.Config.TrueTransition == nodeId)
               this.drawLineBetweenNodes(parentNode.Id,nodeId,"iftrue");
-            if (parentNode.Config.FalseTransition == nodeId)  
+            if (parentNode.Config.FalseTransition == nodeId)
               this.drawLineBetweenNodes(parentNode.Id,nodeId,"iffalse");
           }else {
             if (parentNode.SuccessTransition == nodeId)
@@ -261,13 +261,13 @@ export class FlowEditorComponent implements OnInit {
             if (parentNode.ErrorTransition == nodeId)
                 this.drawLineBetweenNodes(parentNode.Id,nodeId,"err");
             if (parentNode.TimeoutTransition == nodeId)
-                this.drawLineBetweenNodes(parentNode.Id,nodeId,"timeout");    
+                this.drawLineBetweenNodes(parentNode.Id,nodeId,"timeout");
           }
       }
    }else {
         console.log("Node doesn't have inbound lines");
-    } 
-   //out bound lines 
+    }
+   //out bound lines
    var node = this.getNodeById(nodeId);
    if(node.Type == "if"){
     if (node.Config.TrueTransition.length > 0)
@@ -282,9 +282,9 @@ export class FlowEditorComponent implements OnInit {
      if(node.TimeoutTransition)
       if (node.TimeoutTransition.length > 0)
           this.drawLineBetweenNodes(nodeId,node.TimeoutTransition,"timeout");
-     
+
    }
-      
+
  };
 
  recalculateCanvasSize() {
@@ -297,9 +297,9 @@ export class FlowEditorComponent implements OnInit {
     console.log("On canvas size change . value ="+this.canvasHeight);
     document.getElementById("flowEditorCanvasId").style.height = (this.canvasInitHeight+this.canvasHeight)+"px";
  }
- 
+
  //////////////////////////
- 
+
  drawLineBetweenNodes(sourceNodeId,targetNodeId,type) {
   var outSocketElement = document.getElementById("out_socket_nodeid_"+type+"_"+sourceNodeId);
   var inSocketElement = document.getElementById("in_socket_nodeid_"+targetNodeId);
@@ -309,17 +309,17 @@ export class FlowEditorComponent implements OnInit {
     var yOffset = 14;
     this.drawCurvedLine(sourceNodeId+"_"+targetNodeId+"_"+type,outSockCord.x,outSockCord.y-yOffset,inSockCord.x,inSockCord.y-yOffset,"#afe0aa",0.1);
   }
-  
+
  }
- 
+
  drawCurvedLine(id,x1, y1, x2, y2, color, tension) {
-    var svg = document.getElementById("flow-connections"); 
-    
-    var existingLine = document.getElementById(id); 
+    var svg = document.getElementById("flow-connections");
+
+    var existingLine = document.getElementById(id);
     if (existingLine != undefined) {
       svg.removeChild(existingLine);
     }
- 
+
     var shape = document.createElementNS("http://www.w3.org/2000/svg","path");
     var delta = (x2-x1)*tension;
     var hx1=x1+delta;
@@ -328,17 +328,17 @@ export class FlowEditorComponent implements OnInit {
     var hy2=y2;
     var path = "";
     if (y2>y1) {
-        path = "M "  + x1 + " " + y1 + 
-                  " C " + hx1 + " " + hy1 
-                        + " "  + hx2 + " " + hy2 
+        path = "M "  + x1 + " " + y1 +
+                  " C " + hx1 + " " + hy1
+                        + " "  + hx2 + " " + hy2
                   + " " + x2 + " " + y2;
     }else {
        var leftx = x1
        if (x2<x1)
          leftx = x2;
-       leftx = leftx-130; 
+       leftx = leftx-130;
        path = "M "  + x1 + " " + y1 + " L "+x1+" "+(y1+30)+ " L "+leftx+" "+(y1+30) +
-                  "L "+leftx+" "+(y2-30) + "L "+x2+" "+(y2-30)+ "L "+x2+" "+y2;       
+                  "L "+leftx+" "+(y2-30) + "L "+x2+" "+(y2-30)+ "L "+x2+" "+y2;
     }
     shape.setAttributeNS(null, "d", path);
     shape.setAttributeNS(null, "id", id);
@@ -376,7 +376,7 @@ findInputSocketPosition(htmlElement):any {
   };
 }
 
-/////////////////////////// 
+///////////////////////////
  addNode(nodeType:string,uiNodeType:string){
     console.dir(this.selectedNewNodeType)
     this.recalculateCanvasSize();
@@ -393,11 +393,11 @@ findInputSocketPosition(htmlElement):any {
     node.Ui.x = 70;
     node.Ui.y = 170;
     node.Ui.nodeType = uiNodeType;
-    
+
 
     switch (node.Type){
       case "trigger":
-        node.Config = {}; 
+        node.Config = {};
         node.Config["Timeout"] = 0;
         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
         node.Config["IsValueFilterEnabled"] = false;
@@ -414,7 +414,7 @@ findInputSocketPosition(htmlElement):any {
         }
         break;
       case "action":
-        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}}; 
+        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}};
         node.Config["DefaultValue"] = {"Value":"","ValueType":""};
         if (node.Ui.nodeType) {
           switch (node.Ui.nodeType) {
@@ -427,22 +427,25 @@ findInputSocketPosition(htmlElement):any {
               break;
           }
         }
-        break;  
+        break;
+      case "rest_action":
+        node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":true,"Headers":{}};
+        break;
       case "loop":
-        node.Config = {}; 
+        node.Config = {};
         node.Config["StartValue"] = 0;
         node.Config["EndValue"] = 5;
         node.Config["Step"] = 1;
         node.Config["SaveToVariable"] = false;
-        break;  
+        break;
       case "receive":
-        node.Config = {}; 
+        node.Config = {};
         node.Config["Timeout"] = 120;
         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
         node.Config["IsValueFilterEnabled"] = false;
-        break;  
+        break;
       case "if":
-        node.Config = {}; 
+        node.Config = {};
         node.Config["TrueTransition"] = ""
         node.Config["FalseTransition"] = ""
         node.Config["Expression"] = [];
@@ -461,7 +464,7 @@ findInputSocketPosition(htmlElement):any {
         node.Config = 1000;
         break;
       case "set_variable":
-        node.Config = {}; 
+        node.Config = {};
         node.Config["Name"] = ""
         node.Config["UpdateGlobal"] = false
         node.Config["UpdateInputMsg"] = false
@@ -469,7 +472,7 @@ findInputSocketPosition(htmlElement):any {
         variable["Value"] = 0;
         variable["ValueType"] = "";
         node.Config["DefaultValue"] = variable
-        break; 
+        break;
       case "time_trigger":
         node.Config = {};
         node.Config["DefaultMsg"] = {"Value":"","ValueType":""};
@@ -483,9 +486,9 @@ findInputSocketPosition(htmlElement):any {
         node.Config["SunsetTimeOffset"] = 0;
 
         break;
-        
+
     }
-    this.flow.Nodes.push(node) 
+    this.flow.Nodes.push(node)
   }
   showSource() {
     let dialogRef = this.dialog.open(FlowSourceDialog,{
@@ -496,9 +499,9 @@ findInputSocketPosition(htmlElement):any {
     dialogRef.afterClosed().subscribe(result => {
       if(result)
         this.flow = result;
-    });      
+    });
   }
-  
+
   showNodeEditorDialog(flow:Flow,node:MetaNode) {
     let dialogRef = this.dialog.open(NodeEditorDialog,{
       // height: '95%',
@@ -509,7 +512,7 @@ findInputSocketPosition(htmlElement):any {
       if(result=="deleted") {
         this.redrawAllLines();
       }
-    });  
+    });
   }
 
   showContextDialog() {
@@ -518,10 +521,10 @@ findInputSocketPosition(htmlElement):any {
             data:this.flow
           });
     dialogRef.afterClosed().subscribe(result => {
-      
-    });      
+
+    });
   }
-  
+
   getNodeById(nodeId:string):MetaNode {
     console.log("GEtting node for id = "+nodeId);
     var node:MetaNode;
@@ -537,7 +540,7 @@ findInputSocketPosition(htmlElement):any {
   getParentNodesById(nodeId:string):MetaNode[] {
     var nodes:MetaNode[] = [];
     this.flow.Nodes.forEach(element => {
-        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || element.TimeoutTransition==nodeId || 
+        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || element.TimeoutTransition==nodeId ||
             element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
           nodes.push(element);
           return ;
@@ -545,7 +548,7 @@ findInputSocketPosition(htmlElement):any {
     });
     return nodes;
   }
-  // for back compatability 
+  // for back compatability
   enhanceNodes() {
     this.flow.Nodes.forEach(node => {
       if(node.Ui == undefined) {
@@ -560,7 +563,7 @@ findInputSocketPosition(htmlElement):any {
   });
   }
   redrawAllLines() {
-    var svg = document.getElementById("flow-connections"); 
+    var svg = document.getElementById("flow-connections");
     while (svg.firstChild) {
       svg.removeChild(svg.firstChild);
      }
@@ -591,9 +594,9 @@ findInputSocketPosition(htmlElement):any {
         });
 
 
-    });      
+    });
   }
-  
+
 }
 
 export class Flow {
@@ -616,7 +619,7 @@ export class FlowSourceDialog {
   save(){
     this.data = JSON.parse(this.flowSourceText)
     this.dialogRef.close(this.data);
-    
+
   }
 }
 
@@ -633,7 +636,7 @@ export class NodeEditorDialog {
     this.node = data.node;
    }
    deleteNode(node:MetaNode){
-      var nodeId = node.Id; 
+      var nodeId = node.Id;
       let index: number = this.flow.Nodes.indexOf(node);
       if (index !== -1) {
           this.flow.Nodes.splice(index, 1);
@@ -654,7 +657,7 @@ export class NodeEditorDialog {
           }
       });
       this.dialogRef.close("deleted");
-  } 
+  }
   cloneNode(node:MetaNode){
    //  Object.assign(cloneNode,node);
    //  cloneNode.Id = this.getNewNodeId();
@@ -662,7 +665,7 @@ export class NodeEditorDialog {
     var cloneNode = <MetaNode>JSON.parse(JSON.stringify(node));
     cloneNode.Id = this.getNewNodeId();
     this.flow.Nodes.push(cloneNode);
-  } 
+  }
   getNewNodeId():string {
     let id = 0;
     let maxId = 0;
@@ -674,8 +677,8 @@ export class NodeEditorDialog {
     });
     maxId++;
     return maxId+"";
-  } 
-  
+  }
+
 }
 
 @Component({
@@ -695,7 +698,7 @@ export class ContextDialog {
       }).subscribe ((result) => {
          this.localContext = JSON.stringify(result, null, 2);
       });
-    
+
     this.http
       .get(BACKEND_ROOT+'/fimp/flow/context/global')
       .map(function(res: Response){
@@ -704,12 +707,12 @@ export class ContextDialog {
       }).subscribe ((result) => {
          this.globalContext = JSON.stringify(result, null, 2);
       });
-      
-      
+
+
     // this.localContext = JSON.stringify(data, null, 2)
     // this.globalContext = JSON.stringify(data, null, 2)
   }
-  
+
 }
 
 @Component({
@@ -720,7 +723,7 @@ export class FlowRunDialog {
   value : any;
   valueType : string ;
   actionData : MetaNode;
-  
+
   constructor(public dialogRef: MatDialogRef<FlowRunDialog>,@Inject(MAT_DIALOG_DATA) public data: MetaNode,private fimp:FimpService,public snackBar: MatSnackBar) {
     // data.Config. = {"Value":true,"ValueType":msgTypeToValueTypeMap[data.ServiceInterface]}
     // this.valueType = msgTypeToValueTypeMap[data.ServiceInterface];
@@ -732,9 +735,9 @@ export class FlowRunDialog {
     // this.actionData.Type = data.Type;
     // this.actionData.Config = {"Value":true,"ValueType":data.Config.ValueFilter.ValueType}
     this.valueType = data.Config.ValueFilter.ValueType
-  
+
   }
-  
+
   run(){
     let msg  = new FimpMessage(this.data.Service,this.data.ServiceInterface,this.valueType,this.value,null,null)
     this.fimp.publish(this.data.Address,msg.toString());
@@ -755,9 +758,9 @@ export class ServiceLookupDialog  implements OnInit {
     this.msgFlowDirectionD = msgFlowDirectionD
   }
   ngOnInit() {
-    console.log("ng on init Msg flow  direction:"+this.msgFlowDirectionD);  
+    console.log("ng on init Msg flow  direction:"+this.msgFlowDirectionD);
   }
- 
+
   onSelected(intf :ServiceInterface){
     console.dir(intf);
     this.dialogRef.close(intf);

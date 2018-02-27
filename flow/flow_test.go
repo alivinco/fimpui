@@ -283,6 +283,54 @@ func TestTransformFlipFlow(t *testing.T) {
 
 }
 
+func TestRestActionFlow(t *testing.T) {
+	dbName := "RestActionDb.db"
+	log.SetLevel(log.DebugLevel)
+	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)
+	err := mqtt.Start()
+	t.Log("Connected")
+	if err != nil {
+		t.Error("Error connecting to broker ", err)
+	}
+
+	mqtt.SetMessageHandler(onMsg)
+	time.Sleep(time.Second * 1)
+
+	ctx, err := model.NewContextDB(dbName)
+	flowMeta := model.FlowMeta{Id: "TestRestActionFlow"}
+
+	node := model.MetaNode{Id: "1", Label: "Button trigger", Type: "trigger", Address: "pt:j1/mt:evt/rt:dev/rn:test/ad:1/sv:out_bin_switch/ad:199_0", Service: "out_bin_switch", ServiceInterface: "evt.binary.report", SuccessTransition: "2"}
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+
+	//node = model.MetaNode{Id: "2", Label: "Invoke httpbin", Type: "rest_action", SuccessTransition: "",
+	//	Config:flownode.RestActionNodeConfig{Method:"POST",Url:"https://httpbin.org/post",RequestTemplate:"{'param1':{{.Variable}} }"}}
+
+	node = model.MetaNode{Id: "2", Label: "Turn off yamaha", Type: "rest_action", SuccessTransition: "",
+		Config:flownode.RestActionNodeConfig{Method:"POST",Url:"http://yamaha.st/YamahaRemoteControl/ctrl",
+		RequestTemplate:"<YAMAHA_AV cmd=\"PUT\"><Main_Zone><Power_Control><Power>On</Power></Power_Control></Main_Zone></YAMAHA_AV>"}}
+
+	flowMeta.Nodes = append(flowMeta.Nodes, node)
+	flow := NewFlow(flowMeta, ctx, mqtt)
+	flow.SetMessageStream(msgChan)
+	flow.InitAllNodes()
+	flow.Start()
+	time.Sleep(time.Second * 1)
+	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", false, nil, nil, nil)
+	adr := fimpgo.Address{MsgType: fimpgo.MsgTypeEvt, ResourceType: fimpgo.ResourceTypeDevice, ResourceName: "test", ResourceAddress: "1", ServiceName: "out_bin_switch", ServiceAddress: "199_0"}
+	mqtt.Publish(&adr, msg)
+	time.Sleep(time.Second * 1)
+	//variable, err := flow.GetContext().GetVariable("volume", "TestSetVariableFlow")
+	//inputMessage := flow.GetCurrentMessage()
+	//if inputMessage.Payload.Value.(bool) != true {
+	//	t.Error("Wrong value " )
+	//}
+	flow.Stop()
+	// end
+	time.Sleep(time.Second * 2)
+	os.Remove(dbName)
+
+}
+
 func TestTransformAddFlow(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 	mqtt := fimpgo.NewMqttTransport("tcp://localhost:1883", "flow_test", "", "", true, 1, 1)

@@ -5,30 +5,33 @@
     <mat-input-container class="node-label-field">
           <input matInput [(ngModel)]="node.Label" placeholder="Label" >
     </mat-input-container>
-    <div *ngSwitchCase="'trigger'">  
+    <div *ngSwitchCase="'trigger'">
         <trigger-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" ></trigger-node>
         <vinc-trigger-node *ngIf="node.Ui.nodeType=='vinc_trigger'" [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" ></vinc-trigger-node>
     </div>
-    <div *ngSwitchCase="'wait'"> 
+    <div *ngSwitchCase="'wait'">
       <wait-node [node]="node" [nodes]="flow.Nodes" > </wait-node>
     </div>
-    <div *ngSwitchCase="'action'">  
+    <div *ngSwitchCase="'action'">
          <action-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" > </action-node>
          <vinc-action-node *ngIf="node.Ui.nodeType=='vinc_action'" [node]="node" [nodes]="flow.Nodes" ></vinc-action-node>
     </div>
-    <div *ngSwitchCase="'set_variable'">  
+    <div *ngSwitchCase="'rest_action'">
+      <rest-action-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" > </rest-action-node>
+    </div>
+    <div *ngSwitchCase="'set_variable'">
          <set-variable-node [node]="node" [nodes]="flow.Nodes" > </set-variable-node>
-    </div> 
-    <div *ngSwitchCase="'receive'">  
+    </div>
+    <div *ngSwitchCase="'receive'">
          <receive-node [node]="node" [nodes]="flow.Nodes" > </receive-node>
     </div>
-    <div *ngSwitchCase="'loop'">  
+    <div *ngSwitchCase="'loop'">
         <loop-node [node]="node" [nodes]="flow.Nodes" > </loop-node>
     </div>
-    <div *ngSwitchCase="'time_trigger'">  
+    <div *ngSwitchCase="'time_trigger'">
         <time-trigger-node [node]="node" [nodes]="flow.Nodes" > </time-trigger-node>
-   </div>                
-    <div *ngSwitchCase="'if'">  
+   </div>
+    <div *ngSwitchCase="'if'">
       <if-node [node]="node" [nodes]="flow.Nodes" > </if-node>
     </div>
  </div>
@@ -38,4 +41,4 @@
     <button mat-raised-button (click)="deleteNode(node)" >Delete</button>
     <button mat-button mat-dialog-close>Close</button>
  </mat-dialog-actions>
-  
+

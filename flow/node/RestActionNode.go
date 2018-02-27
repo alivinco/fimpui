@@ -5,6 +5,7 @@ import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
+	//"github.com/ChrisTrenkamp/goxpath"
 	"net/http"
 	"text/template"
 	"bytes"
@@ -19,14 +20,24 @@ type RestActionNode struct {
 	httpClient  *http.Client
 }
 
-type RestActionNodeConfig struct {
-	VariableName string
+type ResponseToVariableMap struct {
+	Path string
+	PathType string // xml , json
+	TargetVariableName string
 	IsVariableGlobal bool
-	Method string // GET,POST,PUT,DELETE, etc.
-	PayloadType string // json,xml,string
-	RequestTemplate string
+	TargetVariableType string
+}
+
+type RestActionNodeConfig struct {
 	Url string
+	Method string // GET,POST,PUT,DELETE, etc.
+	TemplateVariableName string
+	IsVariableGlobal bool
+	RequestPayloadType string // json,xml,string
+	RequestTemplate string
 	Headers map[string]string
+	ResponseMapping []ResponseToVariableMap
+	LogResponse bool
 }
 
 type RestActionNodeTemplateParams struct {
@@ -71,6 +82,10 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	node.reqTemplate.Execute(&templateBuffer,templateParams)
 	log.Debug("<RestActionNode> Request:",templateBuffer.String())
 	req, err := http.NewRequest(node.config.Method, node.config.Url, &templateBuffer)
+	for key,value := range node.config.Headers{
+		req.Header.Add(key,value)
+	}
+
 	if err != nil {
 		return []model.NodeID{},err
 	}
@@ -79,9 +94,20 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	if err != nil {
 		return []model.NodeID{},err
 	}
-	var respBuff bytes.Buffer
-	respBuff.ReadFrom(resp.Body)
-	log.Debug("<RestActionNode> Response:",respBuff.String())
+
+	for i , _ := range node.config.ResponseMapping {
+		if node.config.ResponseMapping[i].PathType == "xml" {
+
+		}
+
+	}
+
+	if node.config.LogResponse {
+		var respBuff bytes.Buffer
+		respBuff.ReadFrom(resp.Body)
+		log.Info("<RestActionNode> Response:",respBuff.String())
+	}
+
 	log.Infof(node.flowOpCtx.FlowId+"<RestActionNode> Done . Name = %s,Status = %s", node.meta.Label,resp.Status)
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }
