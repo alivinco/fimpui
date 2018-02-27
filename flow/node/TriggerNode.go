@@ -21,6 +21,7 @@ type TriggerNode struct {
 type TriggerConfig struct {
 	Timeout int64 // in seconds
 	ValueFilter model.Variable
+	InputVariableType string
 	IsValueFilterEnabled bool
 }
 

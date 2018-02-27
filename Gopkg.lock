@@ -15,21 +15,25 @@
   version = "v0.18.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/ChrisTrenkamp/goxpath"
   packages = [
     ".",
     "internal/execxp",
-    "internal/lexer",
-    "internal/parser",
-    "internal/parser/findutil",
-    "internal/parser/intfns",
-    "internal/parser/pathexpr",
-    "internal/xconst",
+    "internal/execxp/findutil",
+    "internal/execxp/intfns",
     "internal/xsort",
-    "tree"
+    "lexer",
+    "parser",
+    "parser/pathexpr",
+    "tree",
+    "tree/xmltree",
+    "tree/xmltree/xmlbuilder",
+    "tree/xmltree/xmlele",
+    "tree/xmltree/xmlnode",
+    "xconst"
   ]
-  revision = "2ad3b31cf4a21db70fc0cacd0e0120eaae566f98"
-  version = "v1.0-alpha3"
+  revision = "c385f95c6022e7756e91beac5f5510872f7dcb7d"
 
 [[projects]]
   name = "github.com/Sirupsen/logrus"
@@ -98,13 +102,13 @@
   version = "v3.1.0"
 
 [[projects]]
+  branch = "master"
   name = "github.com/eclipse/paho.mqtt.golang"
   packages = [
     ".",
     "packets"
   ]
-  revision = "aff15770515e3c57fc6109da73d42b0d46f7f483"
-  version = "v1.1.0"
+  revision = "b01d90bf326f7cf67915b70d48140961284e5c01"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -225,7 +229,7 @@
     "acme/autocert",
     "ssh/terminal"
   ]
-  revision = "49796115aa4b964c318aad4f3084fdb41e9aa067"
+  revision = "8c653846df49742c4c85ec37e5d9f8d3ba657895"
 
 [[projects]]
   branch = "master"
@@ -233,6 +237,9 @@
   packages = [
     "context",
     "context/ctxhttp",
+    "html",
+    "html/atom",
+    "html/charset",
     "http2",
     "http2/hpack",
     "idna",
@@ -254,7 +261,7 @@
     "jws",
     "jwt"
   ]
-  revision = "543e37812f10c46c622c9575afd7ad22f22a12ba"
+  revision = "d7d64896b5ff88e703f289390e3e98cd010a837e"
 
 [[projects]]
   branch = "master"
@@ -263,19 +270,31 @@
     "unix",
     "windows"
   ]
-  revision = "88d2dcc510266da9f7f8c7f34e1940716cab5f5c"
+  revision = "f6cff0780e542efa0c8e864dc8fa522808f6a598"
 
 [[projects]]
   name = "golang.org/x/text"
   packages = [
     "collate",
     "collate/build",
+    "encoding",
+    "encoding/charmap",
+    "encoding/htmlindex",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/japanese",
+    "encoding/korean",
+    "encoding/simplifiedchinese",
+    "encoding/traditionalchinese",
+    "encoding/unicode",
     "internal/colltab",
     "internal/gen",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "internal/utf8internal",
     "language",
+    "runes",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -327,7 +346,7 @@
     "googleapis/iam/v1",
     "googleapis/rpc/status"
   ]
-  revision = "2b5a72b8730b0b16380010cfe5286c42108d88e7"
+  revision = "2d9486acae19cf9bd0c093d7dc236a323726a9e4"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -368,6 +387,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ee21f8e76dc1c525befe1c70da84bb0e022d3ab84fd5b37e1b52ea95b9a648a0"
+  inputs-digest = "7f5597dc626952e7b215e1dbfa97869d63f4ba80cd25f3fb8a31b6428a0fbc09"
   solver-name = "gps-cdcl"
   solver-version = 1

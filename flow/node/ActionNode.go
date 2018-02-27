@@ -17,8 +17,10 @@ type ActionNode struct {
 type ActionNodeConfig struct {
 	DefaultValue model.Variable
 	VariableName string
+	VariableType string
 	IsVariableGlobal bool
 	Props fimpgo.Props
+	RegisterAsVirtualService bool
 }
 
 func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
@@ -46,7 +48,11 @@ func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	log.Info(node.flowOpCtx.FlowId+"<ActionNode> Executing ActionNode . Name = ", node.meta.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.meta.ServiceInterface, Service: node.meta.Service,Properties:node.config.Props}
 	if node.config.VariableName != "" {
-		variable,err := node.ctx.GetVariable(node.config.VariableName,node.flowOpCtx.FlowId)
+		flowId := node.flowOpCtx.FlowId
+		if node.config.IsVariableGlobal {
+			flowId = "global"
+		}
+		variable,err := node.ctx.GetVariable(node.config.VariableName,flowId)
 		if err != nil {
 			log.Error(node.flowOpCtx.FlowId+"<ActionNode> Can't get variable . Error:",err)
 			return nil , err

@@ -3,7 +3,7 @@
 # Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
 # for detailed Gopkg.toml documentation.
 #
-# required = ["github.com/user/thing/cmd/thing"]
+required = ["github.com/eclipse/paho.mqtt.golang"]
 # ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
 #
 # [[constraint]]
@@ -106,4 +106,9 @@
 
 [[constraint]]
   name = "github.com/ChrisTrenkamp/goxpath"
-  version = "1.0.0-alpha3"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/eclipse/paho.mqtt.golang"
+  branch = "master"
+

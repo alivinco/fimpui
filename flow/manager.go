@@ -15,6 +15,7 @@ import (
 	"os"
 	"strings"
 	"github.com/alivinco/fimpui/flow/node"
+	"github.com/mitchellh/mapstructure"
 )
 
 type Manager struct {
@@ -245,24 +246,60 @@ func (mg *Manager) SendInclusionReport(id string) {
 
 	for i := range flow.Nodes {
 		if flow.Nodes[i].IsStartNode() {
-			service := fimptype.Service{}
-			service.Name = flow.Nodes[i].GetMetaNode().Service
-			service.Alias = flow.Nodes[i].GetMetaNode().Label
-			service.Enabled = true
-			address := strings.Replace( flow.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
-			address = strings.Replace( address,"pt:j1/mt:evt","",-1)
-			service.Address = address
-			service.Groups = []string{string(flow.Nodes[i].GetMetaNode().Id)}
-			report.Groups = append(report.Groups,string(flow.Nodes[i].GetMetaNode().Id))
-			intf := fimptype.Interface{}
-			intf.Type = "in"
-			intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
-			intf.ValueType = "bool"
-			intf.Version = "1"
-			service.Interfaces = []fimptype.Interface{intf}
-			service.Props = map[string]interface{}{}
-			service.Tags = []string{}
-			services = append(services,service)
+			var config node.TriggerConfig
+			err := mapstructure.Decode(flow.Nodes[i].GetMetaNode().Config,&config)
+			if err==nil {
+				service := fimptype.Service{}
+				service.Name = flow.Nodes[i].GetMetaNode().Service
+				service.Alias = flow.Nodes[i].GetMetaNode().Label
+				service.Enabled = true
+				address := strings.Replace( flow.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
+				address = strings.Replace( address,"pt:j1/mt:evt","",-1)
+				service.Address = address
+				service.Groups = []string{string(flow.Nodes[i].GetMetaNode().Id)}
+				report.Groups = append(report.Groups,string(flow.Nodes[i].GetMetaNode().Id))
+				intf := fimptype.Interface{}
+				intf.Type = "in"
+				intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
+				intf.ValueType = config.InputVariableType
+				intf.Version = "1"
+				service.Interfaces = []fimptype.Interface{intf}
+				service.Props = map[string]interface{}{}
+				service.Tags = []string{}
+				services = append(services,service)
+			}else {
+			log.Error("<FlMan> Fail to register trigger.Error ",err)
+			}
+		}
+		if flow.Nodes[i].GetMetaNode().Type == "action" {
+			//config,ok := flow.Nodes[i].GetMetaNode().Config.(node.ActionNodeConfig)
+			config := node.ActionNodeConfig{}
+			err := mapstructure.Decode(flow.Nodes[i].GetMetaNode().Config,&config)
+			if err==nil {
+				if config.RegisterAsVirtualService {
+					service := fimptype.Service{}
+					service.Name = flow.Nodes[i].GetMetaNode().Service
+					service.Alias = flow.Nodes[i].GetMetaNode().Label
+					service.Enabled = true
+					address := strings.Replace( flow.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
+					address = strings.Replace( address,"pt:j1/mt:evt","",-1)
+					service.Address = address
+					service.Groups = []string{string(flow.Nodes[i].GetMetaNode().Id)}
+					report.Groups = append(report.Groups,string(flow.Nodes[i].GetMetaNode().Id))
+					intf := fimptype.Interface{}
+					intf.Type = "out"
+					intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
+					intf.ValueType = config.VariableType
+					intf.Version = "1"
+					service.Interfaces = []fimptype.Interface{intf}
+					service.Props = map[string]interface{}{}
+					service.Tags = []string{}
+					services = append(services,service)
+				}
+
+			}else {
+				log.Error("<FlMan> Fail to register action .Error  ",err)
+			}
 		}
 
 	}

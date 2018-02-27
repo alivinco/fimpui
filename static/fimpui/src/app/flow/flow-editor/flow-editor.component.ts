@@ -414,7 +414,7 @@ findInputSocketPosition(htmlElement):any {
         }
         break;
       case "action":
-        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{}};
+        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{},"RegisterAsVirtualService":false};
         node.Config["DefaultValue"] = {"Value":"","ValueType":""};
         if (node.Ui.nodeType) {
           switch (node.Ui.nodeType) {
@@ -429,7 +429,8 @@ findInputSocketPosition(htmlElement):any {
         }
         break;
       case "rest_action":
-        node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":true,"Headers":{}};
+        node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":false,
+          "Headers":[{"Name":"Content-type","Value":"application/json"}],"ResponseMapping":[]};
         break;
       case "loop":
         node.Config = {};
