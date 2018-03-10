@@ -2,7 +2,7 @@
   padding: 20px;
   min-height: 100%;
 }
-  
+
 
 .example-card {
   width: 700px;
@@ -40,7 +40,7 @@
   top:-15px;
   left:70px;
   bottom:inherit;
-}  
+}
 
 .socket-error {
   background: #e62727;
@@ -125,5 +125,5 @@ md-chip {
 }
 
 .node-editor-dialog {
-  max-width: 600px;
+  max-width: 800px;
 }

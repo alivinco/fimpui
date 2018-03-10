@@ -112,3 +112,7 @@ required = ["github.com/eclipse/paho.mqtt.golang"]
   name = "github.com/eclipse/paho.mqtt.golang"
   branch = "master"
 
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/oliveagle/jsonpath"

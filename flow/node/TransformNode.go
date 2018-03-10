@@ -14,14 +14,24 @@ type TransformNode struct {
 	transport *fimpgo.MqttTransport
 }
 
-type TransformNodeConfig struct {
-	Description string
-	IsVariableGlobal bool                    // true - update global variable ; false - update local variable
-	Operation string // type of transform operation , flip , add , subtract , multiply , divide , map , to_bool
-	RValue model.Variable // Constant Right variable value .
-	RVariableName string // Right variable name , if empty , RValue will be used instead
- 	LVariableName string  // Update input message if LVariable is empty
+type ValueMappingRecord struct {
+	LValue model.Variable
+	RValue model.Variable
+}
 
+type TransformNodeConfig struct {
+	TargetVariableName string  // Variable
+	IsTargetVariableGlobal bool
+	TransformType string       // map , calc
+	IsRVariableGlobal bool                    // true - update global variable ; false - update local variable
+	IsLVariableGlobal bool                    // true - update global variable ; false - update local variable
+	Operation string 			// type of transform operation , flip , add , subtract , multiply , divide , to_bool
+	RType     string            // var , const
+	RValue model.Variable 		// Constant Right variable value .
+	RVariableName string 		// Right variable name , if empty , RValue will be used instead
+ 	LVariableName string  		// Update input message if LVariable is empty
+ 	ValueMapping []ValueMappingRecord // ["LValue":1,"RValue":"mode-1"]
+ 	//value mapping
 }
 
 func NewTransformNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
@@ -50,6 +60,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	// There are 2 possible destinations for LVariable : inputMessage , variable from context
 	var lValue model.Variable
 	var rValue model.Variable
+	var result model.Variable
 	var err error
 
 	if node.nodeConfig.LVariableName == "" {
@@ -58,7 +69,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		lValue.ValueType = msg.Payload.ValueType
 	} else {
 		// Use variable
-		if node.nodeConfig.IsVariableGlobal {
+		if node.nodeConfig.IsLVariableGlobal {
 			lValue,err = node.ctx.GetVariable(node.nodeConfig.LVariableName,"global")
 		}else {
 			lValue,err = node.ctx.GetVariable(node.nodeConfig.LVariableName,node.flowOpCtx.FlowId)
@@ -69,21 +80,22 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		return nil , err
 	}
 
-
-	if node.nodeConfig.RVariableName != "" {
-		// Use variable
-		if node.nodeConfig.IsVariableGlobal {
-			rValue,err = node.ctx.GetVariable(node.nodeConfig.RVariableName,"global")
-		}else {
-			rValue,err = node.ctx.GetVariable(node.nodeConfig.RVariableName,node.flowOpCtx.FlowId)
+    if node.nodeConfig.RType == "var" {
+		if node.nodeConfig.RVariableName == "" {
+			rValue.Value = msg.Payload.Value
+			rValue.ValueType = msg.Payload.ValueType
+		}else{
+			// Use variable
+			if node.nodeConfig.IsRVariableGlobal {
+				rValue,err = node.ctx.GetVariable(node.nodeConfig.RVariableName,"global")
+			}else {
+				rValue,err = node.ctx.GetVariable(node.nodeConfig.RVariableName,node.flowOpCtx.FlowId)
+			}
 		}
-
-	}else if node.nodeConfig.RValue.ValueType != "" {
-		rValue = node.nodeConfig.RValue
 	}else {
-		rValue.Value = msg.Payload.Value
-		rValue.ValueType = msg.Payload.ValueType
+		rValue = node.nodeConfig.RValue
 	}
+
 
 	if err != nil {
 		return nil , err
@@ -95,7 +107,8 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			if lValue.ValueType == "bool" {
 				val,ok := rValue.Value.(bool)
 				if ok {
-					lValue.Value = !val
+					result.Value = !val
+					result.ValueType = rValue.ValueType
 				}else {
 					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not bool. Has to bool")
 				}
@@ -104,43 +117,54 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			}
 		case "to_bool":
 			if lValue.IsNumber() {
-				val,err := rValue.ToNumber()
+				val,err := lValue.ToNumber()
 				if err == nil {
 					if val == 0 {
-						lValue.Value = false
+						result.Value = false
 					} else {
-						lValue.Value = true
+						result.Value = true
 					}
-					lValue.ValueType = "bool"
+					result.ValueType = "bool"
 				}else {
 					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
 				}
 			}else {
 				log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be converted into bool")
 			}
+		case "map":
+			for i := range node.nodeConfig.ValueMapping {
+				if rValue.ValueType == node.nodeConfig.ValueMapping[i].LValue.ValueType {
+					if lValue.Value == node.nodeConfig.ValueMapping[i].LValue.Value {
+						result = node.nodeConfig.ValueMapping[i].RValue
+						break
+					}
+				}
+			}
 		case "add","subtract","multiply","divide":
 			if lValue.IsNumber(){
 				rval,err := rValue.ToNumber()
 				lval,err := lValue.ToNumber()
-				var result float64
+				log.Warn(node.flowOpCtx.FlowId+"<Transf> RValue ",rval)
+				var calcResult float64
 				if err == nil {
 					switch node.nodeConfig.Operation {
 					case "add":
-						result = lval + rval
+						calcResult = lval + rval
 					case "subtract":
-						result = lval - rval
+						calcResult = lval - rval
 					case "multiply":
-						result = lval * rval
+						calcResult = lval * rval
 					case "divide":
-						result = lval / rval
+						calcResult = lval / rval
 					default:
 						log.Warn(node.flowOpCtx.FlowId+"<Transf> Unknown arithmetic operator")
 					}
-					if lValue.ValueType == "float" {
-						lValue.Value = result
+					if rValue.ValueType == "float" {
+						result.Value = calcResult
 					}else {
-						lValue.Value = int64(result)
+						result.Value = int64(calcResult)
 					}
+					result.ValueType = lValue.ValueType
 
 				}else {
 					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
@@ -152,17 +176,17 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}
 	}
 
-	if node.nodeConfig.LVariableName == "" {
+	if node.nodeConfig.TargetVariableName == "" {
 		// Update input message
-		msg.Payload.Value = lValue.Value
-		msg.Payload.ValueType = lValue.ValueType
+		msg.Payload.Value = result.Value
+		msg.Payload.ValueType = result.ValueType
 	}else {
 		// Save value into variable
 		// Save default value from node config to variable
-		if node.nodeConfig.IsVariableGlobal {
-				node.ctx.SetVariable(node.nodeConfig.LVariableName, lValue.ValueType, lValue.ValueType, node.nodeConfig.Description, "global", false)
+		if node.nodeConfig.IsTargetVariableGlobal {
+			    node.ctx.SetVariable(node.nodeConfig.TargetVariableName, result.ValueType, result.Value, "", "global", false)
 		} else {
-				node.ctx.SetVariable(node.nodeConfig.LVariableName, lValue.ValueType, lValue.ValueType, node.nodeConfig.Description, node.flowOpCtx.FlowId, false)
+				node.ctx.SetVariable(node.nodeConfig.TargetVariableName, result.ValueType, result.Value, "", node.flowOpCtx.FlowId, false)
 		}
 
 	}

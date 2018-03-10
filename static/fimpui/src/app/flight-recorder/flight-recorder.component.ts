@@ -12,6 +12,8 @@ export class FlightRecorderComponent implements OnInit {
   private reportLogFiles:string[]=[];
   private reportLogMaxSize:number = 0;
   private hostAlias:string = localStorage.getItem("hostAlias") ;
+  private cmdResult:any;
+  private cmdLog:string[]=[];
   constructor(private http : Http,private configs:ConfigsService) { }
 
   ngOnInit() {
@@ -25,19 +27,54 @@ export class FlightRecorderComponent implements OnInit {
     let params = new URLSearchParams();
     params.set('hostAlias', hostAlias);
      this.http
-      .get('/fimp/fr/upload-log-snapshot',{search:params})
+      .get(BACKEND_ROOT+'/fimp/fr/upload-log-snapshot',{search:params})
       .map(function(res: Response){
         let body = res.json();
         //console.log(body.Version);
         return body;
       }).subscribe ((result) => {
          this.reportLogFiles = result;
-        
+
       });
   }
+
+  uploadFileToCloud(hostAlias,filePath) {
+    localStorage.setItem("hostAlias",hostAlias)
+    localStorage.setItem("fileName",filePath)
+    let params = new URLSearchParams();
+    params.set('hostAlias', hostAlias);
+    params.set('fileName', filePath);
+    this.http
+      .get(BACKEND_ROOT+'/fimp/api/fr/upload-file',{search:params})
+      .map(function(res: Response){
+        let body = res.json();
+        //console.log(body.Version);
+        return body;
+      }).subscribe ((result) => {
+      this.reportLogFiles = result;
+
+    });
+  }
+
+  runCommand(cmd) {
+    let params = new URLSearchParams();
+    params.set('cmd', cmd);
+    this.cmdLog.push(cmd)
+    this.http
+      .get(BACKEND_ROOT+'/fimp/api/fr/run-cmd',{search:params})
+      .map(function(res: Response){
+        let body = res.json();
+        //console.log(body.Version);
+        return body;
+      }).subscribe ((result) => {
+      this.cmdResult = result;
+
+    });
+  }
+
   loadSystemConfigs() {
      console.log("Loading system info")
-     
+
      this.http
       .get(BACKEND_ROOT+'/fimp/api/configs')
       .map(function(res: Response){
@@ -48,7 +85,7 @@ export class FlightRecorderComponent implements OnInit {
          console.log(result.report_log_files);
          this.reportLogFiles = result.report_log_files;
          this.reportLogMaxSize = result.report_log_size_limit;
-         
+
       });
   }
 }

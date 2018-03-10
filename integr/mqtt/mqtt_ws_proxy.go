@@ -26,6 +26,11 @@ type WsUpgrader struct {
 }
 
 func (wu *WsUpgrader) Upgrade(c echo.Context) error {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("!!!!!!!!!!! Mqtt WS proxy (Upgrade) crashed with panic!!!!!!!!!!!!!!!")
+		}
+	}()
 	ws, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		log.Error("<MqWsProxy> Can't upgrade . Error:", err)

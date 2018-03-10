@@ -17,115 +17,9 @@ export class FlowNodesComponent implements OnInit {
 
   ngOnInit() {
   }
-  
-}
-
-@Component({
-  selector: 'action-node',
-  templateUrl: './action-node.html',
-  styleUrls: ['./flow-nodes.component.css']
-})
-export class ActionNodeComponent implements OnInit {
-  @Input() node :MetaNode;
-  @Input() nodes:MetaNode[];
-  @Input() flowId:string;
-  localVars:any;
-  globalVars:any;
-  complexValueAsString:any; //string representation of node.Config.DefaultValue.Value
-  propsAsString:any;
-  constructor(public dialog: MatDialog,private http : Http) { 
-    this.loadContext();
-   }
-
-  ngOnInit() { 
-    // backword compatability
-    if (this.node.Config.VariableName=="undefined"){
-      this.node["DefaultValue"] = {"Value":"","ValueType":""};
-      this.node["VariableName"] = "";
-      this.node["IsVariableGlobal"] = false;
-    }
-    try{
-      this.complexValueAsString = JSON.stringify(this.node.Config.DefaultValue.Value);
-    }catch (err){
-      console.log("Can't stringify complex default value")
-    }
-    try{
-      this.propsAsString = JSON.stringify(this.node.Config.Props);
-    }catch (err){
-      console.log("Can't stringify props ")
-    }
-    
-  }
-  updateComplexValue(){
-    this.node.Config.DefaultValue.Value = JSON.parse(this.complexValueAsString)
-  }
-  updateProps(){
-    this.node.Config.Props = JSON.parse(this.propsAsString)
-  }
-
-  serviceLookupDialog(nodeId:string) {
-    let dialogRef = this.dialog.open(ServiceLookupDialog,{
-            width: '500px',
-            data:"in"
-          });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result)
-        this.nodes.forEach(element => {
-           
-            if (element.Id==nodeId) {
-              element.Service = result.serviceName
-              if(element.Label==""||element.Label==undefined){
-                element.Label =  result.serviceAlias + " at "+result.locationAlias
-              }
-              element.ServiceInterface = result.intfMsgType
-              element.Address = result.intfAddress
-              element.Config.DefaultValue.ValueType =  result.intfValueType
-
-            }
-        });
-    });      
-  }
-
-  loadContext() {
-    if (this.flowId) {
-       this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flowId)
-      .map(function(res: Response){
-        let body = res.json();
-        return body;
-      }).subscribe ((result) => {
-         this.localVars = [];
-         for (var key in result){
-            this.node
-            this.localVars.push(result[key].Name);
-         }
-         
-      });
-    }
-   
-    
-    this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/global')
-      .map(function(res: Response){
-        let body = res.json();
-        return body;
-      }).subscribe ((result) => {
-        this.globalVars = [];
-        for (var key in result){
-            this.globalVars.push(result[key].Name);
-         }
-      });  
-  }  
-  variableSelected(event:any,config:any,isGlobal:boolean){
-    // if (config.VariableName.indexOf("__global__")!=-1) {
-    //   config.VariableName = config.VariableName.replace("__global__","");
-    //   config.VariableIsGlobal = true;
-    // }
-    config.IsVariableGlobal = isGlobal;
-
-  }
 
 }
+
 
 @Component({
   selector: 'set-variable-node',
@@ -136,33 +30,11 @@ export class SetVariableNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
+  ngOnInit() {
   }
 }
 
-@Component({
-  selector: 'if-node',
-  templateUrl: './if-node.html',
-  styleUrls: ['./flow-nodes.component.css']
-})
-export class IfNodeComponent implements OnInit {
-  @Input() node :MetaNode;
-  @Input() nodes:MetaNode[];
-  constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
-  }
-  addIfExpression(node:MetaNode){ 
-    let rightVariable = {};
-    let expr = {};
-    expr["Operand"] = "eq";
-    expr["LeftVariableName"] = "";
-    rightVariable["Value"] = 100;
-    rightVariable["ValueType"] = "int";
-    expr["RightVariable"] = rightVariable
-    expr["BooleanOperator"] = "";
-    node.Config["Expression"].push(expr);
-  } 
-}
+
 
 @Component({
   selector: 'receive-node',
@@ -174,7 +46,7 @@ export class ReceiveNodeComponent implements OnInit {
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
 
-  ngOnInit() { 
+  ngOnInit() {
   }
   serviceLookupDialog(nodeId:string) {
     let dialogRef = this.dialog.open(ServiceLookupDialog,{
@@ -195,7 +67,7 @@ export class ReceiveNodeComponent implements OnInit {
               element.Config.ValueFilter.ValueType =  result.intfValueType
             }
         });
-    });      
+    });
   }
 }
 
@@ -224,7 +96,7 @@ export class TimeTriggerNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
+  ngOnInit() {
   }
 }
 
@@ -238,7 +110,7 @@ export class VincTriggerNodeComponent implements OnInit {
   @Input() nodes:MetaNode[];
   @Input() flowId:string;
   constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
+  ngOnInit() {
   }
 }
 
@@ -252,7 +124,7 @@ export class VincActionNodeComponent implements OnInit {
   @Input() nodes:MetaNode[];
   shortcuts:any[];
   constructor(public dialog: MatDialog , private http : Http) { }
-  ngOnInit() { 
+  ngOnInit() {
     this.loadShortcuts()
   }
   loadShortcuts() {
@@ -263,8 +135,8 @@ export class VincActionNodeComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
         this.shortcuts = result
-      });  
-  } 
+      });
+  }
 
 }
 
@@ -278,8 +150,8 @@ export class LoopNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
-    
+  ngOnInit() {
+
   }
 }
 
@@ -292,7 +164,7 @@ export class WaitNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
   constructor(public dialog: MatDialog) { }
-  ngOnInit() { 
+  ngOnInit() {
   }
 }
 
@@ -310,15 +182,15 @@ export class TriggerNodeComponent implements OnInit {
   flowPublishAddress : string;
   constructor(public dialog: MatDialog) { }
 
-  ngOnInit() { 
-    
-    // backword compatability 
+  ngOnInit() {
+
+    // backword compatability
     if (this.node.Config == null) {
       this.node.Config = {};
     }
     if (this.node.Config.Timeout == null) {
       this.node.Config["Timeout"] = 0;
-      this.node.Config["ValueFilter"] = {"Value":"","ValueType":""}; 
+      this.node.Config["ValueFilter"] = {"Value":"","ValueType":""};
     }
   }
   runFlow(node:MetaNode) {
@@ -330,7 +202,7 @@ export class TriggerNodeComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       // this.flow = result;
       // this.loadContext();
-    });      
+    });
   }
 
   onPublishServiceChange(){
@@ -341,9 +213,9 @@ export class TriggerNodeComponent implements OnInit {
         msgType = "evt";
       }
     }catch(err){
-      
+
     }
-    
+
     this.flowPublishAddress = "pt:j1/mt:"+msgType+"/rt:dev/rn:flow/ad:1/sv:"+this.flowPublishService+"/ad:"+this.flowId;
   }
   publishFlowAsVirtualDevice(){
@@ -370,6 +242,6 @@ export class TriggerNodeComponent implements OnInit {
               element.Config.ValueFilter.ValueType =  result.intfValueType
             }
         });
-    });      
+    });
   }
 }

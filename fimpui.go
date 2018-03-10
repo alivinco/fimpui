@@ -28,6 +28,7 @@ import (
 	"github.com/alivinco/fimpui/integr/zwave"
 	"github.com/alivinco/fimpui/statsdb"
 	//_ "net/http/pprof"
+	"os/exec"
 )
 
 type SystemInfo struct {
@@ -57,6 +58,11 @@ func SetupLog(logfile string, level string) {
 }
 
 func startWsCoreProxy(backendUrl string) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error("!!!!!!!!!!!!!WsCoreProxy crashed with panic!!!!!!!!!!!", r)
+		}
+	}()
 	u, _ := url.Parse(backendUrl)
 	http.Handle("/", http.FileServer(http.Dir("static/fhcore")))
 	http.Handle("/ws", websocketproxy.ProxyHandler(u))
@@ -177,6 +183,33 @@ func main() {
 		uploadStatus := objectStorage.UploadLogSnapshot(configs.ReportLogFiles, hostAlias, configs.ReportLogSizeLimit)
 		return c.JSON(http.StatusOK, uploadStatus)
 	})
+	e.GET("/fimp/api/fr/upload-file", func(c echo.Context) error {
+
+		files := []string {c.QueryParam("fileName")}
+		hostAlias := c.QueryParam("hostAlias")
+		log.Info(hostAlias)
+		if hostAlias == "" {
+			hostAlias = "unknown"
+		}
+		uploadStatus := objectStorage.UploadLogSnapshot(files, hostAlias, 0)
+		return c.JSON(http.StatusOK, uploadStatus)
+	})
+
+	e.GET("/fimp/api/fr/run-cmd", func(c echo.Context) error {
+
+		cmd := c.QueryParam("cmd")
+		out, err := exec.Command("bash", "-c", cmd).Output()
+		result := map[string]string{"result":"","error":""}
+
+		if err != nil {
+			log.Error(err)
+			result["result"] = err.Error()
+		}else {
+			result["result"] = string(out)
+		}
+		return c.JSON(http.StatusOK, result)
+	})
+
 	e.POST("/fimp/api/zwave/products/upload-to-cloud", func(c echo.Context) error {
 		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
 		if err != nil {
@@ -622,7 +655,7 @@ func main() {
 	e.File("/fimp/systems-man", index)
 	e.File("/fimp/flow/context", index)
 	e.File("/fimp/flow/overview", index)
-	e.File("/fimp/flow/flow-editor/*", index)
+	e.File("/fimp/flow/flow/editor/*", index)
 	e.File("/fimp/flight-recorder", index)
 	e.File("/fimp/thing-view/*", index)
 	e.File("/fimp/registry/things/*", index)

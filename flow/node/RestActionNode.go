@@ -7,10 +7,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/ChrisTrenkamp/goxpath"
 	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/oliveagle/jsonpath"
 	"net/http"
 	"text/template"
 	"bytes"
+	"encoding/json"
 
+	"io/ioutil"
 )
 type RestActionNode struct {
 	BaseNode
@@ -162,6 +165,21 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 				log.Error("<RestActionNode> Can't parse XML :",err)
 			}
 			//fmt.Println(res)
+		}else if node.config.ResponseMapping[i].PathType == "json" {
+			var jData interface{}
+			bData ,err := ioutil.ReadAll(resp.Body)
+			if err == nil {
+				json.Unmarshal([]byte(bData), &jData)
+				varValue, err := jsonpath.JsonPathLookup(jData, node.config.ResponseMapping[i].Path)
+				if err == nil {
+					flowId := node.flowOpCtx.FlowId
+					if node.config.ResponseMapping[i].IsVariableGlobal {
+						flowId = "global"
+					}
+					node.ctx.SetVariable(node.config.ResponseMapping[i].TargetVariableName,node.config.ResponseMapping[i].TargetVariableType,varValue,"",flowId,false )
+
+				}
+			}
 		}
 
 	}
