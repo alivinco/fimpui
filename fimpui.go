@@ -29,6 +29,7 @@ import (
 	"github.com/alivinco/fimpui/statsdb"
 	//_ "net/http/pprof"
 	"os/exec"
+	"github.com/alivinco/fimpui/flow/api"
 )
 
 type SystemInfo struct {
@@ -164,6 +165,9 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+
+	api.NewContextApi(flowManager.GetGlobalContext(),e)
+
 	e.GET("/fimp/system-info", func(c echo.Context) error {
 
 		return c.JSON(http.StatusOK, sysInfo)
@@ -598,18 +602,6 @@ func main() {
 		return c.JSON(http.StatusOK, resp)
 	})
 
-	e.GET("/fimp/flow/context/:flowid", func(c echo.Context) error {
-		id := c.Param("flowid")
-		if id != "-"{
-			ctx := flowManager.GetGlobalContext().GetRecords(id)
-			return c.JSON(http.StatusOK, ctx)
-		}
-		var ctx []flowmodel.ContextRecord
-		return c.JSON(http.StatusOK, ctx)
-
-
-	})
-
 	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {
 		id := c.Param("id")
 		body, err := ioutil.ReadAll(c.Request().Body)
@@ -663,6 +655,7 @@ func main() {
 	e.File("/fimp/registry/locations", index)
 	e.File("/fimp/registry/admin", index)
 	e.Static("/fimp/static", "static/fimpui/dist/")
+
 	e.Logger.Debug(e.Start(":8081"))
 	log.Info("Exiting the app")
 

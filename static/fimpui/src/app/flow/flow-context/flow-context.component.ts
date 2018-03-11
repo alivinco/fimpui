@@ -10,8 +10,12 @@ import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
 import { BACKEND_ROOT } from "app/globals";
+import {ThingEditorDialog} from "../../registry/things/thing-editor.component";
+import {Thing} from "../../registry/model";
+import {MatDialog} from "@angular/material";
+import {RecordEditorDialog} from "./record-editor-dialog.component";
 
-export class Context {
+export class TableContextRec {
   FlowId : string ;
   Name :string;
   Description:string;
@@ -28,18 +32,51 @@ export class Context {
 export class FlowContextComponent implements OnInit {
   displayedColumns = ['flowId','name','description','valueType','value','updatedAt','action'];
   dataSource: FlowContextDataSource | null;
-  constructor(private http : Http) { 
+  constructor(private http : Http,public dialog: MatDialog) {
   }
   ngOnInit() {
     this.dataSource = new FlowContextDataSource(this.http);
   }
+
+  showRecordEditorDialog(ctxRec:TableContextRec) {
+    let dialogRef = this.dialog.open(RecordEditorDialog,{
+      width: '450px',
+      data:ctxRec
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+      {
+        this.dataSource.getData()
+      }
+    });
+  }
+
+  showAddNewRecordEditorDialog() {
+    var ctxRec = new TableContextRec();
+    ctxRec.FlowId = "global";
+    let dialogRef = this.dialog.open(RecordEditorDialog,{
+      width: '450px',
+      data:ctxRec
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result)
+      {
+        this.dataSource.getData();
+      }
+    });
+  }
+
+  reload() {
+    this.dataSource.getData();
+  }
+
+
 }
 
 
 export class FlowContextDataSource extends DataSource<any> {
-  locations : Location[] = [];
-  locationsObs = new BehaviorSubject<Context[]>([]);
-  
+  ctxRecordsObs = new BehaviorSubject<TableContextRec[]>([]);
+
   constructor(private http : Http) {
     super();
     console.log("Getting context data")
@@ -48,33 +85,33 @@ export class FlowContextDataSource extends DataSource<any> {
 
   getData() {
     this.http
-        .get(BACKEND_ROOT+'/fimp/flow/context/global')
+        .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
         .map((res: Response)=>{
           let result = res.json();
           return this.mapContext(result);
         }).subscribe(result=>{
-          this.locationsObs.next(result);
+          this.ctxRecordsObs.next(result);
         });
 
   }
-  
-  connect(): Observable<Context[]> {
-    return this.locationsObs;
+
+  connect(): Observable<TableContextRec[]> {
+    return this.ctxRecordsObs ;
   }
   disconnect() {}
 
-  mapContext(result:any):Context[] {
-    let locations : Context[] = [];
+  mapContext(result:any):TableContextRec[] {
+    let contexts : TableContextRec[] = [];
     for (var key in result){
-            let loc = new Context();
+            let loc = new TableContextRec();
             loc.FlowId = "global";
             loc.Name = result[key].Name;
-            loc.Description = result[key].Description; 
+            loc.Description = result[key].Description;
             loc.UpdatedAt = result[key].UpdatedAt;
-            loc.Value = result[key].Variable.Value; 
-            loc.ValueType = result[key].Variable.ValueType; 
-            locations.push(loc)
+            loc.Value = result[key].Variable.Value;
+            loc.ValueType = result[key].Variable.ValueType;
+            contexts.push(loc)
      }
-     return locations;     
+     return contexts;
   }
 }

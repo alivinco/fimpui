@@ -25,6 +25,41 @@ func (vrbl * Variable) IsNumber() bool {
 	}
 }
 
+func (vrbl *Variable) IsEqual(var2 *Variable) (bool,error) {
+	if vrbl.ValueType == var2.ValueType {
+		switch vrbl.ValueType {
+		case "string":
+			v1,ok1 := vrbl.Value.(string)
+			v2,ok2 := var2.Value.(string)
+			if ok1 && ok2 {
+				return v1==v2,nil
+			}else {
+				return false , errors.New("Can't cast var to string")
+			}
+		case "int","float":
+			v1,ok1 := vrbl.ToNumber()
+			v2,ok2 := var2.ToNumber()
+			if ok1 == nil && ok2==nil {
+				return v1==v2,nil
+			}else {
+				return false , errors.New("Can't cast var to number")
+			}
+		case "bool":
+			v1,ok1 := vrbl.Value.(bool)
+			v2,ok2 := var2.Value.(bool)
+			if ok1 && ok2 {
+				return v1==v2,nil
+			}else {
+				return false , errors.New("Can't cast var to bool")
+			}
+
+		}
+	}else {
+		return false , errors.New("Types are different")
+	}
+	return false , nil
+}
+
 func (vrbl * Variable)ToNumber()(float64,error) {
 	switch v := vrbl.Value.(type) {
 	case int :
@@ -114,6 +149,19 @@ func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) e
 			}
 			err = b.Put([]byte(rec.Name), data)
 			return err
+		})
+		return err
+	}
+	return nil
+}
+
+func (ctx *Context) DeleteRecord(name string,flowId string,inMemory bool ) error {
+	if inMemory {
+		//ctx.inMemoryStore[flowId] = *rec
+	} else {
+		err := ctx.db.Update(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte(flowId))
+			return b.Delete([]byte(name))
 		})
 		return err
 	}

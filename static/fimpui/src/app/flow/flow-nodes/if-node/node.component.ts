@@ -34,7 +34,7 @@ export class IfNodeComponent implements OnInit {
   loadContext() {
     if (this.flowId) {
       this.http
-        .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flowId)
+        .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flowId)
         .map(function(res: Response){
           let body = res.json();
           return body;
@@ -50,7 +50,7 @@ export class IfNodeComponent implements OnInit {
 
 
     this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
       .map(function(res: Response){
         let body = res.json();
         return body;

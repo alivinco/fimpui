@@ -102,78 +102,90 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
     if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber())  {
-		switch node.nodeConfig.Operation {
-		case "flip":
-			if lValue.ValueType == "bool" {
-				val,ok := rValue.Value.(bool)
-				if ok {
-					result.Value = !val
-					result.ValueType = rValue.ValueType
-				}else {
-					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not bool. Has to bool")
-				}
-			}else {
-				log.Warn(node.flowOpCtx.FlowId+"<Transf> Only bool variable can be flipped")
-			}
-		case "to_bool":
-			if lValue.IsNumber() {
-				val,err := lValue.ToNumber()
-				if err == nil {
-					if val == 0 {
-						result.Value = false
-					} else {
-						result.Value = true
+
+    	if node.nodeConfig.TransformType == "calc" {
+			switch node.nodeConfig.Operation {
+			case "flip":
+				if lValue.ValueType == "bool" {
+					val,ok := rValue.Value.(bool)
+					if ok {
+						result.Value = !val
+						result.ValueType = rValue.ValueType
+					}else {
+						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not bool. Has to bool")
 					}
-					result.ValueType = "bool"
 				}else {
-					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
+					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only bool variable can be flipped")
 				}
-			}else {
-				log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be converted into bool")
+			case "to_bool":
+				if lValue.IsNumber() {
+					val,err := lValue.ToNumber()
+					if err == nil {
+						if val == 0 {
+							result.Value = false
+						} else {
+							result.Value = true
+						}
+						result.ValueType = "bool"
+					}else {
+						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
+					}
+				}else {
+					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be converted into bool")
+				}
+			case "add","subtract","multiply","divide":
+				if lValue.IsNumber(){
+					rval,err := rValue.ToNumber()
+					lval,err := lValue.ToNumber()
+					var calcResult float64
+					if err == nil {
+						switch node.nodeConfig.Operation {
+						case "add":
+							calcResult = lval + rval
+						case "subtract":
+							calcResult = lval - rval
+						case "multiply":
+							calcResult = lval * rval
+						case "divide":
+							calcResult = lval / rval
+						default:
+							log.Warn(node.flowOpCtx.FlowId+"<Transf> Unknown arithmetic operator")
+						}
+						if rValue.ValueType == "float" {
+							result.Value = calcResult
+						}else {
+							result.Value = int64(calcResult)
+						}
+						result.ValueType = lValue.ValueType
+
+					}else {
+						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
+					}
+				}else {
+					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be used for arithmetic operations")
+				}
+
 			}
-		case "map":
+		}else if node.nodeConfig.TransformType == "map" {
 			for i := range node.nodeConfig.ValueMapping {
-				if rValue.ValueType == node.nodeConfig.ValueMapping[i].LValue.ValueType {
-					if lValue.Value == node.nodeConfig.ValueMapping[i].LValue.Value {
+				log.Debug(node.flowOpCtx.FlowId+"<Transf> record Value ",node.nodeConfig.ValueMapping[i].LValue.Value)
+				log.Debug(node.flowOpCtx.FlowId+"<Transf> record input Value = ",lValue.Value )
+				if lValue.ValueType == node.nodeConfig.ValueMapping[i].LValue.ValueType {
+					varsAreEqual , err :=  lValue.IsEqual(&node.nodeConfig.ValueMapping[i].LValue)
+					if err != nil {
+						log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while comparing map vars : ",err)
+					}
+					if varsAreEqual {
 						result = node.nodeConfig.ValueMapping[i].RValue
+						log.Debug(node.flowOpCtx.FlowId+"<Transf> Result is set")
 						break
 					}
 				}
 			}
-		case "add","subtract","multiply","divide":
-			if lValue.IsNumber(){
-				rval,err := rValue.ToNumber()
-				lval,err := lValue.ToNumber()
-				log.Warn(node.flowOpCtx.FlowId+"<Transf> RValue ",rval)
-				var calcResult float64
-				if err == nil {
-					switch node.nodeConfig.Operation {
-					case "add":
-						calcResult = lval + rval
-					case "subtract":
-						calcResult = lval - rval
-					case "multiply":
-						calcResult = lval * rval
-					case "divide":
-						calcResult = lval / rval
-					default:
-						log.Warn(node.flowOpCtx.FlowId+"<Transf> Unknown arithmetic operator")
-					}
-					if rValue.ValueType == "float" {
-						result.Value = calcResult
-					}else {
-						result.Value = int64(calcResult)
-					}
-					result.ValueType = lValue.ValueType
-
-				}else {
-					log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
-				}
-			}else {
-				log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be used for arithmetic operations")
-			}
-
 		}
+
+
+
 	}
 
 	if node.nodeConfig.TargetVariableName == "" {

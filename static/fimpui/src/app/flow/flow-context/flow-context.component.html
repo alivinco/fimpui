@@ -5,14 +5,14 @@
   <br/>
   <div class="table-container mat-elevation-z8">
     <div class="example-header">
-      
+
     </div>
-  
+
     <mat-table #table [dataSource]="dataSource">
-  
+
       <!--- Note that these columns can be defined in any order.
             The actual rendered columns are set as a property on the row definition" -->
-    
+
       <!-- Progress Column -->
       <ng-container cdkColumnDef="flowId">
         <mat-header-cell  *cdkHeaderCellDef> Flow id  </mat-header-cell>
@@ -40,13 +40,21 @@
         </ng-container>
       <ng-container cdkColumnDef="action">
         <mat-header-cell *cdkHeaderCellDef> Action </mat-header-cell>
-        <mat-cell *cdkCellDef="let row"><mat-chip-list> 
-          <mat-chip  > Edit </mat-chip>
+        <mat-cell *cdkCellDef="let row"><mat-chip-list>
+          <mat-chip (click)="showRecordEditorDialog(row)" > Edit </mat-chip>
         </mat-chip-list> </mat-cell>
       </ng-container>
-      
+
       <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row *cdkRowDef="let row; columns: displayedColumns;"></mat-row>
     </mat-table>
+    <div style="width:100%;height:60px">&nbsp; </div>
+    <div>
+    <button class="add-button" (click)="showAddNewRecordEditorDialog()" mat-mini-fab>Add</button>
+    <button class="add-button" style="left:70px" (click)="reload()" mat-mini-fab>
+        <mat-icon aria-label="Example icon-button with a heart icon">refresh</mat-icon>
+    </button>
+    </div>
   </div>
-  
+
+

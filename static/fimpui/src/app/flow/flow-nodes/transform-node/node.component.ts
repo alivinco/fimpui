@@ -21,14 +21,14 @@ export class TransformNodeComponent implements OnInit {
   }
   addValueMapping(node:MetaNode){
     let valueMap = {};
-    valueMap["LValue"] = {"ValueType":"string","Value":""};
-    valueMap["RValue"] = {"ValueType":"string","Value":""};
+    valueMap["LValue"] = {"ValueType":"int","Value":0};
+    valueMap["RValue"] = {"ValueType":"int","Value":0};
     node.Config["ValueMapping"].push(valueMap);
   }
   loadContext() {
     if (this.flowId) {
       this.http
-        .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flowId)
+        .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flowId)
         .map(function(res: Response){
           let body = res.json();
           return body;
@@ -44,7 +44,7 @@ export class TransformNodeComponent implements OnInit {
 
 
     this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
       .map(function(res: Response){
         let body = res.json();
         return body;
@@ -54,6 +54,13 @@ export class TransformNodeComponent implements OnInit {
         this.globalVars.push(result[key].Name);
       }
     });
+  }
+
+  deleteMappingRecord(record:any) {
+    var i = this.node.Config.ValueMapping.indexOf(record);
+    if(i != -1) {
+      this.node.Config.ValueMapping.splice(i, 1);
+    }
   }
 
   variableSelected(event:any,config:any){

@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RegistryModule} from 'app/registry/registry.module'
 import { VariableElementComponent} from 'app/flow/flow-nodes/ui-elements/ui-elements.component'
+import { RecordEditorDialog} from "./flow-context/record-editor-dialog.component";
 import { CdkTableModule } from '@angular/cdk/table';
 
 import { MatTableModule,
@@ -85,8 +86,10 @@ import { MatTableModule,
      TransformNodeComponent,
      WaitNodeComponent,
      VincTriggerNodeComponent,
-     VincActionNodeComponent
+     VincActionNodeComponent,
+     RecordEditorDialog
+
   ],
-  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog]
+  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog,RecordEditorDialog]
 })
 export class FlowModule { }

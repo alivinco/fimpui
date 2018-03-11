@@ -121,17 +121,17 @@
       <span [ngSwitch]="vmap.LValue.ValueType">
               <span *ngSwitchCase="'string'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput [(ngModel)]="vmap.LValue.Value" placeholder="value" >
+                      <input matInput [(ngModel)]="vmap.LValue.Value" placeholder="From value" >
                   </mat-form-field>
               </span>
               <span *ngSwitchCase="'int'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput type="number" [(ngModel)]="vmap.LValue.Value" placeholder="value" >
+                      <input matInput type="number" [(ngModel)]="vmap.LValue.Value" placeholder="From value" >
                   </mat-form-field>
               </span>
               <span *ngSwitchCase="'float'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput type="number" [(ngModel)]="vmap.LValue.Value" placeholder="value" >
+                      <input matInput type="number" [(ngModel)]="vmap.LValue.Value" placeholder="From value" >
                   </mat-form-field>
               </span>
 
@@ -160,22 +160,22 @@
       <span [ngSwitch]="vmap.RValue.ValueType">
               <span *ngSwitchCase="'string'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput [(ngModel)]="vmap.RValue.Value" placeholder="value" >
+                      <input matInput [(ngModel)]="vmap.RValue.Value" placeholder="To value" >
                   </mat-form-field>
               </span>
               <span *ngSwitchCase="'int'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput type="number" [(ngModel)]="vmap.RValue.Value" placeholder="value" >
+                      <input matInput type="number" [(ngModel)]="vmap.RValue.Value" placeholder="To value" >
                   </mat-form-field>
               </span>
               <span *ngSwitchCase="'float'">
                   <mat-form-field class="node-transition-field">
-                      <input matInput type="number" [(ngModel)]="vmap.RValue.Value" placeholder="value" >
+                      <input matInput type="number" [(ngModel)]="vmap.RValue.Value" placeholder="To value" >
                   </mat-form-field>
               </span>
 
               <span *ngSwitchCase="'bool'">
-                <mat-radio-group class="example-radio-group" placeholder="value" [(ngModel)]="vmap.RValue.Value">
+                <mat-radio-group class="example-radio-group" placeholder="To value" [(ngModel)]="vmap.RValue.Value">
                   <mat-radio-button class="example-radio-button" [value] = "true">
                     true (On)
                   </mat-radio-button>
@@ -194,6 +194,7 @@
           <mat-option value = "bool">bool</mat-option>
         </mat-select>
       </mat-form-field>
+      <button mat-raised-button (click)="deleteMappingRecord(vmap)" >Delete</button>
     </div>
     <button mat-raised-button (click)="addValueMapping(node)" >Add mapping</button>
   </div>

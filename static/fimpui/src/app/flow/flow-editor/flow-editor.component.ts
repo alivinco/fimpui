@@ -86,7 +86,7 @@ export class FlowEditorComponent implements OnInit {
   }
   loadContext() {
     this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/'+this.flow.Id)
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flow.Id)
       .map(function(res: Response){
         let body = res.json();
         return body;
@@ -99,7 +99,7 @@ export class FlowEditorComponent implements OnInit {
       });
 
     this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
       .map(function(res: Response){
         let body = res.json();
         return body;
@@ -450,7 +450,7 @@ findInputSocketPosition(htmlElement):any {
           "TargetVariableName":"","IsTargetVariableGlobal":false,
           "TransformType":"calc","Rtype":"var","IsRVariableGlobal":false,
           "IsLVariableGlobal":false,
-          "Operation":"add","RValue":{"ValueType":"string","Value":""},"RVariableName":"","LVariableName":"","ValueMapping":[]};
+          "Operation":"add","RValue":{"ValueType":"int","Value":0},"RVariableName":"","LVariableName":"","ValueMapping":[]};
         break;
       case "if":
         node.Config = {};
@@ -699,7 +699,7 @@ export class ContextDialog {
   globalContext : string;
   constructor(public dialogRef: MatDialogRef<ContextDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow,private http : Http) {
      this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/'+data.Id)
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/'+data.Id)
       .map(function(res: Response){
         let body = res.json();
         return body;
@@ -708,7 +708,7 @@ export class ContextDialog {
       });
 
     this.http
-      .get(BACKEND_ROOT+'/fimp/flow/context/global')
+      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
       .map(function(res: Response){
         let body = res.json();
         return body;
