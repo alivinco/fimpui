@@ -4,7 +4,7 @@ import { FimpService} from 'app/fimp/fimp.service';
 import { Observable }    from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 import {Router} from '@angular/router';
-import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message'; 
+import { FimpMessage ,NewFimpMessageFromString } from '../fimp/Message';
 import { Http, Response,URLSearchParams,RequestOptions,Headers }  from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
 import {MatSnackBar} from '@angular/material';
@@ -21,7 +21,7 @@ import {
   styleUrls: ['./zwave-man.component.css']
 })
 export class ZwaveManComponent implements OnInit ,OnDestroy {
-  selectedOption: string; 
+  selectedOption: string;
   nodes : any[];
   zwAdState : string;
   globalNonSecureInclMode : string;
@@ -48,12 +48,12 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       if (fimpMsg.service == "zwave-ad" )
         {
         if(fimpMsg.mtype == "evt.network.all_nodes_report" )
-        { 
+        {
           this.nodes = fimpMsg.val;
           this.loadThingsFromRegistry()
 
           // for(var key in fimpMsg.val){
-          //   this.nodes.push({"id":key,"status":fimpMsg.val[key]}); 
+          //   this.nodes.push({"id":key,"status":fimpMsg.val[key]});
           // }
           this.showProgress(false);
           localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));
@@ -63,7 +63,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
               console.log("Reloading nodes ");
               this.reloadNodes();
             }
-               
+
         }else if (fimpMsg.mtype == "evt.state.report"){
             this.zwAdState = fimpMsg.val;
             if (fimpMsg.val == "NET_UPDATED" || fimpMsg.val == "RUNNING") {
@@ -87,7 +87,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       }
       //this.messages.push("topic:"+msg.topic," payload:"+msg.payload);
     });
-    
+
     // Let's load nodes list from cache otherwise reload nodes from zwave-ad .
     if (localStorage.getItem("zwaveNodesList")==null){
         this.reloadNodes();
@@ -95,7 +95,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         this.nodes = JSON.parse(localStorage.getItem("zwaveNodesList"));
         this.loadThingsFromRegistry();
     }
-    
+
   }
   ngOnDestroy() {
     this.globalSub.unsubscribe();
@@ -106,7 +106,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     }else {
       this.progressBarMode = "determinate";
     }
-  } 
+  }
 
   loadThingsFromRegistry() {
      this.http
@@ -126,7 +126,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
                }
            }
          }
-         localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));         
+         localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));
       });
   }
   requestAllInclusionReports(){
@@ -164,7 +164,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     this.router.navigateByUrl("/timeline");
   }
   updateNetwork(){
-    let msg  = new FimpMessage("zwave-ad","cmd.network.update","null",null,null,null)
+    let msg  = new FimpMessage("zwave-ad","cmd.network.update","string","topology",null,null)
     this.showProgress(true);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
@@ -199,7 +199,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
   addDevice(){
     console.log("Add device")
-   
+
     let dialogRef = this.dialog.open(AddDeviceDialog, {
       height: '400px',
       width: '600px',
@@ -230,14 +230,14 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       let body = res.json();
       return body;
     }).subscribe ((result) => {
-         this.localTemplates = result     
+         this.localTemplates = result
     });
     this.http.get(BACKEND_ROOT+'/fimp/api/zwave/products/list-local-templates?type=cache')
     .map(function(res: Response){
       let body = res.json();
       return body;
     }).subscribe ((result) => {
-         this.localTemplatesCache = result     
+         this.localTemplatesCache = result
     });
   }
   downloadTemplatesFromCloud(){
@@ -258,17 +258,17 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
        console.log("Flow was saved");
     });
   }
-  
+
   openTemplateEditor(templateName:string,templateType :string ) {
     templateName = templateName.replace("zw_","");
     let dialogRef = this.dialog.open(TemplateEditorDialog,{
             // height: '95%',
             width: '95%',
-            data:{"name":templateName,"type":templateType} 
+            data:{"name":templateName,"type":templateType}
           });
     dialogRef.afterClosed().subscribe(result => {
               this.loadLocalTemplates();
-          });       
+          });
   }
 
 }
@@ -286,18 +286,18 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   s2pin : string;
 
   constructor(public dialogRef: MatDialogRef<AddDeviceDialog>,private fimp:FimpService,@Inject(MAT_DIALOG_DATA) public data: any) {
-    
+
     console.log("Dialog constructor Opened");
   }
   ngOnInit(){
     this.messages = [];
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
-      
+
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
       if (fimpMsg.service == "zwave-ad" )
         {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
-        { 
+        {
           this.messages.push("Node added :"+fimpMsg.val.address);
           this.messages.push("Product name :"+fimpMsg.val.product_name);
         } else if (fimpMsg.mtype == "evt.thing.exclusion_report" ){
@@ -324,7 +324,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
 
     if(this.forceInterview) {
       props["template_name"] = "__interview__";
-    } 
+    }
     if(this.forceNonSecure){
       props["force_non_secure"] = "true";
     }
@@ -353,18 +353,18 @@ export class RemoveDeviceDialog implements OnInit, OnDestroy  {
   forceNonSecure : boolean;
 
   constructor(public dialogRef: MatDialogRef<RemoveDeviceDialog>,private fimp:FimpService,@Inject(MAT_DIALOG_DATA) public data: any) {
-    
+
     console.log("Dialog constructor Opened");
   }
   ngOnInit(){
     this.messages = [];
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
-      
+
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
       if (fimpMsg.service == "zwave-ad" )
         {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
-        { 
+        {
           this.messages.push("Node added :"+fimpMsg.val.address);
           this.messages.push("Product name :"+fimpMsg.val.product_name);
         } else if (fimpMsg.mtype == "evt.thing.exclusion_report" ){
@@ -424,7 +424,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
       let body = res.json();
       return body;
     }).subscribe ((result) => {
-         this.template = result;     
+         this.template = result;
          if(this.template.auto_configs == undefined) {
            this.template["auto_configs"] = {"assoc":[],"configs":[]}
          }
@@ -439,11 +439,11 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
          }
          if(this.template.wakeup_interval == undefined){
            this.template.wakeup_interval = this.template.wkup_intv;
-         } 
+         }
          if( this.template["docs_ref"] == undefined){
           this.template["docs_ref"] = "";
          }
-         // Converting json object into string, needed for editor 
+         // Converting json object into string, needed for editor
          this.template.dev_custom.service_descriptor.forEach(element => {
            element.descriptor = JSON.stringify(element.descriptor, null, 2);
          });
@@ -518,7 +518,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
       .subscribe ((result) => {
          console.log("Operation executed");
          this.dialogRef.close();
-         
+
       });
   }
 
@@ -532,7 +532,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
   }
 
   prepareTemplate(){
-    // Converting descriptor back from string to object 
+    // Converting descriptor back from string to object
     this.template.dev_custom.service_descriptor.forEach(element => {
       element.descriptor = JSON.parse(element.descriptor);
     });
@@ -564,14 +564,14 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
       .post(BACKEND_ROOT+'/fimp/api/zwave/products/template/'+this.templateType+'/'+this.templateName,JSON.stringify(this.template),  options )
       .subscribe ((result) => {
          console.log("Template is saved");
-         
+
       });
   }
 
   ngOnDestroy() {
-    
+
   }
-  
+
 
 }
 

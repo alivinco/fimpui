@@ -637,6 +637,12 @@ func main() {
 		AllowOrigins: []string{"http://localhost:4200", "http:://localhost:8082"},
 		AllowMethods: []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 	}))
+	//e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+	//	if username == "fh" && password == "Hemmelig1" {
+	//		return true, nil
+	//	}
+	//	return false, nil
+	//}))
 	e.GET("/mqtt", wsUpgrader.Upgrade)
 	e.File("/fimp", index)
 	//e.File("/fhcore", "static/fhcore.html")
@@ -657,6 +663,7 @@ func main() {
 	e.Static("/fimp/static", "static/fimpui/dist/")
 
 	e.Logger.Debug(e.Start(":8081"))
+	//e.Shutdown(context.Background())
 	log.Info("Exiting the app")
 
 

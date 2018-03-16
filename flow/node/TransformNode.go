@@ -22,7 +22,7 @@ type ValueMappingRecord struct {
 type TransformNodeConfig struct {
 	TargetVariableName string  // Variable
 	IsTargetVariableGlobal bool
-	TransformType string       // map , calc
+	TransformType string       // map , calc , str-to-json ,json-to-str
 	IsRVariableGlobal bool                    // true - update global variable ; false - update local variable
 	IsLVariableGlobal bool                    // true - update global variable ; false - update local variable
 	Operation string 			// type of transform operation , flip , add , subtract , multiply , divide , to_bool

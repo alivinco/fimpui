@@ -45,6 +45,10 @@ func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport
 	return &flow
 }
 
+func (fl *Flow) SetStoragePath(path string) {
+	fl.opContext.StoragePath = path
+}
+
 func (fl *Flow) CleanupBeforeDelete() {
 	fl.globalContext.UnregisterFlow(fl.Id)
 }
@@ -60,7 +64,12 @@ func (fl *Flow) initFromMetaFlow(meta *model.FlowMeta) {
 }
 
 func (fl *Flow) InitAllNodes() {
-
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error(fl.Id+"<Flow> Flow process CRASHED with error while doing node configuration : ",r)
+			fl.opContext.State = "INIT_FAIL"
+		}
+	}()
 	log.Infof("<Flow> ---------Initializing Flow Id = %s , Name = %s -----------",fl.Id,fl.Name)
 	for _,metaNode := range fl.FlowMeta.Nodes {
 		var newNode model.Node
@@ -157,7 +166,7 @@ func (fl *Flow) IsFlowValid() bool {
 	var flowHasStartNode bool
 	for i := range fl.Nodes {
 		node := fl.Nodes[i].GetMetaNode()
-		if node.Type == "trigger" || node.Type == "action" {
+		if node.Type == "trigger" || node.Type == "action" || node.Type == "receive" {
 			if node.Address == "" ||  node.ServiceInterface == "" || node.Service == ""	{
 				log.Error(fl.Id+"<Flow> Flow is not valid , node is not configured . Node ",node.Label)
 				return false
@@ -306,7 +315,7 @@ func (fl *Flow) Start() error {
 		log.Infof(fl.Id+"<Flow> Flow %s is running", fl.Name)
 		go fl.Run()
 	}else {
-		fl.opContext.State = "NOTCONFIGURED"
+		fl.opContext.State = "NOT_CONFIGURED"
 		log.Errorf(fl.Id+"<Flow> Flow %s is not valid and will not be started.Flow should have at least one trigger or wait node ",fl.Name)
 		return errors.New("Flow should have at least one trigger or wait node")
 	}

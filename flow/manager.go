@@ -130,6 +130,7 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 
 	flow := NewFlow(flowMeta, mg.globalContext, mg.msgTransport)
 	flow.SetMessageStream(mg.GetNewStream(flow.Id))
+	flow.SetStoragePath(mg.config.ContextStorageDir)
 
 	flow.InitAllNodes()
 	mg.flowRegistry = append(mg.flowRegistry,flow)
