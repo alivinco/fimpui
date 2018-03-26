@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"os"
+	"encoding/json"
 )
 
 type ExecNode struct {
@@ -16,6 +17,7 @@ type ExecNode struct {
 	ctx *model.Context
 	transport *fimpgo.MqttTransport
 	config ExecNodeConfig
+	scriptFullPath string
 }
 
 type ExecNodeConfig struct {
@@ -44,17 +46,17 @@ func (node *ExecNode) LoadNodeConfig() error {
 		log.Error(node.flowOpCtx.FlowId+"<ExecNode> err")
 	}
 	if node.config.ExecType == "python" {
-		scripFullPath := filepath.Join(node.flowOpCtx.StoragePath,node.flowOpCtx.FlowId+"_"+string(node.meta.Id)+".py")
-		err = ioutil.WriteFile(scripFullPath, []byte(node.config.ScriptBody), 0644)
-
+		node.scriptFullPath = filepath.Join(node.flowOpCtx.StoragePath,node.flowOpCtx.FlowId+"_"+string(node.meta.Id)+".py")
+		err = ioutil.WriteFile(node.scriptFullPath, []byte(node.config.ScriptBody), 0644)
 	}
 	return err
 }
 
 // is invoked when node flow is stopped
 func (node *ExecNode) Cleanup() error {
-	scripFullPath := filepath.Join(node.flowOpCtx.StoragePath,node.flowOpCtx.FlowId+"_"+string(node.meta.Id)+".py")
-	os.Remove(scripFullPath)
+	if node.scriptFullPath != "" {
+		os.Remove(node.scriptFullPath)
+	}
 	return nil
 }
 
@@ -70,10 +72,37 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		cmd = exec.Command(node.config.Command)
 	case "sh-cmd":
 		cmd = exec.Command("bash", "-c", node.config.Command)
+	case "python":
+		if node.config.IsInputJson {
+			strMsg,err := json.Marshal(msg)
+			if err != nil {
+				return []model.NodeID{node.meta.ErrorTransition},err
+			}
+			cmd = exec.Command("python",node.scriptFullPath,string(strMsg))
+		}else {
+			cmd = exec.Command("python",node.scriptFullPath)
+		}
+
+
 	}
 	output , err := cmd.CombinedOutput()
-	msg.Payload.Value = string(output)
-	msg.Payload.ValueType = "string"
+	log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Normal Output : ", string(output))
+	if err != nil {
+		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Err Output : ", err.Error())
+	}
+
+
+	flowId := node.flowOpCtx.FlowId
+	if node.config.OutputVariableName != "" {
+		if node.config.IsOutputVariableGlobal {
+			flowId = "global"
+		}
+		node.ctx.SetVariable(node.config.OutputVariableName,"string",string(output),"",flowId,false )
+	}else {
+		msg.Payload.Value = string(output)
+		msg.Payload.ValueType = "string"
+	}
+
 	if err != nil {
 		return []model.NodeID{node.meta.ErrorTransition},err
 	}

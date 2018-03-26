@@ -44,6 +44,9 @@
     <mat-list-item> <button mat-raised-button (click)="addNode('transform','')" >
         <mat-icon aria-label="Edit node">transform</mat-icon> Transform</button>
     </mat-list-item>
+    <mat-list-item> <button mat-raised-button (click)="addNode('exec','')" >
+        <mat-icon aria-label="Exec node">flash_on</mat-icon> Exec</button>
+    </mat-list-item>
     </mat-list>
   </mat-sidenav>
 
@@ -76,6 +79,7 @@
                     <mat-icon *ngSwitchCase="'loop'" aria-label="Edit node">loop</mat-icon>
                     <mat-icon *ngSwitchCase="'set_variable'" aria-label="Edit node">edit</mat-icon>
                     <mat-icon *ngSwitchCase="'transform'" aria-label="Edit node">transform</mat-icon>
+                    <mat-icon *ngSwitchCase="'exec'" aria-label="Exec node">flash_on</mat-icon>
                     <mat-icon *ngSwitchDefault aria-label="Edit node">build</mat-icon>
                   </button>
                   {{ node.Type }}

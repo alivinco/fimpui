@@ -11,6 +11,7 @@ class ContextRecord{
   Description : string;
   UpdatedAt : string;
   Variable : Variable;
+  FlowId:string;
 }
 
 @Component({
@@ -34,12 +35,17 @@ class ContextRecord{
       request.Variable.Value = this.ctxRec.Value;
       request.Variable.ValueType = this.ctxRec.ValueType;
       request.Description = this.ctxRec.Description;
-
+      if (this.ctxRec.FlowId == null ) {
+        this.ctxRec.FlowId = "global";
+      }
       this.http
-        .post(BACKEND_ROOT+'/fimp/api/flow/context/record',JSON.stringify(request),  options )
+        .post(BACKEND_ROOT+'/fimp/api/flow/context/record/'+this.ctxRec.FlowId,JSON.stringify(request),  options )
         .subscribe ((result) => {
            console.log("Context record was saved");
-           this.dialogRef.close("ok");
+          this.snackBar.open('Saved',null,{duration: 2000});
+           this.dialogRef.close(this.ctxRec);
+        },(result)=> {
+          this.snackBar.open('Error !!! . Save the flow and try again.',null,{duration: 10000});
         });
     }
 

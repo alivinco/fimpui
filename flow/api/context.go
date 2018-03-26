@@ -32,7 +32,8 @@ func (ctx * ContextApi) RegisterRestApi() {
 		return c.JSON(http.StatusOK, ctx)
 	})
 
-	ctx.echo.POST("/fimp/api/flow/context/record", func(c echo.Context) error {
+	ctx.echo.POST("/fimp/api/flow/context/record/:flowid", func(c echo.Context) error {
+		flowId := c.Param("flowid")
 		body, err := ioutil.ReadAll(c.Request().Body)
 		if err != nil {
 			return err
@@ -44,7 +45,7 @@ func (ctx * ContextApi) RegisterRestApi() {
 			log.Error("<ContextApi> Can't unmarshal context record.")
 			return err
 		}
-		ctx.ctx.PutRecord(&rec,"global",false)
+		ctx.ctx.PutRecord(&rec,flowId,false)
 
 		return c.JSON(http.StatusOK, ctx)
 	})

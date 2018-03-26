@@ -25,6 +25,9 @@
     <div *ngSwitchCase="'transform'">
       <transform-node [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" > </transform-node>
     </div>
+    <div *ngSwitchCase="'exec'">
+      <exec-node [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" > </exec-node>
+    </div>
     <div *ngSwitchCase="'receive'">
          <receive-node [node]="node" [nodes]="flow.Nodes" > </receive-node>
     </div>

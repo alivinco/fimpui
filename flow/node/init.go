@@ -18,4 +18,5 @@ var Registry = map[string]Constructor{
 	"loop":         NewLoopNode,
 	"time_trigger": NewTimeTriggerNode,
 	"transform":    NewTransformNode,
+	"exec":			NewExecNode,
 }

@@ -445,13 +445,6 @@ findInputSocketPosition(htmlElement):any {
         node.Config["ValueFilter"] = {"Value":"","ValueType":""};
         node.Config["IsValueFilterEnabled"] = false;
         break;
-      case "transform":
-        node.Config = {
-          "TargetVariableName":"","IsTargetVariableGlobal":false,
-          "TransformType":"calc","Rtype":"var","IsRVariableGlobal":false,
-          "IsLVariableGlobal":false,
-          "Operation":"add","RValue":{"ValueType":"int","Value":0},"RVariableName":"","LVariableName":"","ValueMapping":[]};
-        break;
       case "if":
         node.Config = {};
         node.Config["TrueTransition"] = ""

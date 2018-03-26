@@ -17,8 +17,20 @@ export class TransformNodeComponent implements OnInit {
   globalVars:any;
   constructor(public dialog: MatDialog,private http : Http) { }
   ngOnInit() {
+    this.loadDefaultConfig();
     this.loadContext();
   }
+
+  loadDefaultConfig() {
+    if (this.node.Config==null) {
+      this.node.Config = {
+        "TargetVariableName":"","IsTargetVariableGlobal":false,
+        "TransformType":"calc","Rtype":"var","IsRVariableGlobal":false,
+        "IsLVariableGlobal":false,
+        "Operation":"add","RValue":{"ValueType":"int","Value":0},"RVariableName":"","LVariableName":"","ValueMapping":[]};
+    }
+  }
+
   addValueMapping(node:MetaNode){
     let valueMap = {};
     valueMap["LValue"] = {"ValueType":"int","Value":0};
@@ -35,7 +47,6 @@ export class TransformNodeComponent implements OnInit {
         }).subscribe ((result) => {
         this.localVars = [];
         for (var key in result){
-          this.node
           this.localVars.push(result[key].Name);
         }
 

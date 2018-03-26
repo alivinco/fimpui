@@ -39,6 +39,7 @@ export class FlowContextComponent implements OnInit {
   }
 
   showRecordEditorDialog(ctxRec:TableContextRec) {
+    ctxRec.FlowId = "global";
     let dialogRef = this.dialog.open(RecordEditorDialog,{
       width: '450px',
       data:ctxRec
