@@ -82,8 +82,6 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}else {
 			cmd = exec.Command("python",node.scriptFullPath)
 		}
-
-
 	}
 	output , err := cmd.CombinedOutput()
 	log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Normal Output : ", string(output))
@@ -93,17 +91,39 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 
 	flowId := node.flowOpCtx.FlowId
+	outputJson := make(map[string]interface{})
+	if node.config.IsOutputJson {
+		err = json.Unmarshal(output,&outputJson)
+
+	}
+	if err != nil {
+		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Script output can't be unmarshaled to JSON : ", err.Error())
+		return []model.NodeID{node.meta.ErrorTransition},err
+	}
+
 	if node.config.OutputVariableName != "" {
 		if node.config.IsOutputVariableGlobal {
 			flowId = "global"
 		}
-		node.ctx.SetVariable(node.config.OutputVariableName,"string",string(output),"",flowId,false )
+		if node.config.IsOutputJson {
+			log.Debug(node.flowOpCtx.FlowId+"<ExecNode> JSON : ", outputJson["ab"])
+			err = node.ctx.SetVariable(node.config.OutputVariableName,"object",outputJson,"",flowId,false )
+		}else {
+			err = node.ctx.SetVariable(node.config.OutputVariableName,"string",string(output),"",flowId,false )
+		}
+
 	}else {
-		msg.Payload.Value = string(output)
-		msg.Payload.ValueType = "string"
+		if node.config.IsOutputJson {
+			msg.Payload.Value = outputJson
+			msg.Payload.ValueType = "object"
+		}else {
+			msg.Payload.Value = string(output)
+			msg.Payload.ValueType = "string"
+		}
 	}
 
 	if err != nil {
+		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Failed to save variable : ", err.Error())
 		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil

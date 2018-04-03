@@ -93,6 +93,7 @@ type Context struct {
 
 func NewContextDB(storageLocation string) (*Context , error) {
 	var err error
+	gob.Register(map[string]interface{}{})
 	ctx := Context{}
 	ctx.inMemoryStore = make(map[string][]ContextRecord)
 	ctx.db, err = bolt.Open(storageLocation, 0600, nil)
@@ -137,6 +138,8 @@ func (ctx *Context) SetVariable(name string,valueType string,value interface{},d
 	return ctx.PutRecord(&rec,flowId,inMemory)
 }
 
+
+
 func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) error {
 	if inMemory {
 		//ctx.inMemoryStore[flowId] = *rec
@@ -177,6 +180,15 @@ func (ctx *Context) GetVariable(name string,flowId string) (Variable,error) {
 		return Variable{},err
 	}
 
+}
+
+func (ctx *Context) GetVariableType(name string ,flowId string) (string,error) {
+	varb,err := ctx.GetVariable(name,flowId)
+	if err == nil {
+		return varb.ValueType , err
+	}else {
+		return "",err
+	}
 }
 
 func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) {
