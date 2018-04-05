@@ -15,12 +15,12 @@
     </mat-card-header>
     <mat-card-content>
           <table>
-           
+
           <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th>
             <th style="width: 150px">Alias</th><th style="width: 75px">Power</th><th style="width: 70px">Status</th><th >Actions</th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td> 
+          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td>
           <td> {{node.alias}}</td><td> {{node.power_source}}</td>  <td> {{node.status}} </td>
            <td  >
              <mat-chip-list>
@@ -32,49 +32,93 @@
              </mat-chip-list>
           </td>
           </tr>
-          </tbody> 
+          </tbody>
          </table>
-     <p>Adapter state: {{zwAdState}}</p> 
+     <p>Adapter state: {{zwAdState}}</p>
      <p>Incl proc state: {{inclProcState}}</p>
      <p>Enabled global non-secure incl.: {{globalNonSecureInclMode}}</p>
-     <p>Last error : {{errorMsg}}</p> 
-     <mat-progress-bar  [mode]="progressBarMode" ></mat-progress-bar>   
+     <p>Last error : {{errorMsg}}</p>
+     <mat-progress-bar  [mode]="progressBarMode" ></mat-progress-bar>
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button (click)="addDevice(True)" color="primary" > Add device</button>
       <button mat-raised-button (click)="removeDevice()" color="warn" >Exclude device</button>
       <button mat-raised-button (click)="reloadNodes()">Reload list</button>
+      <button mat-raised-button (click)="topology.hidden = !topology.hidden" >Network stats</button>
       <button mat-raised-button (click)="settings.hidden = !settings.hidden" >Advanced</button>
       <br/>
-      <div> Ping device:
-         <mat-input-container >
-          <input matInput #pingFromInput placeholder="from node">
-        </mat-input-container>
-        <mat-input-container > 
-          <input matInput #pingToInput placeholder="to node">
-        </mat-input-container>
-        <mat-input-container style="width:50px"> 
+      <div #topology hidden >
+        <p><button mat-raised-button color="accent" (click)="requestImaStats()">Reload</button>
+        <button mat-raised-button color="accent" (click)="resetImaStats()">Reset</button></p>
+        <table>
+
+          <thead>
+            <tr>
+              <th style="width: 70px">Node Id</th>
+              <th style="width: 70px">Tx count</th>
+              <th style="width: 70px">Err count</th>
+              <th style="width: 70px">Route change</th>
+              <th style="width: 70px">Has LWR</th>
+              <th style="width: 100px">LWR speed</th>
+              <th style=" width: 400px">Last working route (LWR)</th>
+            </tr> </thead>
+          <tbody>
+          <tr *ngFor="let node of networkStats">
+            <td> {{node.node_id}}</td>
+            <td> {{node.tx_count}}</td>
+            <td> {{node.err_count}}</td>
+            <td> {{node.route_change}}</td>
+            <td> {{node.lwr.has_lwr}}</td>
+            <td> {{node.lwr.link_sp}}</td>
+            <td> route : GW ->
+              <span *ngIf="!node.lwr.has_lwr" >? -> </span>
+              <span *ngIf="node.lwr.r1!=0" >{{node.lwr.r1}} -> </span>
+              <span *ngIf="node.lwr.r2!=0" >{{node.lwr.r2}} -> </span>
+              <span *ngIf="node.lwr.r3!=0" >{{node.lwr.r3}} -> </span>
+              <span *ngIf="node.lwr.r4!=0" >{{node.lwr.r4}} -> </span>  {{ node.node_id }} </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div id="zwnetwork" style="width: 100%;height: 700px"></div>
+
+
+
+      </div>
+
+      <div #settings hidden >
+        <p>Advanced settings </p>
+
+        <div> Ping device:
+          <mat-input-container >
+            <input matInput #pingFromInput placeholder="from node">
+          </mat-input-container>
+          <mat-input-container >
+            <input matInput #pingToInput placeholder="to node">
+          </mat-input-container>
+          <mat-input-container style="width:50px">
             <input matInput #txLevelInput placeholder="lvl">
-        </mat-input-container>
+          </mat-input-container>
           <button mat-raised-button (click)="pingNode(pingFromInput.value,pingToInput.value,txLevelInput.value)">Ping</button>
           <p>Result : {{ pingResult }} </p>
-      </div>
-      <div #settings hidden > 
-        <p>Advanced settings </p>
-        <button mat-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button> 
-        <button mat-raised-button color="accent" (click)="updateNetwork()">Start network update </button> 
+        </div>
+
+        <button mat-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button>
+        <button mat-raised-button color="accent" (click)="updateNetwork()">Start network update </button>
+        <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in network </button>
+        <button mat-raised-button color="accent" (click)="cleanUpNetwork()">Run network cleanup </button>
        <p> <button mat-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> </p>
-       <p> 
+       <p>
         <button mat-raised-button  (click)="setGatewayMode('enableGlobalForceNonSecure')">Enable global non-secure inclusion</button>
         <button mat-raised-button  (click)="setGatewayMode('disableGlobalForceNonSecure')">Disable global non-secure inclusion</button>
-      </p> 
-      <p> 
+      </p>
+      <p>
          <button mat-raised-button  (click)="requestAllInclusionReports()">Request inclusion reports for all nodes</button>
-      </p> 
-       <p> 
+      </p>
+       <p>
          <button mat-raised-button  (click)="downloadTemplatesFromCloud()">Download all stable templates from cloud </button>
          <button mat-raised-button  (click)="uploadCacheToCloud()">Upload unstable templates into cloud </button>
-       </p> 
+       </p>
          <h4>FH templates</h4>
          <mat-list>
            <mat-list-item *ngFor="let temp of localTemplates" (click)="openTemplateEditor(temp.file_name,'stable')" > {{temp.alias}} ( {{temp.file_name}} ) </mat-list-item>

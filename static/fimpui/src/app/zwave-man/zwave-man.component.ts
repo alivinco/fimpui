@@ -14,6 +14,7 @@ import {
   MqttService
 }  from 'angular2-mqtt';
 
+declare var vis: any;
 
 @Component({
   selector: 'app-zwave-man',
@@ -23,6 +24,8 @@ import {
 export class ZwaveManComponent implements OnInit ,OnDestroy {
   selectedOption: string;
   nodes : any[];
+  networkStats : any[];
+  repeaterNodes :number[];
   zwAdState : string;
   globalNonSecureInclMode : string;
   inclProcState : string;
@@ -57,6 +60,29 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
           // }
           this.showProgress(false);
           localStorage.setItem("zwaveNodesList", JSON.stringify(this.nodes));
+        }else if (fimpMsg.mtype == "evt.zwnetstats.net_ping_report"){
+
+          for(let node of this.nodes) {
+            node["status"] = ""
+          }
+          for(let stNode of fimpMsg.val) {
+            var isFound = false;
+            for(let node of this.nodes) {
+              if (stNode["address"] == node["address"]) {
+                node["status"] = stNode["status"];
+                isFound = true;
+              }
+            }
+            if (!isFound) {
+              this.nodes.push(stNode)
+            }
+
+          }
+
+        }else if (fimpMsg.mtype == "evt.zwnetstats.full_report"){
+          this.networkStats = fimpMsg.val;
+          this.drawNetworkTopology();
+
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
             console.log("New inclusion report");
             if(this.isReloadNodesEnabled) {
@@ -106,6 +132,79 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     }else {
       this.progressBarMode = "determinate";
     }
+  }
+
+
+  isNodeRepeater(nodeId) {
+      for(let rep of this.repeaterNodes) {
+        if (rep == nodeId) {
+          return true
+        }
+      }
+      return false
+  }
+
+  drawNetworkTopology() {
+    this.repeaterNodes = []
+    var nodes = [];
+
+
+    var edges = []
+    for(let node of this.networkStats) {
+      for(let nbNode of node["nb_info"]) {
+          edges.push({from:node["node_id"],to:nbNode["node_id"],arrows:'to'})
+          if(nbNode["is_rep"]) {
+            this.repeaterNodes.push(nbNode["node_id"])
+          }
+      }
+    }
+
+    for(let node of this.networkStats) {
+      var rgroup = "sleep"
+      if(this.isNodeRepeater(node["node_id"])) {
+        rgroup ="rep"
+        console.log("Node is repater ="+node["node_id"]);
+      }
+      nodes.push({id:node["node_id"],label:"Node "+node["node_id"],group:rgroup})
+    }
+    var nodesDS = new vis.DataSet(nodes);
+
+    var edgesDS = new vis.DataSet(edges);
+
+
+    // create a network
+    var container = document.getElementById('zwnetwork');
+
+    // provide the data in the vis format
+    var data = {
+      nodes: nodesDS,
+      edges: edgesDS
+    };
+    // var options = {};
+    var options = {
+      nodes: {
+        shape: 'dot',
+        size: 16
+      },
+      physics: {
+        forceAtlas2Based: {
+          gravitationalConstant: -26,
+          centralGravity: 0.005,
+          springLength: 230,
+          springConstant: 0.18
+        },
+        maxVelocity: 146,
+        solver: 'forceAtlas2Based',
+        timestep: 0.35,
+        stabilization: {iterations: 150}
+      },
+      groups: {
+        "rep": {color:{background:'green'}, borderWidth:3},
+        "sleep": {color:{background:'gray'}, borderWidth:3}
+      }
+    };
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
   }
 
   loadThingsFromRegistry() {
@@ -168,6 +267,37 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     this.showProgress(true);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
+
+
+
+  cleanUpNetwork(){
+    let msg  = new FimpMessage("zwave-ad","cmd.network.cleanup","string","full",null,null)
+    this.showProgress(true);
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+
+  pingNetwork(){
+    let msg  = new FimpMessage("zwave-ad","cmd.zwnetstats.net_ping","string","",null,null)
+    this.showProgress(true);
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+
+  requestImaStats(){
+    let msg  = new FimpMessage("zwave-ad","cmd.zwnetstats.get_full_report","string","",null,null)
+    this.showProgress(true);
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+
+  resetImaStats(){
+    let msg  = new FimpMessage("zwave-ad","cmd.zwnetstats.reset","string","",null,null)
+    this.showProgress(true);
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+
+
+
+
+
   updateDevice(nodeId :number){
     let msg  = new FimpMessage("zwave-ad","cmd.network.node_update","int",Number(nodeId),null,null)
     this.showProgress(true);
