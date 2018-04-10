@@ -20,11 +20,14 @@ import {MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
 export class EventLogComponent implements OnInit {
   displayedColumns = ['timestamp','resourceType','address','code','errSource','msg'];
   dataSource: EventLogDataSource | null;
-  constructor(private http : Http,public dialog: MatDialog) { 
+  constructor(private http : Http,public dialog: MatDialog) {
   }
 
   ngOnInit() {
     this.dataSource = new EventLogDataSource(this.http);
+  }
+  dropDb() {
+    this.dataSource.dropDb();
   }
 }
 
@@ -47,20 +50,20 @@ export class EventLogDataSource extends DataSource<any> {
         {
           if (resultTmp[events[i]["ThingAddress"]]== undefined)
             resultTmp[events[i]["ThingAddress"]] = 1;
-          else   
+          else
             resultTmp[events[i]["ThingAddress"]] = resultTmp[events[i]["ThingAddress"]]+1;
-        }  
+        }
     }
     var resultArray = [];
     for(let thingAddr in resultTmp) {
       resultArray.push({"address":thingAddr,"count":resultTmp[thingAddr]})
     }
-    return resultArray.sort(function(a,b){ 
-      if(a.count<b.count) 
+    return resultArray.sort(function(a,b){
+      if(a.count<b.count)
          return 1;
-      if(a.count>b.count) 
+      if(a.count>b.count)
          return -1;
-      return 0;   
+      return 0;
     })
   }
 
@@ -80,13 +83,25 @@ export class EventLogDataSource extends DataSource<any> {
         });
 
   }
-  
+
+  dropDb() {
+    this.http
+      .post(BACKEND_ROOT+'/fimp/api/stats/drop-eventsdb',{})
+      .map((res: Response)=>{
+        let result = res.json();
+        return result;
+      }).subscribe(result=>{
+        this.getData();
+    });
+
+  }
+
   connect(): Observable<Location[]> {
     return this.eventsObs;
   }
   disconnect() {}
-  
-  
+
+
 }
 
 @Component({
@@ -102,18 +117,18 @@ export class EventsPerDeviceChart implements OnInit  {
   public barChartLabels:string[] = [];
   public barChartType:string = 'bar';
   public barChartLegend:boolean = true;
- 
+
   public barChartData:any[] = [
     {data: [], label: 'ERRORs'},
     // {data: [28, 48, 40, 19, 86, 27, 90], label: 'Series B'}
   ];
-  
+
 
   ngOnInit() {
 
     this.loadData();
   }
-   
+
   loadData(){
     console.log("Loading data");
     console.dir(this.events);
@@ -126,6 +141,6 @@ export class EventsPerDeviceChart implements OnInit  {
       this.barChartData[0]["data"].push(this.events[i].count)
     }
   }
- 
-  
+
+
 }

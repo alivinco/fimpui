@@ -16,12 +16,32 @@
     <mat-card-content>
           <table>
 
-          <thead><tr><th style="width: 70px">Node Id</th><th style="width: 150px">Product hash</th><th style="width:300px">Product name</th>
-            <th style="width: 150px">Alias</th><th style="width: 75px">Power</th><th style="width: 70px">Status</th><th >Actions</th></tr> </thead>
+          <thead><tr>
+            <th style="width: 70px">Node Id</th>
+            <th style="width: 150px">Product hash</th>
+            <th style="width:300px">Product name</th>
+            <th style="width: 150px">Alias</th>
+            <th style="width: 75px">Power</th>
+            <th style="width: 70px">Status</th>
+            <th >Actions</th></tr> </thead>
           <tbody>
          <tr *ngFor="let node of nodes">
-          <td> {{node.address}}</td> <td> {{node.hash}}</td><td> {{node.product_name}}</td>
-          <td> {{node.alias}}</td><td> {{node.power_source}}</td>  <td> {{node.status}} </td>
+           <td> {{node.address}}</td>
+           <td> {{node.hash}}</td>
+           <td> {{node.product_name}}</td>
+           <td> {{node.alias}}</td>
+           <td>
+             <mat-icon *ngIf="node.power_source=='ac'" >power</mat-icon>
+             <mat-icon *ngIf="node.power_source=='battery'" >battery_std</mat-icon>
+           </td>
+           <td>
+                <mat-icon *ngIf="node.status=='OK'" style="color: #27ae60">done</mat-icon>
+                <mat-icon *ngIf="node.status=='NO_PING'" >done</mat-icon>
+                <mat-icon *ngIf="node.status=='NO_RESP'" style="color: red">error_outline</mat-icon>
+                <mat-icon *ngIf="node.status=='UP'" style="color: #27ae60">thumb_up</mat-icon>
+                <mat-icon *ngIf="node.status=='DOWN'" style="color: red">thumb_down</mat-icon>
+                <mat-icon *ngIf="node.status=='SLEEP'" >history</mat-icon>
+           </td>
            <td  >
              <mat-chip-list>
              <mat-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]">Services</mat-chip>
@@ -55,33 +75,60 @@
           <thead>
             <tr>
               <th style="width: 70px">Node Id</th>
+              <th style="width: 150px">Alias</th>
+              <th style="width: 50px">Power</th>
+              <th style="width: 70px">Status</th>
               <th style="width: 70px">Tx count</th>
               <th style="width: 70px">Err count</th>
               <th style="width: 70px">Route change</th>
               <th style="width: 70px">Has LWR</th>
-              <th style="width: 100px">LWR speed</th>
-              <th style=" width: 400px">Last working route (LWR)</th>
+              <th style="width: 100px">LWR speed (kbps)</th>
+              <th style=" width: 250px">Last working route (LWR)</th>
+              <th style=" width: 400px">Neighbors</th>
+
             </tr> </thead>
           <tbody>
           <tr *ngFor="let node of networkStats">
             <td> {{node.node_id}}</td>
+            <td> {{node.alias}}</td>
+            <td>
+              <mat-icon *ngIf="node.power_source=='ac'" >power</mat-icon>
+              <mat-icon *ngIf="node.power_source=='battery'" >battery_std</mat-icon>
+            </td>
+            <td>
+              <mat-icon *ngIf="node.status=='OK'" style="color: #27ae60">done</mat-icon>
+              <mat-icon *ngIf="node.status=='NO_PING'" >done</mat-icon>
+              <mat-icon *ngIf="node.status=='NO_RESP'" style="color: red">error_outline</mat-icon>
+              <mat-icon *ngIf="node.status=='UP'" style="color: green">thumb_up</mat-icon>
+              <mat-icon *ngIf="node.status=='DOWN'" style="color: red">thumb_down</mat-icon>
+              <mat-icon *ngIf="node.status=='SLEEP'" >history</mat-icon>
+            </td>
             <td> {{node.tx_count}}</td>
             <td> {{node.err_count}}</td>
             <td> {{node.route_change}}</td>
-            <td> {{node.lwr.has_lwr}}</td>
+            <td> <mat-icon *ngIf="node.lwr.has_lwr" style="color: green">done</mat-icon> <mat-icon *ngIf="!node.lwr.has_lwr" style="color: red">error_outline</mat-icon> </td>
             <td> {{node.lwr.link_sp}}</td>
-            <td> route : GW ->
-              <span *ngIf="!node.lwr.has_lwr" >? -> </span>
-              <span *ngIf="node.lwr.r1!=0" >{{node.lwr.r1}} -> </span>
-              <span *ngIf="node.lwr.r2!=0" >{{node.lwr.r2}} -> </span>
-              <span *ngIf="node.lwr.r3!=0" >{{node.lwr.r3}} -> </span>
-              <span *ngIf="node.lwr.r4!=0" >{{node.lwr.r4}} -> </span>  {{ node.node_id }} </td>
+            <td> GW(1) ->
+              <span *ngIf="node.lwr.has_lwr" >
+                <span *ngIf="node.lwr.r1!=0" >{{node.lwr.r1}} -> </span>
+                <span *ngIf="node.lwr.r2!=0" >{{node.lwr.r2}} -> </span>
+                <span *ngIf="node.lwr.r3!=0" >{{node.lwr.r3}} -> </span>
+                <span *ngIf="node.lwr.r4!=0" >{{node.lwr.r4}} -> </span>
+                {{ node.node_id }}
+              </span>
+            </td>
+            <td>
+              <span *ngFor="let  nbl of node.nb_info">
+                {{ nbl.node_id }},
+              </span>
+            </td>
           </tr>
           </tbody>
         </table>
 
-        <div id="zwnetwork" style="width: 100%;height: 700px"></div>
 
+        <div id="zwnetwork" style="width: 100%;height: 1000px"></div>
+        <button mat-raised-button color="accent" (click)="stopSimulation()">Stop</button>
 
 
       </div>

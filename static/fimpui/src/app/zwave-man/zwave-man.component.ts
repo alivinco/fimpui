@@ -27,6 +27,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   networkStats : any[];
   repeaterNodes :number[];
   zwAdState : string;
+  visJsNetwork : any;
   globalNonSecureInclMode : string;
   inclProcState : string;
   errorMsg : string;
@@ -76,11 +77,13 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
             if (!isFound) {
               this.nodes.push(stNode)
             }
+            this.drawNetworkTopology();
 
           }
 
         }else if (fimpMsg.mtype == "evt.zwnetstats.full_report"){
           this.networkStats = fimpMsg.val;
+          localStorage.setItem("zwNetworkStats", JSON.stringify(this.networkStats));
           this.drawNetworkTopology();
 
         }else if (fimpMsg.mtype == "evt.thing.exclusion_report" || fimpMsg.mtype == "evt.thing.inclusion_report"){
@@ -121,6 +124,10 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
         this.nodes = JSON.parse(localStorage.getItem("zwaveNodesList"));
         this.loadThingsFromRegistry();
     }
+    if (localStorage.getItem("zwNetworkStats")!=null){
+      this.networkStats = JSON.parse(localStorage.getItem("zwNetworkStats"));
+      this.drawNetworkTopology()
+    }
 
   }
   ngOnDestroy() {
@@ -144,67 +151,119 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
       return false
   }
 
+  getNodeByAddress(address:string){
+    for(let node of this.nodes) {
+      if(node.address == address) {
+        return node;
+      }
+    }
+  }
+
+
+
   drawNetworkTopology() {
-    this.repeaterNodes = []
-    var nodes = [];
-
-
-    var edges = []
-    for(let node of this.networkStats) {
-      for(let nbNode of node["nb_info"]) {
-          edges.push({from:node["node_id"],to:nbNode["node_id"],arrows:'to'})
-          if(nbNode["is_rep"]) {
-            this.repeaterNodes.push(nbNode["node_id"])
+        this.repeaterNodes = []
+        var nodes = [];
+        var edges = []
+        for(let node of this.networkStats) {
+          var tnd = this.getNodeByAddress(String(node.node_id)) ;
+          if (tnd) {
+            node["alias"] = tnd.alias;
+            node["power_source"] = tnd.power_source;
+            node["status"] = tnd.status;
+            console.log("Alias is set "+tnd.alias);
           }
-      }
-    }
+          for(let nbNode of node["nb_info"]) {
+              var skip = false
+              for(let n of edges){
+                if(n.to==node["node_id"] && n.from == nbNode["node_id"] ){
+                  skip = true
+                  break
+                }
+              }
+              if(skip){
+                continue
+              }
+              edges.push({from:node["node_id"],to:nbNode["node_id"],arrows:''})
+              if(nbNode["is_rep"]) {
+                this.repeaterNodes.push(nbNode["node_id"])
+              }
+          }
+        }
 
-    for(let node of this.networkStats) {
-      var rgroup = "sleep"
-      if(this.isNodeRepeater(node["node_id"])) {
-        rgroup ="rep"
-        console.log("Node is repater ="+node["node_id"]);
-      }
-      nodes.push({id:node["node_id"],label:"Node "+node["node_id"],group:rgroup})
-    }
-    var nodesDS = new vis.DataSet(nodes);
+        for(let node of this.networkStats) {
+            var rgroup = "sleep"
+            if(node["node_id"]==1) {
+              rgroup = "gw"
+            }else
+            if(this.isNodeRepeater(node["node_id"])) {
+              rgroup ="rep"
+              // console.log("Node is repater ="+node["node_id"]);
+            }
+            nodes.push({id:node["node_id"],label:"Node "+node["node_id"],group:rgroup,title:node["alias"]})
+        }
+        var nodesDS = new vis.DataSet(nodes);
 
-    var edgesDS = new vis.DataSet(edges);
+        var edgesDS = new vis.DataSet(edges);
 
 
-    // create a network
-    var container = document.getElementById('zwnetwork');
+        // create a network
+        var container = document.getElementById('zwnetwork');
 
-    // provide the data in the vis format
-    var data = {
-      nodes: nodesDS,
-      edges: edgesDS
-    };
-    // var options = {};
-    var options = {
-      nodes: {
-        shape: 'dot',
-        size: 16
-      },
-      physics: {
-        forceAtlas2Based: {
-          gravitationalConstant: -26,
-          centralGravity: 0.005,
-          springLength: 230,
-          springConstant: 0.18
-        },
-        maxVelocity: 146,
-        solver: 'forceAtlas2Based',
-        timestep: 0.35,
-        stabilization: {iterations: 150}
-      },
-      groups: {
-        "rep": {color:{background:'green'}, borderWidth:3},
-        "sleep": {color:{background:'gray'}, borderWidth:3}
-      }
-    };
-    // initialize your network!
-    var network = new vis.Network(container, data, options);
+        // provide the data in the vis format
+        var data = {
+          nodes: nodesDS,
+          edges: edgesDS
+        };
+
+        // gravitationalConstant: -26,
+    //               centralGravity: 0.005,
+    //               springLength: 230,
+    //               springConstant: 0.18,
+    //               avoidOverlap:0.5
+        // var options = {};
+        var options = {
+          nodes: {
+            shape: 'dot',
+            size: 16,
+
+          },
+          edges : {
+            chosen:{edge:function(values, id, selected, hovering) {
+                values.color = "orange";
+                values.width = 3;
+              }}
+          },
+          layout: {
+            randomSeed:1
+          },
+          physics: {
+            enabled:true,
+            forceAtlas2Based: {
+              avoidOverlap:0.65,
+              gravitationalConstant: -45,
+                            // centralGravity: 0.005,
+              //               springLength: 230,
+                            springConstant: 0.18
+            },
+            maxVelocity: 500,
+            minVelocity:200,
+            solver: 'forceAtlas2Based',
+            timestep: 0.35,
+            stabilization: {iterations: 100}
+          },
+          groups: {
+            "gw": {color:{background:'red'}, borderWidth:3,size:30},
+            "rep": {color:{background:'green'}, borderWidth:2,size:18},
+            "sleep": {color:{background:'gray'}, borderWidth:1}
+          }
+        };
+        // initialize your network!
+        this.visJsNetwork = new vis.Network(container, data, options);
+  }
+
+  stopSimulation(){
+    this.visJsNetwork.stopSimulation()
   }
 
   loadThingsFromRegistry() {
@@ -283,6 +342,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   }
 
   requestImaStats(){
+    this.networkStats = []
     let msg  = new FimpMessage("zwave-ad","cmd.zwnetstats.get_full_report","string","",null,null)
     this.showProgress(true);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
@@ -293,9 +353,6 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     this.showProgress(true);
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
-
-
-
 
 
   updateDevice(nodeId :number){

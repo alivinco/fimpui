@@ -55,6 +55,10 @@ func (st *StatsStore) DisconnectDB() {
 	st.db.Close()
 }
 
+func (st *StatsStore) DropDb() error {
+	return st.db.Drop(&EventRec{})
+}
+
 func (st *StatsStore) AddEvent(errMsg *EventRec) {
 	errMsg.Timestamp = time.Now()
 	err := st.db.Save(errMsg)
