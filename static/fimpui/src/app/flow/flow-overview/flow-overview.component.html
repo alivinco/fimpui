@@ -10,9 +10,12 @@
       <!--<mat-card-subtitle>Dog Breed</mat-card-subtitle>-->
     </mat-card-header>
     <mat-card-content>
-         
+
    <table>
-      <thead><tr><th style="width: 300px">Name</th><th style="width: 50px">Ok</th><th style="width: 50px">Err</th>
+      <thead><tr><th style="width: 300px">Name</th>
+        <th style="width: 100px">Group</th>
+        <th style="width: 50px">Ok</th>
+        <th style="width: 50px">Err</th>
         <th style="width: 250px">Current Node</th>
         <th style="width: 70px">At start </th>
         <th style="width: 330px">Last start  </th>
@@ -21,21 +24,24 @@
         <th style="width: 350px">Description</th><th style="width: 250px">Actions</th></tr> </thead>
       <tbody>
       <tr *ngFor="let flow of flows">
-          <td> {{flow.Name}}</td><td> {{flow.TriggerCounter}}</td> <td> {{flow.ErrorCounter}}</td>
+          <td> {{flow.Name}}</td>
+          <td> {{flow.Group}}</td>
+          <td> {{flow.TriggerCounter}}</td>
+          <td> {{flow.ErrorCounter}}</td>
           <td> {{flow.Stats.CurrentNodeLabel}} ({{flow.Stats.CurrentNodeId}}) </td>
           <td> {{flow.Stats.IsAtStartingPoint}} </td>
           <td> {{flow.Stats.StartedAt | date:'yyyy-MM-dd H:mm:ss'}} </td>
           <td> {{flow.Stats.LastExecutionTime }} </td>
           <td> {{flow.State }} </td>
           <td> {{flow.Description}}</td> <td>
-             
+
              <mat-chip-list>
              <mat-chip class="open-chip" [routerLink]="['/flow/editor',flow.Id]">Open</mat-chip>
              <mat-chip color="warn" (click)="deleteFlow(flow.Id)">Delete</mat-chip>
              </mat-chip-list>
           </td>
           </tr>
-          </tbody> 
+          </tbody>
     </table>
 
     </mat-card-content>

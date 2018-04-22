@@ -67,9 +67,7 @@ func (endp *IntegrationAPIRestEndp) ctlProcessEndpoint(c echo.Context) error {
 	case "stop":
 		err = proc.Stop()
 		break
-	case "broker_auto_config":
-		endp.integr.BrokerAutoConfig(IDt(procID))
-		break
+
 	case "state":
 		return c.JSON(http.StatusOK, DefaultResponse{ID: IDt(procID), Msg: proc.State})
 

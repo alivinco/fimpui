@@ -80,6 +80,7 @@ func (node *TimeTriggerNode) Init() error {
 
 		}
 		node.cron.Start()
+
 	}
 
 	return nil
@@ -163,7 +164,11 @@ func (node *TimeTriggerNode) ConfigureInStream(activeSubscriptions *[]string,msg
 
 // is invoked when node flow is stopped
 func (node *TimeTriggerNode) Cleanup() error {
-	node.cron.Stop()
+	if node.config.GenerateAstroTimeEvents {
+		node.astroTimer.Stop()
+	}else {
+		node.cron.Stop()
+	}
 	return nil
 }
 

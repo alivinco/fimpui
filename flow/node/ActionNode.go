@@ -21,6 +21,7 @@ type ActionNodeConfig struct {
 	IsVariableGlobal bool
 	Props fimpgo.Props
 	RegisterAsVirtualService bool
+	VirtualServiceGroup string
 }
 
 func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {

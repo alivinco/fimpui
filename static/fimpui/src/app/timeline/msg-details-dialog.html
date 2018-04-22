@@ -4,9 +4,9 @@
         <div><strong>Interface :</strong> {{fimpMsg.mtype}}</div>
         <div><strong>Message :</strong></div>
         <div>{{fimpMsg.raw}}</div>
-        <div style="padding: 10px"> 
-          <button mat-raised-button (click)="parentComp.copyToMqttClient(fimpMsg.topic,fimpMsg.raw)" >Copy to MQTT client</button>  
+        <div style="padding: 10px;overflow-x:scroll;max-height: 90%">
+          <button mat-raised-button (click)="parentComp.copyToMqttClient(fimpMsg.topic,fimpMsg.raw)" >Copy to MQTT client</button>
           <button mat-raised-button (click)="parentComp.sendMessage(fimpMsg.topic,fimpMsg.raw)" >Resend</button>
-          <button mat-raised-button (click)="close()" >Close</button> 
-        </div> 
+          <button mat-raised-button (click)="close()" >Close</button>
+        </div>
 </div>

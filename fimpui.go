@@ -24,12 +24,13 @@ import (
 	"strconv"
 	"strings"
 
-	lumberjack "gopkg.in/natefinch/lumberjack.v2"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"github.com/alivinco/fimpui/integr/zwave"
 	"github.com/alivinco/fimpui/statsdb"
 	//_ "net/http/pprof"
 	"os/exec"
 	"github.com/alivinco/fimpui/flow/api"
+	"github.com/alivinco/fimpui/process/tsdb"
 )
 
 type SystemInfo struct {
@@ -124,6 +125,11 @@ func main() {
 	streamProcessor := statsdb.NewStreamProcessor(configs,statsStore)
 	streamProcessor.InitMessagingTransport()
 	log.Info("<main> Started ")
+	//---------STATS STORE-----------------
+	log.Info("<main>-------------- Starting TimeSeries integration process ")
+
+
+	log.Info("<main> Started ")
 	//----------VINCULUM CLIENT------------
 	log.Info("<main>-------------- Starting VinculumClient ")
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
@@ -167,6 +173,8 @@ func main() {
 	e.Use(middleware.Recover())
 
 	api.NewContextApi(flowManager.GetGlobalContext(),e)
+	// Uncomment the line below to enable Time Series exporter.
+	tsdb.Boot(configs,e)
 
 	e.GET("/fimp/system-info", func(c echo.Context) error {
 
@@ -360,6 +368,20 @@ func main() {
 		}
 
 	})
+	//ClearDb
+
+	e.POST("/fimp/api/stats/drop-eventsdb", func(c echo.Context) error {
+		err := statsStore.DropDb()
+		if err == nil {
+			return c.JSON(http.StatusOK,err)
+		} else {
+			log.Error("Faild to drop db ",err)
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+	})
+
+
 
 	e.GET("/fimp/api/stats/metrics/counters", func(c echo.Context) error {
 

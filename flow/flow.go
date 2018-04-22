@@ -349,13 +349,20 @@ func (fl *Flow) Stop() error {
 	select {
 	case fl.opContext.NodeControlSignalChannel <- model.SIGNAL_STOP:
 	default:
-		log.Debug(fl.Id+"<Flow> No signal listener.")
+		//log.Debug(fl.Id+"<Flow> No signal listener.")
 	}
-	fl.msgInStream <- model.Message{}
+	select {
+	case fl.msgInStream <- model.Message{CancelOp:true}:
+	default:
+		//log.Debug(fl.Id+"<Flow> No msgInStream.")
+	}
+	log.Debug(fl.Id+"<Flow> Starting node cleanup")
 	for i := range fl.Nodes{
 		fl.Nodes[i].Cleanup()
 	}
+	log.Debug(fl.Id+"<Flow> Nodes cleanup completed")
 	fl.CancelAllRunningNodes()
+	log.Debug(fl.Id+"<Flow> All running nodes were canceled")
 	close(fl.nodeOutboundStream)
 	log.Info(fl.Id+"<Flow> All streams and running goroutins were closed  ")
 	log.Info(fl.Id+"<Flow> Stopped .  ", fl.Name)

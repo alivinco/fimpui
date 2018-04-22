@@ -16,6 +16,7 @@
   "flow_storage_dir":"./flow_storage",
   "registry_db_file":"./registry.db",
   "context_storage_dir":"./flow_storage/context.db",
+  "proc_config_store_path":"./proc/",
   "log_file":"./fimpui.log",
   "log_level":"debug"
 }

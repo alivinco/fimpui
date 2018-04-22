@@ -155,20 +155,21 @@ func (pr *Process) filter(context *MsgContext, topic string, iotMsg *fimpgo.Fimp
 
 				}
 			}
-			context.filterID = pr.Config.Filters[i].ID
-			measure := pr.Config.getMeasurementByID(pr.Config.Filters[i].MeasurementID)
-			if measure == nil {
-				log.Errorf("<tsdb> Measurement either is not defined or provided ID is wrong.")
-				return false
-			}
-			context.measurement = measure
-			if measure.UseServiceAsMeasurementName {
-				context.measurementName = iotMsg.Service
-			}else {
-				context.measurementName = measure.Name
-			}
+
 			//////////////////////////////////////////////////////////////
 			if result {
+				context.filterID = pr.Config.Filters[i].ID
+				measure := pr.Config.getMeasurementByID(pr.Config.Filters[i].MeasurementID)
+				if measure == nil {
+					log.Errorf("<tsdb> Measurement either is not defined or provided ID is wrong.")
+					return false
+				}
+				context.measurement = measure
+				if measure.UseServiceAsMeasurementName {
+					context.measurementName = iotMsg.Service
+				}else {
+					context.measurementName = measure.Name
+				}
 				// log.Debugf("There is match with filter %+v", filter)
 				return true
 			}

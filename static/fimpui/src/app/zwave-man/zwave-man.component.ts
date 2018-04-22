@@ -31,6 +31,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   globalNonSecureInclMode : string;
   inclProcState : string;
   errorMsg : string;
+  selectedCommand : string ;
   globalSub : Subscription;
   progressBarMode : string ;
   localTemplates : string[];
@@ -101,7 +102,15 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
               this.showProgress(true);
             }
         }else if (fimpMsg.mtype == "evt.error.report") {
-            this.errorMsg = fimpMsg.props["msg"];
+          this.errorMsg = fimpMsg.props["msg"];
+        }else if(fimpMsg.mtype == "evt.ping.report"){
+
+          var node = this.getNodeByAddress(fimpMsg.val["address"])
+          if (fimpMsg.val.status=="SUCCESS")
+            node.status = "OK";
+          else
+            node.status = "NO_RESP";
+
         }else if (fimpMsg.mtype == "evt.network.update_report") {
             this.zwAdState = fimpMsg.val;
         }else if (fimpMsg.mtype == "evt.adapter.states_report") {
@@ -301,6 +310,15 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,props,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:dev_sys/ad:"+fromNode+"_0",msg.toString());
   }
+
+  pingNodeFromGw(toNode:string){
+    this.pingResult = "working...";
+    let props:Map<string,string> = new Map();
+    props["tx_level"] = "0";
+    let msg  = new FimpMessage("zwave-ad","cmd.ping.send","string",toNode,props,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
+  }
+
   reloadNodes(){
     this.isReloadNodesEnabled = true;
     this.getAdapterStates();
@@ -354,6 +372,25 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
 
+  runCommand(node:any) {
+     switch (this.selectedCommand) {
+       case "update":
+         this.updateDevice(node.address);
+         break;
+       case "template":
+         this.openTemplateEditor(node.hash+'.json','stable');
+         break;
+       case "delete":
+         this.deleteFailedDevice(node.address);
+         break;
+       case "replace":
+         this.replaceDevice(node.address);
+         break;
+       case "ping":
+         this.pingNodeFromGw(String(node.address));
+         break;
+     }
+  }
 
   updateDevice(nodeId :number){
     let msg  = new FimpMessage("zwave-ad","cmd.network.node_update","int",Number(nodeId),null,null)
@@ -596,7 +633,7 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     this.templateType = data["type"]
     this.template = {};
     this.template["auto_configs"] = {"assoc":[],"configs":[]};
-    this.template["dev_custom"] = {"service_grouping":[],"service_descriptor":[],"basic_mapping":[]}
+    this.template["dev_custom"] = {"service_grouping":[],"service_descriptor":[],"basic_mapping":[],"binary_switch_mapping":[]}
     this.template["docs_ref"] = ""
     console.log("Dialog constructor Opened");
   }
@@ -678,7 +715,41 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
 
 
   addNewServiceDescriptor() {
-    this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":"","comment":""});
+    var sampleDescriptor = {
+      "enabled": true,
+      "groups": [
+        "ch_0"
+      ],
+      "interfaces": [
+        {
+          "intf_t": "out",
+          "msg_t": "evt.mode.report",
+          "val_t": "bool",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.mode.set",
+          "val_t": "string",
+          "ver": "1"
+        },
+        {
+          "intf_t": "in",
+          "msg_t": "cmd.mode.get_report",
+          "val_t": "null",
+          "ver": "1"
+        }
+      ],
+      "location": "",
+      "name": "siren_ctrl",
+      "props": {
+        "is_secure": true,
+        "is_unsecure": false,
+        "sup_modes":["on","off","fire"]
+      }
+    }
+    var strDescriptor = JSON.stringify(sampleDescriptor,null, 2);
+    this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":strDescriptor,"comment":""});
   }
   deleteServiceDescriptor(serviceDescriptor:any) {
     var i = this.template.dev_custom.service_descriptor.indexOf(serviceDescriptor);
@@ -694,6 +765,26 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
     var i = this.template.dev_custom.basic_mapping.indexOf(basicMapping);
     if(i != -1) {
       this.template.dev_custom.basic_mapping.splice(i, 1);
+    }
+  }
+
+  addNewBinarySwitchMapping() {
+    if (this.template.dev_custom.bin_switch_mapping == undefined) {
+      this.template.dev_custom.bin_switch_mapping = [];
+    }
+    this.template.dev_custom.bin_switch_mapping.push(
+      {"endp":0,"service":"","msg_type":"",
+        "cc_value":true,
+        "fimp_value":{"val":"","val_t":"string"},
+        "is_get_report_cmd":false,"comment":"" });
+
+
+  }
+
+  deleteBinarySwitchMapping(binSwMapping:any) {
+    var i = this.template.dev_custom.bin_switch_mapping.indexOf(binSwMapping);
+    if(i != -1) {
+      this.template.dev_custom.bin_switch_mapping.splice(i, 1);
     }
   }
 

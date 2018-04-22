@@ -23,6 +23,8 @@ type TriggerConfig struct {
 	ValueFilter model.Variable
 	InputVariableType string
 	IsValueFilterEnabled bool
+	RegisterAsVirtualService bool
+	VirtualServiceGroup string
 }
 
 func NewTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode, ctx *model.Context, transport *fimpgo.MqttTransport) model.Node {

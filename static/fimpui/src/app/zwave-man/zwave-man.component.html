@@ -20,7 +20,7 @@
             <th style="width: 70px">Node Id</th>
             <th style="width: 150px">Product hash</th>
             <th style="width:300px">Product name</th>
-            <th style="width: 150px">Alias</th>
+            <th style="width: 300px">Alias</th>
             <th style="width: 75px">Power</th>
             <th style="width: 70px">Status</th>
             <th >Actions</th></tr> </thead>
@@ -45,10 +45,17 @@
            <td  >
              <mat-chip-list>
              <mat-chip class="open-chip" [routerLink]="['/thing-view','zw',node.address]">Services</mat-chip>
-             <mat-chip class="open-chip" (click)="openTemplateEditor(node.hash+'.json','stable')">Template</mat-chip>
-             <mat-chip (click)="updateDevice(node.address)">Update</mat-chip>
-             <mat-chip color="warn" (click)="deleteFailedDevice(node.address)">Delete</mat-chip>
-             <mat-chip color="warn" (click)="replaceDevice(node.address)">Replace</mat-chip>
+             <mat-form-field style="width: 140px;height:30px; margin-left: 10px">
+                 <mat-select  [(value)]="selectedCommand" placeholder="Select command">
+                   <mat-option value="ping"> Ping </mat-option>
+                   <mat-option value="template"> Show template </mat-option>
+                   <mat-option value="update"> Update </mat-option>
+                   <mat-option value="delete"> Delete </mat-option>
+                   <mat-option value="replace"> Replace </mat-option>
+                 </mat-select>
+             </mat-form-field>
+             <mat-chip color="warn" (click)="runCommand(node)">Run</mat-chip>
+
              </mat-chip-list>
           </td>
           </tr>
@@ -70,6 +77,7 @@
       <div #topology hidden >
         <p><button mat-raised-button color="accent" (click)="requestImaStats()">Reload</button>
         <button mat-raised-button color="accent" (click)="resetImaStats()">Reset</button></p>
+        <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in the network </button>
         <table>
 
           <thead>
@@ -152,7 +160,7 @@
 
         <button mat-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button>
         <button mat-raised-button color="accent" (click)="updateNetwork()">Start network update </button>
-        <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in network </button>
+        <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in the network </button>
         <button mat-raised-button color="accent" (click)="cleanUpNetwork()">Run network cleanup </button>
        <p> <button mat-raised-button color="warn" (click)="resetNetwork()">Z-Wave network reset </button> </p>
        <p>

@@ -24,6 +24,7 @@ type ReactorEvent struct {
 type FlowMeta struct {
 	Id          string
 	Name        string
+	Group       string
 	Description string
 	Nodes       []MetaNode
 }

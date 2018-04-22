@@ -37,6 +37,14 @@ export class ExecNodeComponent implements OnInit {
           "IsOutputJson": false,
           "IsInputJson":  false
         }
+      this.node.Config.ScriptBody = "import json\n" +
+        "import sys\n" +
+        "inMsg=json.loads(sys.argv[1])\n" +
+        "\n" +
+        "def welcome_me():\n" +
+        "   a = {\"ab\":1,\"bc\":inMsg[\"AddressStr\"]}\n" +
+        "   print(json.dumps(a))\n" +
+        "welcome_me()"
     }
   }
 

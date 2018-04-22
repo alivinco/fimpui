@@ -1,5 +1,5 @@
 <div>
-     <div #nodebody> 
+     <div #nodebody>
          <mat-expansion-panel>
             <mat-expansion-panel-header>
                     <mat-panel-title>
@@ -33,6 +33,12 @@
                    </mat-input-container>
                    <p>Address: {{ flowPublishAddress }}</p>
                    <button mat-raised-button (click)="publishFlowAsVirtualDevice()" >Copy to service binding</button>
+                  <div style="margin-bottom: 5px;margin-top: 10px" >
+                    <mat-checkbox [(ngModel)]="node.Config.RegisterAsVirtualService" >Register as virtual service</mat-checkbox>
+                  </div>
+                  <mat-input-container style="width: 200px">
+                    <input matInput [(ngModel)]="node.Config.VirtualServiceGroup" placeholder="Service group">
+                  </mat-input-container>
         </mat-expansion-panel>
         <mat-expansion-panel>
            <mat-expansion-panel-header>
@@ -42,7 +48,7 @@
            </mat-expansion-panel-header>
             <div style="margin-bottom: 30px;margin-top:5px" >
                     <mat-checkbox [(ngModel)]="node.Config.IsValueFilterEnabled" > Enable value filter </mat-checkbox>
-            </div> 
+            </div>
             <mat-select #nodeTypeInput class="value-selector" placeholder="Value type" [(ngModel)]="node.Config.ValueFilter.ValueType">
                 <mat-option value="">The same as input </mat-option>
                 <mat-option value="string">string</mat-option>
@@ -71,7 +77,7 @@
                         <input matInput type="number" [(ngModel)]="node.Config.ValueFilter.Value" placeholder="Default value">
                     </mat-input-container>
                 <span *ngSwitchCase="''">
-        
+
                 </span>
                 <mat-radio-group *ngSwitchCase="'bool'" class="example-radio-group" placeholder="Default value" [(ngModel)]="node.Config.ValueFilter.Value">
                         <mat-radio-button class="example-radio-button" [value]="true">
