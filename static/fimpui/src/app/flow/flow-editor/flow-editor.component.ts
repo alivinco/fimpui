@@ -428,10 +428,10 @@ findInputSocketPosition(htmlElement):any {
           }
         }
         break;
-      case "rest_action":
-        node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":false,
-          "Headers":[{"Name":"Content-type","Value":"application/json"}],"ResponseMapping":[]};
-        break;
+      // case "rest_action":
+      //   node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":false,
+      //     "Headers":[{"Name":"Content-type","Value":"application/json"}],"ResponseMapping":[]};
+      //   break;
       case "loop":
         node.Config = {};
         node.Config["StartValue"] = 0;

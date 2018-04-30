@@ -13,7 +13,7 @@ export class RestActionNodeComponent implements OnInit {
   shortcuts:any[];
   constructor(public dialog: MatDialog) { }
   ngOnInit() {
-
+    this.loadDefaultConfig();
   }
   addHeader() {
     this.node.Config.Headers.push({"Name":"","Value":""})
@@ -49,5 +49,29 @@ export class RestActionNodeComponent implements OnInit {
       this.node.Config.Headers.splice(i, 1);
     }
   }
+
+  loadDefaultConfig() {
+    if (this.node.Config==null) {
+      this.node.Config = {
+        "Url": "http://",
+        "Method": "GET",
+        "RequestPayloadType": "json",
+        "RequestTemplate": "", "LogResponse": false,
+        "Headers": [{"Name": "Content-type", "Value": "application/json"}],
+        "ResponseMapping": [],
+        "Auth": {
+          "Enabled": false,
+          "GrantType": "password",
+          "Url": "http://",
+          "ClientID": "",
+          "ClientSecret": "",
+          "Scope": "",
+          "Username": "",
+          "Password": ""
+        }
+      };
+    }
+  }
+
 
 }

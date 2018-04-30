@@ -78,9 +78,9 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			if err != nil {
 				return []model.NodeID{node.meta.ErrorTransition},err
 			}
-			cmd = exec.Command("python",node.scriptFullPath,string(strMsg))
+			cmd = exec.Command("python3",node.scriptFullPath,string(strMsg))
 		}else {
-			cmd = exec.Command("python",node.scriptFullPath)
+			cmd = exec.Command("python3",node.scriptFullPath)
 		}
 	}
 	output , err := cmd.CombinedOutput()

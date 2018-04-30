@@ -48,6 +48,41 @@
 
     <mat-expansion-panel>
       <mat-expansion-panel-header>
+        <mat-panel-title> Authentication </mat-panel-title>
+      </mat-expansion-panel-header>
+        <div style="margin-bottom: 5px" >
+          <mat-checkbox [(ngModel)]="node.Config.Auth.Enabled" > Enabled </mat-checkbox>
+        </div>
+
+        <p><mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.Url" placeholder="Auth endpoint" >
+        </mat-form-field></p>
+
+        <mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.GrantType" placeholder="Grant type" >
+        </mat-form-field>
+
+        <mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.Scope" placeholder="Scope" >
+        </mat-form-field>
+        <p><mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.ClientID" placeholder="Client id" >
+        </mat-form-field>
+        <mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.ClientSecret" placeholder="Client secret" >
+        </mat-form-field></p>
+
+        <p><mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.Username" placeholder="Username" >
+        </mat-form-field>
+        <mat-form-field class="node-transition-field">
+          <input matInput [(ngModel)]="node.Config.Auth.Password" placeholder="Password" >
+        </mat-form-field></p>
+
+    </mat-expansion-panel>
+
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
         <mat-panel-title> Response mapping </mat-panel-title>
       </mat-expansion-panel-header>
 

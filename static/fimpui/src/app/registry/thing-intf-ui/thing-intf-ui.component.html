@@ -4,36 +4,36 @@
       <div [ngSwitch]="msgType">
         <div *ngSwitchCase="'evt.sensor.report'"> <h3> {{intf.lastValue.val}} {{intf.lastValue.props.unit}}</h3>  </div>
         <div *ngSwitchCase="'evt.scene.report'"> <h3> {{intf.lastValue.val}} </h3>  </div>
-        <div *ngSwitchCase="'evt.binary.report'"> <mat-chip-list> 
+        <div *ngSwitchCase="'evt.binary.report'"> <mat-chip-list>
           <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"> {{intf.lastValue.val}} </mat-chip>
            </mat-chip-list> </div>
-        <div *ngSwitchCase="'evt.open.report'"> 
-          <mat-chip-list> 
+        <div *ngSwitchCase="'evt.open.report'">
+          <mat-chip-list>
               <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"><h4>  {{intf.lastValue.val}}</h4> </mat-chip>
-           </mat-chip-list> 
+           </mat-chip-list>
         </div>
-        <div *ngSwitchCase="'evt.presence.report'"> 
-            <mat-chip-list> 
+        <div *ngSwitchCase="'evt.presence.report'">
+            <mat-chip-list>
                 <mat-chip style="width: 170px" color="primary" selected="{{intf.lastValue.val}}"><h4>  {{intf.lastValue.val}}</h4> </mat-chip>
-             </mat-chip-list> 
+             </mat-chip-list>
           </div>
         <div *ngSwitchCase="'evt.config.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
-            {{item.key}} = {{item.value}} 
-          </div>   
+            {{item.key}} = {{item.value}}
+          </div>
         </div>
         <div *ngSwitchCase="'evt.modelvl.report'">
           <div *ngFor="let item of intf.lastValue.val|keys" >
-            {{item.key}} = {{item.value}} 
-          </div>   
+            {{item.key}} = {{item.value}}
+          </div>
         </div>
         <div *ngSwitchCase="'evt.group.members_report'">
           <p>Group :{{ intf.lastValue.val.group }} </p>
           <p> Members :
           <span *ngFor="let member of intf.lastValue.val.members" >
-            {{ member }}, 
+            {{ member }},
           </span>
-          </p>   
+          </p>
         </div>
         <div *ngSwitchCase="'evt.alarm.report'">
           <div>Event  = <b>{{ intf.lastValue.val.event }}</b> </div>
@@ -56,7 +56,7 @@
       </div>
     </div>
   <div [ngSwitch]="msgType">
-      <div *ngSwitchCase="'cmd.binary.set'"> 
+      <div *ngSwitchCase="'cmd.binary.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -66,7 +66,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.color.set'"> 
+      <div *ngSwitchCase="'cmd.color.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -81,12 +81,12 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.lvl.set'"> 
+      <div *ngSwitchCase="'cmd.lvl.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
             <td>
-              <mat-slider #lvlValue thumbLabel  min="0" max="100" step="1" value="0"></mat-slider>
+              <mat-slider #lvlValue thumbLabel  min="0" max="255" step="1" value="0"></mat-slider>
             </td>
             <td><mat-input-container class="example-full-width">
               <input #durationValue matInput placeholder="Duration" type="number" value="0">
@@ -96,7 +96,19 @@
           </table>
         </form>
       </div>
-       <div *ngSwitchCase="'cmd.lvl.start'"> 
+      <div *ngSwitchCase="'cmd.scene.set'">
+        <form class="intf-form">
+          <table class="table-full-width" cellspacing="0">
+            <tr>
+              <td><mat-input-container class="example-full-width">
+                <input #sceneValue matInput placeholder="Scene name" type="text" value="">
+              </mat-input-container></td>
+              <td><button mat-raised-button (click)="cmdModeSet(sceneValue.value)" >Set</button></td>
+            </tr>
+          </table>
+        </form>
+      </div>
+       <div *ngSwitchCase="'cmd.lvl.start'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -110,7 +122,7 @@
           </table>
         </form>
       </div>
-       <div *ngSwitchCase="'cmd.lvl.stop'"> 
+       <div *ngSwitchCase="'cmd.lvl.stop'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -119,7 +131,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.lvl.get_report'"> 
+      <div *ngSwitchCase="'cmd.lvl.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -128,7 +140,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.state.get_report'"> 
+      <div *ngSwitchCase="'cmd.state.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -138,7 +150,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.tstate.set'"> 
+      <div *ngSwitchCase="'cmd.tstate.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -150,7 +162,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.notiftype.set'"> 
+      <div *ngSwitchCase="'cmd.notiftype.set'">
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0">
             <tr>
@@ -167,7 +179,7 @@
             </table>
           </form>
       </div>
-      <div *ngSwitchCase="'cmd.notiftype.get_report'"> 
+      <div *ngSwitchCase="'cmd.notiftype.get_report'">
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0">
             <tr>
@@ -176,7 +188,7 @@
             </table>
           </form>
         </div>
-      <div *ngSwitchCase="'cmd.lock.set'"> 
+      <div *ngSwitchCase="'cmd.lock.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -186,7 +198,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.binary.get_report'"> 
+      <div *ngSwitchCase="'cmd.binary.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -195,7 +207,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.setpoint.set'"> 
+      <div *ngSwitchCase="'cmd.setpoint.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -210,7 +222,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.modelvl.set'"> 
+      <div *ngSwitchCase="'cmd.modelvl.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -225,7 +237,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.mode.set'"> 
+      <div *ngSwitchCase="'cmd.mode.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -237,7 +249,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.mode.get_report'"> 
+      <div *ngSwitchCase="'cmd.mode.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td><button mat-raised-button (click)="cmdGetReportNull()" >Get</button></td>
@@ -245,7 +257,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.setpoint.get_report'"> 
+      <div *ngSwitchCase="'cmd.setpoint.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td><mat-input-container class="example-full-width">
@@ -256,7 +268,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.config.set'"> 
+      <div *ngSwitchCase="'cmd.config.set'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -271,7 +283,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.config.get_report'"> 
+      <div *ngSwitchCase="'cmd.config.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td class="control-first-td"><mat-input-container class="example-full-width">
@@ -282,7 +294,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.group.add_members'"> 
+      <div *ngSwitchCase="'cmd.group.add_members'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -297,7 +309,7 @@
           </table>
         </form>
       </div>
-      <div *ngSwitchCase="'cmd.group.delete_members'"> 
+      <div *ngSwitchCase="'cmd.group.delete_members'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0">
           <tr>
@@ -313,7 +325,7 @@
         </form>
       </div>
 
-      <div *ngSwitchCase="'cmd.group.get_members'"> 
+      <div *ngSwitchCase="'cmd.group.get_members'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td class="control-first-td"><mat-input-container class="example-full-width">
@@ -323,8 +335,8 @@
           </tr>
           </table>
         </form>
-      </div> 
-      <div *ngSwitchCase="'cmd.modelvl.get_report'"> 
+      </div>
+      <div *ngSwitchCase="'cmd.modelvl.get_report'">
           <form class="intf-form">
           <table class="table-full-width" cellspacing="0"><tr>
               <td><mat-input-container class="example-full-width">
@@ -334,9 +346,9 @@
             </tr>
             </table>
           </form>
-        </div> 
-  
-      <div *ngSwitchCase="'cmd.meter.get_report'"> 
+        </div>
+
+      <div *ngSwitchCase="'cmd.meter.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td><mat-input-container class="example-full-width">
@@ -348,7 +360,7 @@
         </form>
       </div>
 
-      <div *ngSwitchCase="'cmd.sensor.get_report'"> 
+      <div *ngSwitchCase="'cmd.sensor.get_report'">
         <form class="intf-form">
         <table class="table-full-width" cellspacing="0"><tr>
             <td><button mat-raised-button (click)="cmdSensorReportGet('')" >Get</button></td>
@@ -357,5 +369,5 @@
         </form>
       </div>
 
-  </div>   
+  </div>
 </div>

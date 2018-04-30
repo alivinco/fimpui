@@ -13,10 +13,10 @@ export class ThingIntfUiComponent implements OnInit {
   @Input() msgType : string;
   @Input() addr: string;
   @Input() service :string;
-  
-  constructor(private fimp:FimpService) { 
+
+  constructor(private fimp:FimpService) {
     // this.fimp.getGlobalObservable().subscribe((msg) => {
-    // let fimpMsg = NewFimpMessageFromString(msg.payload.toString()); 
+    // let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
     // });
    }
 
@@ -72,17 +72,19 @@ export class ThingIntfUiComponent implements OnInit {
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,mode,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
   }
+
+
   cmdLevelStart(direction:string,duration:number){
     var val = direction;
     var props = new Map<string,string>() ;
     props["duration"] = String(duration);
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,val,props,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
-  } 
+  }
   cmdLevelStop(direction:string){
     let msg  = new FimpMessage(this.service,this.intf.msgType,this.intf.valueType,null,null,null)
     this.fimp.publish("pt:j1/mt:cmd"+this.addr,msg.toString());
-  } 
+  }
 
   cmdGroupSet(group:string,member:string){
     let val = {};
@@ -129,12 +131,12 @@ export class KeysPipe implements PipeTransform {
   transform(value, args:string[]) : any {
     if (!value) {
       return value;
-    } 
+    }
 
     let keys = [];
     for (let key in value) {
       keys.push({key: key, value: value[key]});
-    } 
+    }
     return keys;
-  } 
-} 
+  }
+}

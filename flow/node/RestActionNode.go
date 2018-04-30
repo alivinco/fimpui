@@ -14,6 +14,9 @@ import (
 	"encoding/json"
 
 	"io/ioutil"
+	"net/url"
+	"strings"
+	"time"
 )
 type RestActionNode struct {
 	BaseNode
@@ -23,6 +26,8 @@ type RestActionNode struct {
 	reqTemplate *template.Template
 	urlTemplate *template.Template
 	httpClient  *http.Client
+	accessToken string
+	tokenExpiresAt time.Time
 }
 
 type ResponseToVariableMap struct {
@@ -50,10 +55,30 @@ type RestActionNodeConfig struct {
 	Headers []Header
 	ResponseMapping []ResponseToVariableMap
 	LogResponse bool
+	Auth OAuth
+}
+
+type OAuth struct {
+	Enabled bool
+	GrantType string
+	Url string
+	ClientID string
+	ClientSecret string
+	Scope string
+	Username string
+	Password string
+
+}
+
+type AuthResponse struct {
+	AccessToken string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn int64 `json:"expires_in"`
 }
 
 type RestActionNodeTemplateParams struct {
 	Variable interface{}
+	Token string
 	Message *model.Message
 }
 
@@ -80,6 +105,7 @@ func (node *RestActionNode) LoadNodeConfig() error {
 		if err != nil {
 			log.Error(node.flowOpCtx.FlowId+"<RestActionNode> Failed while parsing url template.Error:",err)
 		}
+		node.Authenticate("","")
 	}
 	return err
 }
@@ -88,14 +114,140 @@ func (node *RestActionNode) WaitForEvent(responseChannel chan model.ReactorEvent
 
 }
 
+func (node *RestActionNode) loadAccessTokenFromContext()bool {
+	accessTokenVar,err := node.ctx.GetVariable("access_token",node.flowOpCtx.FlowId)
+
+	if err != nil {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Error , can't load access token from context.Err",err)
+		node.accessToken = ""
+		return false
+	}
+	var ok bool
+	node.accessToken ,ok = accessTokenVar.Value.(string)
+	if !ok {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Error , can't load access token from context,variable is not a string .Err",err)
+		node.accessToken = ""
+		return false
+	}
+
+	if node.accessToken == "" {
+		return false
+	}
+	return true
+}
+
+
+func (node *RestActionNode) Authenticate(username string,password string ) {
+	if ! node.config.Auth.Enabled {
+		node.accessToken = ""
+		return
+	}
+	if node.loadAccessTokenFromContext() {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Auth token already loaded ")
+		return
+	}
+	log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Requesting new token")
+	data := url.Values{}
+	data.Add("grant_type", node.config.Auth.GrantType)
+	data.Add("client_id", node.config.Auth.ClientID)
+	data.Add("client_secret", node.config.Auth.ClientSecret)
+	data.Add("scope", node.config.Auth.Scope)
+	data.Add("username", node.config.Auth.Username)
+	data.Add("password", node.config.Auth.Password)
+
+	client := &http.Client{}
+	r, _ := http.NewRequest("POST", node.config.Auth.Url, strings.NewReader(data.Encode()))
+	r.Header.Add("Content-Type","application/x-www-form-urlencoded")
+	//bReq ,err := ioutil.ReadAll(r.Body)
+	//log.Info("<RestActionNode> Auth request:",string(bReq))
+
+	resp, err := client.Do(r)
+	if err != nil {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Auth error . Error : ", err)
+		return
+	}
+	bData ,err := ioutil.ReadAll(resp.Body)
+	if err == nil {
+
+		log.Info("<RestActionNode> Auth Response:",string(bData))
+
+		jresp := AuthResponse{}
+		json.Unmarshal([]byte(bData), &jresp)
+
+		log.Info("<RestActionNode> Auth Response:",string(bData))
+
+		node.accessToken = jresp.AccessToken
+		node.tokenExpiresAt = time.Now().Add(time.Second* time.Duration(jresp.ExpiresIn))
+
+		log.Infof(node.flowOpCtx.FlowId+"<RestActionNode> Auth successfully . Access toke expires after %d seconds , at ", jresp.ExpiresIn,node.tokenExpiresAt.Format("2006-01-02 15:04:05"))
+		node.ctx.SetVariable("access_token","object",jresp.AccessToken,"",node.flowOpCtx.FlowId,false )
+		node.ctx.SetVariable("refresh_token","string",jresp.RefreshToken,"",node.flowOpCtx.FlowId,false )
+		node.ctx.SetVariable("expires_at","string",node.tokenExpiresAt,"",node.flowOpCtx.FlowId,false )
+	}
+
+}
+
+func (node *RestActionNode) refreshToken() {
+	log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Refreshing access token . ")
+	refreshTokenVar,err := node.ctx.GetVariable("refresh_token",node.flowOpCtx.FlowId)
+
+	if err != nil {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Error , can't load refresh token from context.Err",err)
+		node.accessToken = ""
+		return
+	}
+	refreshToken ,ok := refreshTokenVar.Value.(string)
+	if !ok {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Error , can't load refresh token from context,variable is not a string .Err",err)
+		node.accessToken = ""
+		return
+	}
+	data := url.Values{}
+	data.Add("grant_type", "refresh_token")
+	data.Add("client_id", node.config.Auth.ClientID)
+	data.Add("client_secret", node.config.Auth.ClientSecret)
+	data.Add("refresh_token", refreshToken)
+
+	client := &http.Client{}
+	r, _ := http.NewRequest("POST", node.config.Auth.Url, strings.NewReader(data.Encode()))
+	r.Header.Add("Content-Type","application/x-www-form-urlencoded")
+	resp, err := client.Do(r)
+	if err != nil {
+		log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Auth error . Error : ", err)
+		return
+	}
+	bData ,err := ioutil.ReadAll(resp.Body)
+	if err == nil {
+		jresp := AuthResponse{}
+		json.Unmarshal([]byte(bData), &jresp)
+
+		log.Info("<RestActionNode> Auth Response:",string(bData))
+
+		node.accessToken = jresp.AccessToken
+		node.tokenExpiresAt = time.Now().Add(time.Second* time.Duration(jresp.ExpiresIn))
+
+		log.Infof(node.flowOpCtx.FlowId+"<RestActionNode> Token refreshed successfully . Access toke expires after %d seconds , at ", jresp.ExpiresIn,node.tokenExpiresAt.Format("2006-01-02 15:04:05"))
+		node.ctx.SetVariable("access_token","object",jresp.AccessToken,"",node.flowOpCtx.FlowId,false )
+		node.ctx.SetVariable("refresh_token","string",jresp.RefreshToken,"",node.flowOpCtx.FlowId,false )
+		node.ctx.SetVariable("expires_at","string",node.tokenExpiresAt,"",node.flowOpCtx.FlowId,false )
+	}
+}
+
 func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	log.Info(node.flowOpCtx.FlowId+"<RestActionNode> Executing RestActionNode . Name = ", node.meta.Label)
+
+	if node.accessToken != "" {
+		if time.Now().Before(node.tokenExpiresAt) {
+			node.refreshToken()
+		}
+	}
 
 	var templateBuffer bytes.Buffer
 	var urlTemplateBuffer bytes.Buffer
 	templateParams := RestActionNodeTemplateParams{}
     templateParams.Variable = msg.Payload.Value
     templateParams.Message = msg
+    templateParams.Token = node.accessToken
 
 	node.reqTemplate.Execute(&templateBuffer,templateParams)
 	node.urlTemplate.Execute(&urlTemplateBuffer,templateParams)
@@ -115,6 +267,17 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	if err != nil {
 		return []model.NodeID{},err
 	}
+	if node.config.Auth.Enabled {
+		if resp.StatusCode == 401 || resp.StatusCode == 403 || resp.StatusCode == 400 {
+			// Maybe token is not valid anymore , refreshing token and reDoing request.
+			node.refreshToken()
+			resp, err = node.httpClient.Do(req)
+			if err != nil {
+				return []model.NodeID{},err
+			}
+		}
+	}
+
 
 	for i := range node.config.ResponseMapping {
 		if node.config.ResponseMapping[i].PathType == "xml" {
