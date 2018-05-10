@@ -70,6 +70,20 @@ export class RestActionNodeComponent implements OnInit {
           "Password": ""
         }
       };
+    }else{
+      if (this.node.Config.Auth==undefined ) {
+        this.node.Config["Auth"] = {
+          "Enabled": false,
+          "GrantType": "password",
+          "Url": "http://",
+          "ClientID": "",
+          "ClientSecret": "",
+          "Scope": "",
+          "Username": "",
+          "Password": ""
+        }
+
+      }
     }
   }
 

@@ -5,6 +5,7 @@ import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
+	"github.com/alivinco/fimpui/flow/utils"
 )
 
 type TransformNode struct {
@@ -21,8 +22,9 @@ type ValueMappingRecord struct {
 
 type TransformNodeConfig struct {
 	TargetVariableName string  // Variable
+	TargetVariableType string
 	IsTargetVariableGlobal bool
-	TransformType string       // map , calc , str-to-json ,json-to-str , jsonpath , xmlpath
+	TransformType string       // map , calc , str-to-json ,json-to-str , jpath , xpath
 	IsRVariableGlobal bool                    // true - update global variable ; false - update local variable
 	IsLVariableGlobal bool                    // true - update global variable ; false - update local variable
 	Operation string 			// type of transform operation , flip , add , subtract , multiply , divide , to_bool
@@ -31,6 +33,7 @@ type TransformNodeConfig struct {
 	RVariableName string 		// Right variable name , if empty , RValue will be used instead
  	LVariableName string  		// Update input message if LVariable is empty
  	ValueMapping []ValueMappingRecord // ["LValue":1,"RValue":"mode-1"]
+ 	Path string  // JsonPath or XPath
  	//value mapping
 }
 
@@ -182,10 +185,14 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					}
 				}
 			}
+		}else if node.nodeConfig.TransformType == "jpath" || node.nodeConfig.TransformType == "xpath" {
+			result.Value,err = utils.GetValueByPath(msg,node.nodeConfig.TransformType,node.nodeConfig.Path,node.nodeConfig.TargetVariableType)
+			result.ValueType = node.nodeConfig.TargetVariableType
+			if err != nil {
+				log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while processing path in variable : ",err)
+				return []model.NodeID{node.meta.ErrorTransition},err
+			}
 		}
-
-
-
 	}
 
 	if node.nodeConfig.TargetVariableName == "" {
@@ -204,6 +211,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }
+
 
 func (node *TransformNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
 

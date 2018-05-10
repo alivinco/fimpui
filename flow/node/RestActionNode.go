@@ -158,6 +158,7 @@ func (node *RestActionNode) Authenticate(username string,password string ) {
 	client := &http.Client{}
 	r, _ := http.NewRequest("POST", node.config.Auth.Url, strings.NewReader(data.Encode()))
 	r.Header.Add("Content-Type","application/x-www-form-urlencoded")
+
 	//bReq ,err := ioutil.ReadAll(r.Body)
 	//log.Info("<RestActionNode> Auth request:",string(bReq))
 
@@ -262,7 +263,9 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	if err != nil {
 		return []model.NodeID{},err
 	}
-
+	if node.config.Auth.Enabled {
+		req.Header.Add("Authorization","Bearer "+node.accessToken)
+	}
 	resp, err := node.httpClient.Do(req)
 	if err != nil {
 		return []model.NodeID{},err
@@ -271,6 +274,7 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 		if resp.StatusCode == 401 || resp.StatusCode == 403 || resp.StatusCode == 400 {
 			// Maybe token is not valid anymore , refreshing token and reDoing request.
 			node.refreshToken()
+			req.Header.Set("Authorization","Bearer "+node.accessToken)
 			resp, err = node.httpClient.Do(req)
 			if err != nil {
 				return []model.NodeID{},err

@@ -127,7 +127,23 @@ export class FlowEditorComponent implements OnInit {
          console.log("Flow was saved");
       });
   }
-
+  runFlow() {
+    let node:MetaNode;
+    for(node of this.flow.Nodes) {
+      if (node.Type == "trigger") {
+        break;
+      }
+    }
+    let dialogRef = this.dialog.open(FlowRunDialog,{
+      // height: '95%',
+      width: '500px',
+      data:node
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      // this.flow = result;
+      // this.loadContext();
+    });
+  }
   sendFlowControllCommands(command:string) {
     this.http
       .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+this.flow.Id+'/'+command,null,  {} )
@@ -397,21 +413,6 @@ findInputSocketPosition(htmlElement):any {
 
     switch (node.Type){
       case "trigger":
-        node.Config = {};
-        node.Config["Timeout"] = 0;
-        node.Config["ValueFilter"] = {"Value":"","ValueType":""};
-        node.Config["IsValueFilterEnabled"] = false;
-        if (node.Ui.nodeType) {
-          switch (node.Ui.nodeType) {
-            case "vinc_trigger":
-              node.Address = "pt:j1/mt:evt/rt:app/rn:vinculum/ad:1"
-              node.ServiceInterface = "evt.mode.report"
-              node.Service = "home_mode"
-              node.Label = "Home mode trigger"
-              node.Config.ValueFilter.ValueType = "string"
-              break;
-          }
-        }
         break;
       case "action":
         node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{},"RegisterAsVirtualService":false};
@@ -541,10 +542,16 @@ findInputSocketPosition(htmlElement):any {
   getParentNodesById(nodeId:string):MetaNode[] {
     var nodes:MetaNode[] = [];
     this.flow.Nodes.forEach(element => {
-        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || element.TimeoutTransition==nodeId ||
-            element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
+        if (element.SuccessTransition==nodeId || element.ErrorTransition==nodeId || element.TimeoutTransition==nodeId ) {
           nodes.push(element);
           return ;
+        }else {
+          if (element.Config) {
+            if (element.Config.TrueTransition==nodeId || element.Config.FalseTransition==nodeId) {
+              nodes.push(element);
+              return ;
+            }
+          }
         }
     });
     return nodes;

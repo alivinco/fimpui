@@ -11,6 +11,7 @@ type Message struct {
 	AddressStr string
 	Address    fimpgo.Address
 	Payload    fimpgo.FimpMessage
+	RawPayload []byte
 	Header     map[string]string
 	CancelOp   bool // if true , listening end should close all operations
 }

@@ -57,7 +57,7 @@ func (mg *Manager) InitMessagingTransport() {
 }
 
 func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
-	msg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg}
+	msg := model.Message{AddressStr: topic, Address: *addr, Payload: *iotMsg,RawPayload:rawMessage}
 	// Message broadcast to all flows
 	for id, stream := range mg.msgStreams {
 		if mg.GetFlowById(id).IsFlowInterestedInMessage(topic) {

@@ -66,6 +66,8 @@ func (node *ExecNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
 
 func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	log.Info(node.flowOpCtx.FlowId+"<ExecNode> Executing ExecNode . Name = ", node.meta.Label)
+
+	//log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Input value : ", r)
     var cmd * exec.Cmd
 	switch node.config.ExecType {
 	case "cmd":
@@ -74,6 +76,13 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		cmd = exec.Command("bash", "-c", node.config.Command)
 	case "python":
 		if node.config.IsInputJson {
+
+			if msg.Payload.ValueType == "object" {
+				var val interface{}
+				msg.Payload.GetObjectValue(&val)
+				msg.Payload.Value = val
+				log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Input value : ", val)
+			}
 			strMsg,err := json.Marshal(msg)
 			if err != nil {
 				return []model.NodeID{node.meta.ErrorTransition},err

@@ -5,6 +5,12 @@ import (
 	"github.com/dchest/uniuri"
 	"github.com/pkg/errors"
 	"strings"
+	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/labstack/gommon/log"
+	"encoding/json"
+	"github.com/oliveagle/jsonpath"
+	"bytes"
 )
 
 func GenerateId(len int) string {
@@ -81,3 +87,64 @@ func match(route []string, topic []string) bool {
 func RouteIncludesTopic(route, topic string) bool {
 	return match(strings.Split(route, "/"), strings.Split(topic, "/"))
 }
+
+
+func GetValueByPath(msg *model.Message,pathType string,path string,targetVariableType string) (interface{},error) {
+	if pathType == "xpath" {
+		xTree, err := xmltree.ParseXML(bytes.NewReader(msg.RawPayload))
+		if err == nil {
+			var varValue interface{}
+			var xpExec = goxpath.MustParse(path)
+
+			switch targetVariableType {
+			case "string":
+				result, err := xpExec.Exec(xTree)
+				if err == nil {
+					log.Debug("<RestActionNode> Xpath result :",result.String())
+					varValue = result.String()
+				}
+			case "bool":
+				result, err := xpExec.ExecBool(xTree)
+				if err == nil {
+					log.Debug("<RestActionNode> Xpath result :",result)
+					varValue = result
+				}
+			case "int":
+				result, err := xpExec.ExecNum(xTree)
+				if err == nil {
+					log.Debug("<RestActionNode> Xpath result :",int(result))
+					varValue = int(result)
+				}
+			case "float":
+				result, err := xpExec.ExecNum(xTree)
+				if err == nil {
+					log.Debug("<RestActionNode> Xpath result :",result)
+					varValue = result
+				}
+			}
+
+			if err != nil {
+				log.Error("<RestActionNode> Can't find result :",err)
+				return nil,errors.New("Can't extract value.")
+			}else {
+				return varValue,nil
+			}
+
+
+		}else {
+			log.Error("<RestActionNode> Can't parse XML :",err)
+		}
+		//fmt.Println(res)
+	}else if pathType == "jpath" {
+		var jData interface{}
+		json.Unmarshal(msg.RawPayload, &jData)
+		varValue, err := jsonpath.JsonPathLookup(jData, path)
+		if err == nil {
+			return varValue,nil
+		}else {
+			return nil,err
+		}
+	}
+	return nil,errors.New("Unknown path type")
+}
+
