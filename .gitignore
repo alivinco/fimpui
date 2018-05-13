@@ -36,3 +36,7 @@ testem.log
 #System Files
 .DS_Store
 Thumbs.db
+vendor/golang.org/x
+debian/opt/fimpui/static/fimpui/dist
+var/flow_storage
+*.deb

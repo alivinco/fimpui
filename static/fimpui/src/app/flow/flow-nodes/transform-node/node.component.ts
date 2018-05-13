@@ -3,6 +3,7 @@ import {Component, Input, OnInit} from "@angular/core";
 import {MatDialog} from "@angular/material";
 import {Http, Response} from "@angular/http";
 import {BACKEND_ROOT} from "../../../globals";
+import {ContextVariable} from "../../flow-context/variable-selector.component";
 
 @Component({
   selector: 'transform-node',
@@ -24,10 +25,18 @@ export class TransformNodeComponent implements OnInit {
   loadDefaultConfig() {
     if (this.node.Config==null) {
       this.node.Config = {
-        "TargetVariableName":"","IsTargetVariableGlobal":false,
-        "TransformType":"calc","Rtype":"var","IsRVariableGlobal":false,
+        "TargetVariableName":"",
+        "IsTargetVariableGlobal":false,
+        "TransformType":"calc",
+        "Rtype":"var","IsRVariableGlobal":false,
         "IsLVariableGlobal":false,
-        "Operation":"add","RValue":{"ValueType":"int","Value":0},"RVariableName":"","LVariableName":"","ValueMapping":[]};
+        "Operation":"add",
+        "RValue":{"ValueType":"int","Value":0},
+        "RVariableName":"",
+        "LVariableName":"",
+        "ValueMapping":[],
+        "XPathMapping":[]
+      };
     }
   }
 
@@ -37,6 +46,34 @@ export class TransformNodeComponent implements OnInit {
     valueMap["RValue"] = {"ValueType":"int","Value":0};
     node.Config["ValueMapping"].push(valueMap);
   }
+
+  addXPathMapping(node:MetaNode){
+    let valueMap = {
+      "Path":"",
+      "TargetVariableName":"",
+      "TargetVariableType":"",
+      "IsTargetVariableGlobal":false,
+      "UpdateInputVariable":false
+    };
+    node.Config["XPathMapping"].push(valueMap);
+  }
+
+  targetVariableSelected(cvar:ContextVariable,vmap) {
+    vmap.TargetVariableName = cvar.Name;
+    vmap.TargetVariableType = cvar.Type;
+    vmap.IsTargetVariableGlobal = cvar.isGlobal;
+  }
+
+  resultVariableSelected(cvar:ContextVariable) {
+    this.node.Config.TargetVariableName = cvar.Name;
+    this.node.Config.IsTargetVariableGlobal = cvar.isGlobal;
+  }
+
+  lVariableSelected(cvar:ContextVariable) {
+    this.node.Config.LVariableName = cvar.Name;
+    this.node.Config.IsLVariableGlobal = cvar.isGlobal;
+  }
+
   loadContext() {
     if (this.flowId) {
       this.http
@@ -71,6 +108,13 @@ export class TransformNodeComponent implements OnInit {
     var i = this.node.Config.ValueMapping.indexOf(record);
     if(i != -1) {
       this.node.Config.ValueMapping.splice(i, 1);
+    }
+  }
+
+  deleteXPathRecord(record:any) {
+    var i = this.node.Config.XPathMapping.indexOf(record);
+    if(i != -1) {
+      this.node.Config.XPathMapping.splice(i, 1);
     }
   }
 

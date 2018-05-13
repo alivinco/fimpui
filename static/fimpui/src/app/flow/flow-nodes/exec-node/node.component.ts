@@ -49,11 +49,11 @@ export class ExecNodeComponent implements OnInit {
   }
 
   inputVariableSelected(cvar:ContextVariable) {
-    this.node.Config.InputVariableName = cvar.variableName;
+    this.node.Config.InputVariableName = cvar.Name;
     this.node.Config.IsInputVariableGlobal = cvar.isGlobal;
   }
   outputVariableSelected(cvar:ContextVariable) {
-    this.node.Config.OutputVariableName = cvar.variableName;
+    this.node.Config.OutputVariableName = cvar.Name;
     this.node.Config.IsOutputVariableGlobal = cvar.isGlobal;
   }
 

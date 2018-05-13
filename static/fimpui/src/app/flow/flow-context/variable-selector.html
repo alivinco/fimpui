@@ -1,11 +1,11 @@
 <div>
   <mat-form-field style="width: 200px">
-    <mat-select *ngIf="!isGlobal" style="width: 200px"   placeholder="{{label}}" [(ngModel)]="variableName" (change)="onSelected()" >
+    <mat-select style="width: 200px"   placeholder="{{label}}" [(ngModel)]="variableName" (change)="onSelected()" >
       <mat-option value = "">Default Input</mat-option>
-      <mat-option *ngFor="let vari of localVars" [value]="vari" >{{vari}}</mat-option>
-    </mat-select>
-    <mat-select *ngIf="isGlobal" style="width: 200px"  placeholder="{{label}}" [(ngModel)]="variableName" (change)="onSelected()" >
-      <mat-option *ngFor="let vari of globalVars" value="{{vari}}">{{vari}}</mat-option>
+      <ng-container *ngFor="let vari of vars">
+        <mat-option *ngIf="vari.isGlobal==isGlobal" [value]="vari.Name" >{{vari.Name}}({{vari.Type}})</mat-option>
+      </ng-container>
+
     </mat-select>
   </mat-form-field>
   <mat-checkbox style="margin-bottom: 5px; margin-right: 10px;" [(ngModel)]="isGlobal" > Is global </mat-checkbox>

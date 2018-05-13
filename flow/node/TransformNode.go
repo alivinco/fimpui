@@ -15,11 +15,6 @@ type TransformNode struct {
 	transport *fimpgo.MqttTransport
 }
 
-type ValueMappingRecord struct {
-	LValue model.Variable
-	RValue model.Variable
-}
-
 type TransformNodeConfig struct {
 	TargetVariableName string  // Variable
 	TargetVariableType string
@@ -33,8 +28,22 @@ type TransformNodeConfig struct {
 	RVariableName string 		// Right variable name , if empty , RValue will be used instead
  	LVariableName string  		// Update input message if LVariable is empty
  	ValueMapping []ValueMappingRecord // ["LValue":1,"RValue":"mode-1"]
- 	Path string  // JsonPath or XPath
+ 	XPathMapping []TransformXPathRecord
  	//value mapping
+}
+
+type ValueMappingRecord struct {
+	LValue model.Variable
+	RValue model.Variable
+}
+
+type TransformXPathRecord struct {
+	Name string
+	Path string
+	TargetVariableName string
+	TargetVariableType string
+	IsTargetVariableGlobal bool
+	UpdateInputVariable bool
 }
 
 func NewTransformNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {
@@ -80,6 +89,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
 	if err != nil {
+		log.Warn(node.flowOpCtx.FlowId+"<Transf> Error 1 : ",err)
 		return nil , err
 	}
 
@@ -104,7 +114,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		return nil , err
 	}
 
-    if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber())  {
+    if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber()) || (node.nodeConfig.TransformType == "xpath" || node.nodeConfig.TransformType == "jpath" )  {
 
     	if node.nodeConfig.TransformType == "calc" {
 			switch node.nodeConfig.Operation {
@@ -186,12 +196,32 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				}
 			}
 		}else if node.nodeConfig.TransformType == "jpath" || node.nodeConfig.TransformType == "xpath" {
-			result.Value,err = utils.GetValueByPath(msg,node.nodeConfig.TransformType,node.nodeConfig.Path,node.nodeConfig.TargetVariableType)
-			result.ValueType = node.nodeConfig.TargetVariableType
-			if err != nil {
-				log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while processing path in variable : ",err)
-				return []model.NodeID{node.meta.ErrorTransition},err
+			log.Info(node.flowOpCtx.FlowId+"<Transf> Doing XPATH transformation ")
+			for i := range node.nodeConfig.XPathMapping {
+				result.Value,err = utils.GetValueByPath(msg,node.nodeConfig.TransformType,node.nodeConfig.XPathMapping[i].Path,node.nodeConfig.XPathMapping[i].TargetVariableType)
+				result.ValueType = node.nodeConfig.TargetVariableType
+				log.Info(node.flowOpCtx.FlowId+"<Transf> Extracted value : ",result.Value)
+				if err != nil {
+					log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while processing path in variable : ",err)
+					return []model.NodeID{node.meta.ErrorTransition},err
+				}
+				if node.nodeConfig.XPathMapping[i].TargetVariableName == "" {
+					// Update input message
+					msg.Payload.Value = result.Value
+					msg.Payload.ValueType = result.ValueType
+				}else {
+					// Save value into variable
+					// Save default value from node config to variable
+					log.Info(node.flowOpCtx.FlowId+"<Transf> Setting transformed variable : ")
+					if node.nodeConfig.XPathMapping[i].IsTargetVariableGlobal {
+						node.ctx.SetVariable(node.nodeConfig.XPathMapping[i].TargetVariableName, result.ValueType, result.Value, "", "global", false)
+					} else {
+						node.ctx.SetVariable(node.nodeConfig.XPathMapping[i].TargetVariableName, result.ValueType, result.Value, "", node.flowOpCtx.FlowId, false)
+					}
+
+				}
 			}
+			return []model.NodeID{node.meta.SuccessTransition},nil
 		}
 	}
 

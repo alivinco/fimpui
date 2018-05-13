@@ -7,7 +7,9 @@ import {MatDialog} from "@angular/material";
 
 export class ContextVariable {
 
-  variableName : string;
+  Name : string;
+  Type : string;
+  Value : any;
   isGlobal : boolean;
 }
 
@@ -22,8 +24,7 @@ export class VariableSelectorComponent implements OnInit {
     @Input() label : string;
     @Input() flowId:string;
     @Output() onSelect = new EventEmitter<ContextVariable>();
-    localVars:any;
-    globalVars:any;
+    vars:ContextVariable[];
 
   ngOnInit() {
     this.loadContext();
@@ -32,6 +33,7 @@ export class VariableSelectorComponent implements OnInit {
   }
 
   loadContext() {
+    this.vars = [];
     if (this.flowId) {
       this.http
         .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flowId)
@@ -39,9 +41,13 @@ export class VariableSelectorComponent implements OnInit {
           let body = res.json();
           return body;
         }).subscribe ((result) => {
-        this.localVars = [];
         for (var key in result){
-          this.localVars.push(result[key].Name);
+          let v = new ContextVariable()
+          v.isGlobal = false
+          v.Name  = result[key].Name
+          v.Type = result[key].Variable.ValueType;
+          v.Value = result[key].Variable.Value;
+          this.vars.push(v);
         }
 
       });
@@ -54,9 +60,13 @@ export class VariableSelectorComponent implements OnInit {
         let body = res.json();
         return body;
       }).subscribe ((result) => {
-      this.globalVars = [];
       for (var key in result){
-        this.globalVars.push(result[key].Name);
+        let v = new ContextVariable()
+        v.isGlobal = true
+        v.Name  = result[key].Name;
+        v.Type = result[key].Variable.ValueType;
+        v.Value = result[key].Variable.Value;
+        this.vars.push(v);
       }
     });
   }
@@ -77,11 +87,25 @@ export class VariableSelectorComponent implements OnInit {
     });
   }
 
+  getVariableByName(name:string,isGlobal:boolean):ContextVariable {
+    for (let v of this.vars) {
+      if(v.Name == name && v.isGlobal == isGlobal) {
+        return v;
+      }
+    }
+    return null;
+
+  }
+
   onSelected() {
-     var event = new ContextVariable();
-     event.variableName = this.variableName;
-     event.isGlobal = this.isGlobal;
-     this.onSelect.emit(event);
+     // var event = new ContextVariable();
+     // event.Name = this.variableName;
+     // event.isGlobal = this.isGlobal;
+     var v = this.getVariableByName(this.variableName,this.isGlobal)
+     if (v) {
+       this.onSelect.emit(v);
+     }
+
   }
 
 }
