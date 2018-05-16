@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
@@ -57,7 +56,7 @@ func (node *TransformNode) LoadNodeConfig() error {
 	defValue := TransformNodeConfig{}
 	err := mapstructure.Decode(node.meta.Config,&defValue)
 	if err != nil{
-		log.Error(node.flowOpCtx.FlowId+"<Transf> Can't decode configuration",err)
+		node.getLog().Error(" Can't decode configuration",err)
 	}else {
 		node.nodeConfig = defValue
 		node.meta.Config = defValue
@@ -66,7 +65,7 @@ func (node *TransformNode) LoadNodeConfig() error {
 }
 
 func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info(node.flowOpCtx.FlowId+"<Transf> Executing TransformNode . Name = ", node.meta.Label)
+	node.getLog().Info(" Executing TransformNode . Name = ", node.meta.Label)
 
 	// There are 3 possible sources for RVariable : default value , inputMessage , variable from context
 	// There are 2 possible destinations for LVariable : inputMessage , variable from context
@@ -89,7 +88,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
 	if err != nil {
-		log.Warn(node.flowOpCtx.FlowId+"<Transf> Error 1 : ",err)
+		node.getLog().Warn(" Error 1 : ",err)
 		return nil , err
 	}
 
@@ -125,10 +124,10 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 						result.Value = !val
 						result.ValueType = rValue.ValueType
 					}else {
-						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not bool. Has to bool")
+						node.getLog().Error(" Value type is not bool. Has to bool")
 					}
 				}else {
-					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only bool variable can be flipped")
+					node.getLog().Warn(" Only bool variable can be flipped")
 				}
 			case "to_bool":
 				if lValue.IsNumber() {
@@ -141,10 +140,10 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 						}
 						result.ValueType = "bool"
 					}else {
-						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
+						node.getLog().Error(" Value type is not number.")
 					}
 				}else {
-					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be converted into bool")
+					node.getLog().Warn(" Only numeric value can be converted into bool")
 				}
 			case "add","subtract","multiply","divide":
 				if lValue.IsNumber(){
@@ -162,7 +161,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 						case "divide":
 							calcResult = lval / rval
 						default:
-							log.Warn(node.flowOpCtx.FlowId+"<Transf> Unknown arithmetic operator")
+							node.getLog().Warn(" Unknown arithmetic operator")
 						}
 						if rValue.ValueType == "float" {
 							result.Value = calcResult
@@ -172,37 +171,37 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 						result.ValueType = lValue.ValueType
 
 					}else {
-						log.Error(node.flowOpCtx.FlowId+"<Transf> Value type is not number.")
+						node.getLog().Error(" Value type is not number.")
 					}
 				}else {
-					log.Warn(node.flowOpCtx.FlowId+"<Transf> Only numeric value can be used for arithmetic operations")
+					node.getLog().Warn(" Only numeric value can be used for arithmetic operations")
 				}
 
 			}
 		}else if node.nodeConfig.TransformType == "map" {
 			for i := range node.nodeConfig.ValueMapping {
-				log.Debug(node.flowOpCtx.FlowId+"<Transf> record Value ",node.nodeConfig.ValueMapping[i].LValue.Value)
-				log.Debug(node.flowOpCtx.FlowId+"<Transf> record input Value = ",lValue.Value )
+				//node.getLog().Debug(" record Value ",node.nodeConfig.ValueMapping[i].LValue.Value)
+				node.getLog().Debug(" record input Value = ",lValue.Value )
 				if lValue.ValueType == node.nodeConfig.ValueMapping[i].LValue.ValueType {
 					varsAreEqual , err :=  lValue.IsEqual(&node.nodeConfig.ValueMapping[i].LValue)
 					if err != nil {
-						log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while comparing map vars : ",err)
+						node.getLog().Warn(" Error while comparing map vars : ",err)
 					}
 					if varsAreEqual {
 						result = node.nodeConfig.ValueMapping[i].RValue
-						log.Debug(node.flowOpCtx.FlowId+"<Transf> Result is set")
+						node.getLog().Debug(" Result is set")
 						break
 					}
 				}
 			}
 		}else if node.nodeConfig.TransformType == "jpath" || node.nodeConfig.TransformType == "xpath" {
-			log.Info(node.flowOpCtx.FlowId+"<Transf> Doing XPATH transformation ")
+			node.getLog().Info(" Doing XPATH transformation ")
 			for i := range node.nodeConfig.XPathMapping {
 				result.Value,err = utils.GetValueByPath(msg,node.nodeConfig.TransformType,node.nodeConfig.XPathMapping[i].Path,node.nodeConfig.XPathMapping[i].TargetVariableType)
 				result.ValueType = node.nodeConfig.TargetVariableType
-				log.Info(node.flowOpCtx.FlowId+"<Transf> Extracted value : ",result.Value)
+				node.getLog().Info(" Extracted value : ",result.Value)
 				if err != nil {
-					log.Warn(node.flowOpCtx.FlowId+"<Transf> Error while processing path in variable : ",err)
+					node.getLog().Warn(" Error while processing path in variable : ",err)
 					return []model.NodeID{node.meta.ErrorTransition},err
 				}
 				if node.nodeConfig.XPathMapping[i].TargetVariableName == "" {
@@ -212,7 +211,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				}else {
 					// Save value into variable
 					// Save default value from node config to variable
-					log.Info(node.flowOpCtx.FlowId+"<Transf> Setting transformed variable : ")
+					node.getLog().Info(" Setting transformed variable : ")
 					if node.nodeConfig.XPathMapping[i].IsTargetVariableGlobal {
 						node.ctx.SetVariable(node.nodeConfig.XPathMapping[i].TargetVariableName, result.ValueType, result.Value, "", "global", false)
 					} else {

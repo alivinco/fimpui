@@ -2,7 +2,6 @@ package node
 
 import "time"
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpgo"
 )
@@ -25,7 +24,7 @@ func (node *WaitNode) LoadNodeConfig() error {
 	if ok {
 		node.meta.Config = int(delay)
 	}else {
-		log.Error(node.flowOpCtx.FlowId+"<FlMan> Can't cast Wait node delay value")
+		node.getLog().Error(" Can't cast Wait node delay value")
 	}
 
 	return nil
@@ -38,10 +37,10 @@ func (node *WaitNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 func (node *WaitNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	delayMilisec, ok := node.meta.Config.(int)
 	if ok {
-		log.Info(node.flowOpCtx.FlowId+"<Node> Waiting  for = ", delayMilisec)
+		node.getLog().Info(" Waiting  for = ", delayMilisec)
 		time.Sleep(time.Millisecond * time.Duration(delayMilisec))
 	} else {
-		log.Error(node.flowOpCtx.FlowId+"<Node> Wrong time format")
+		node.getLog().Error(" Wrong time format")
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }

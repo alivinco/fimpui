@@ -1,0 +1,13 @@
+<h1 mat-dialog-title> Log </h1>
+<mat-dialog-content >
+<mat-input-container   style="width: 100%;font-family: monospace;font-size: medium;">
+    <textarea mat-autosize  minRows="6" matInput [(ngModel)]="flowLog" > </textarea>
+</mat-input-container>
+</mat-dialog-content>
+<mat-dialog-actions >
+<button mat-raised-button color="warn" (click)="reload()" >Reload</button>
+  <mat-input-container style="height: 35px;margin: 10px" class="example-full-width">
+    <input matInput [(ngModel)]="limit" placeholder="Limit" >
+  </mat-input-container>
+<button mat-raised-button mat-dialog-close>Close</button>
+</mat-dialog-actions>

@@ -1,9 +1,8 @@
 package node
 
 import (
-"github.com/alivinco/fimpgo"
-"github.com/alivinco/fimpui/flow/model"
-log "github.com/Sirupsen/logrus"
+	"github.com/alivinco/fimpgo"
+	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
 	"time"
 	"github.com/alivinco/fimpui/flow/utils"
@@ -35,6 +34,7 @@ func NewReceiveNode(flowOpCtx *model.FlowOperationalContext ,meta model.MetaNode
 	node.flowOpCtx = flowOpCtx
 	node.meta = meta
 	node.config = ReceiveConfig{}
+	node.SetupBaseNode()
 	return &node
 }
 
@@ -45,7 +45,7 @@ func (node *ReceiveNode) ConfigureInStream(activeSubscriptions *[]string,msgInSt
 }
 
 func (node *ReceiveNode) initSubscriptions() {
-	log.Info(node.flowOpCtx.FlowId+"<Node> ReceiveNode is listening for events . Name = ", node.meta.Label)
+	node.getLog().Info("ReceiveNode is listening for events . Name = ", node.meta.Label)
 	needToSubscribe := true
 	for i := range *node.activeSubscriptions {
 			if (*node.activeSubscriptions)[i] == node.meta.Address {
@@ -55,11 +55,11 @@ func (node *ReceiveNode) initSubscriptions() {
 	}
 	if needToSubscribe {
 		if node.meta.Address != "" {
-			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> Subscribing for service by address :", node.meta.Address)
+			node.getLog().Info("Subscribing for service by address :", node.meta.Address)
 			node.transport.Subscribe(node.meta.Address)
 			*node.activeSubscriptions = append(*node.activeSubscriptions, node.meta.Address)
 		}else {
-			log.Error(node.flowOpCtx.FlowId+"<ReceiveNode> Can't subscribe to service with empty address")
+			node.getLog().Error("Can't subscribe to service with empty address")
 		}
 	}
 }
@@ -68,7 +68,7 @@ func (node *ReceiveNode) initSubscriptions() {
 func (node *ReceiveNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&node.config)
 	if err != nil{
-		log.Error(err)
+		node.getLog().Error("Failed to load node configs.Err:",err)
 	}
 	return err
 }
@@ -77,9 +77,9 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 	node.isReactorRunning = true
 	defer func() {
 		node.isReactorRunning = false
-		log.Debug("<ReceiveNode> Reactor-WaitForEvent is stopped ")
+		node.getLog().Debug("Reactor-WaitForEvent is stopped ")
 	}()
-	log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Reactor-Waiting for event .chan size = ",len(node.msgInStream))
+	node.getLog().Debug("Reactor-Waiting for event .chan size = ",len(node.msgInStream))
 	start := time.Now()
 	timeout := node.config.Timeout
 	if timeout == 0 {
@@ -89,7 +89,7 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 	for {
 		select {
 		case newMsg := <-node.msgInStream:
-			log.Info(node.flowOpCtx.FlowId+"<ReceiveNode> New message :")
+			node.getLog().Info("New message :")
 			if newMsg.CancelOp {
 				return
 			}
@@ -102,7 +102,7 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 					case nodeEventStream <- newEvent:
 						return
 					default:
-							log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+						node.getLog().Debug("Message is dropped (no listeners) ")
 					}
 
 				} else if newMsg.Payload.Value == node.config.ValueFilter.Value {
@@ -111,7 +111,7 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 					case nodeEventStream <- newEvent:
 						return
 					default:
-						log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+						node.getLog().Debug("Message is dropped (no listeners) ")
 					}
 				}
 			}
@@ -119,20 +119,20 @@ func (node *ReceiveNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 				elapsed := time.Since(start)
 				timeout = timeout - int64(elapsed.Seconds())
 			}
-			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Not interested .")
+			node.getLog().Debug("Not interested .")
 
 		case <-time.After(time.Second * time.Duration(timeout)):
-			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Timeout ")
+			node.getLog().Debug(" Timeout ")
 			newEvent := model.ReactorEvent{}
 			newEvent.TransitionNodeId = node.meta.TimeoutTransition
 			select {
 			case nodeEventStream <- newEvent:
 				return
 			default:
-				log.Debug("<ReceiveNode> Message is dropped (no listeners) ")
+				node.getLog().Debug("Message is dropped (no listeners) ")
 			}
 		case signal := <-node.flowOpCtx.NodeControlSignalChannel:
-			log.Debug(node.flowOpCtx.FlowId+"<ReceiveNode> Control signal ")
+			node.getLog().Debug("Control signal ")
 			if signal == model.SIGNAL_STOP {
 				return
 			}

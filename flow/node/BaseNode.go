@@ -3,6 +3,7 @@ package node
 import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
+	log "github.com/Sirupsen/logrus"
 )
 
 type BaseNode struct {
@@ -14,7 +15,17 @@ type BaseNode struct {
 	isMsgReactor bool  // true - node reacts on messages and requires input stream .
 	isReactorRunning bool
 	transport *fimpgo.MqttTransport
+	logFields log.Fields
 
+
+}
+
+func (node *BaseNode) SetupBaseNode() {
+	node.logFields = log.Fields{"comp":"fnode","ntype":node.meta.Type,"fid":node.flowOpCtx.FlowId,"nid":node.meta.Id}
+}
+
+func (node *BaseNode) getLog() *log.Entry {
+	return log.WithFields(node.logFields)
 }
 
 func (node *BaseNode) GetMetaNode()*model.MetaNode {

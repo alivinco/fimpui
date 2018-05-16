@@ -504,6 +504,17 @@ findInputSocketPosition(htmlElement):any {
     });
   }
 
+  showLog() {
+    let dialogRef = this.dialog.open(FlowLogDialog,{
+      // height: '95%',
+      width: '95%',
+      data:this.flow
+    });
+    dialogRef.afterClosed().subscribe(result => {
+
+    });
+  }
+
   showNodeEditorDialog(flow:Flow,node:MetaNode) {
     let dialogRef = this.dialog.open(NodeEditorDialog,{
       // height: '95%',
@@ -627,6 +638,31 @@ export class FlowSourceDialog {
   save(){
     this.data = JSON.parse(this.flowSourceText)
     this.dialogRef.close(this.data);
+
+  }
+}
+
+@Component({
+  selector: 'flow-log-dialog',
+  templateUrl: 'flow-log-dialog.html',
+  styleUrls: ['flow-editor.component.css']
+})
+export class FlowLogDialog {
+  flowLog :string ;
+  limit : number;
+  constructor(public dialogRef: MatDialogRef<FlowSourceDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow,private http : Http) {
+    this.limit = 10000;
+    this.reload();
+  }
+  reload(){
+    this.http
+      .get(BACKEND_ROOT+'/fimp/api/get-log?limit='+this.limit)
+      .map(function(res: Response){
+        let body = res.text();
+        return body;
+      }).subscribe ((result) => {
+        this.flowLog = result;
+    });
 
   }
 }

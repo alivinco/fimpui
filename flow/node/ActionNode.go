@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
@@ -29,13 +28,14 @@ func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,c
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
 	node.config = ActionNodeConfig{DefaultValue:model.Variable{}}
+	node.SetupBaseNode()
 	return &node
 }
 
 func (node *ActionNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&node.config)
 	if err != nil{
-		log.Error(node.flowOpCtx.FlowId+"<ActionNode> err")
+		node.getLog().Error("Can't decode config.Err:",err)
 
 	}
 	return err
@@ -46,7 +46,7 @@ func (node *ActionNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
 }
 
 func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info(node.flowOpCtx.FlowId+"<ActionNode> Executing ActionNode . Name = ", node.meta.Label)
+	node.getLog().Info("Executing ActionNode . Name = ", node.meta.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.meta.ServiceInterface, Service: node.meta.Service,Properties:node.config.Props}
 	if node.config.VariableName != "" {
 		flowId := node.flowOpCtx.FlowId
@@ -55,7 +55,7 @@ func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}
 		variable,err := node.ctx.GetVariable(node.config.VariableName,flowId)
 		if err != nil {
-			log.Error(node.flowOpCtx.FlowId+"<ActionNode> Can't get variable . Error:",err)
+			node.getLog().Error("Can't get variable . Error:",err)
 			return nil , err
 		}
 		fimpMsg.ValueType = variable.ValueType
@@ -74,7 +74,7 @@ func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	if err != nil {
 		return nil,err
 	}
-	log.Debug(node.flowOpCtx.FlowId+"<ActionNode> Action message :", fimpMsg)
+	node.getLog().Debug(" Action message :", fimpMsg)
 	node.transport.PublishRaw(node.meta.Address, msgBa)
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }

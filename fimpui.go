@@ -31,6 +31,7 @@ import (
 	"os/exec"
 	"github.com/alivinco/fimpui/flow/api"
 	"github.com/alivinco/fimpui/process/tsdb"
+	"github.com/alivinco/fimpui/flow/utils"
 )
 
 type SystemInfo struct {
@@ -40,7 +41,8 @@ type SystemInfo struct {
 // SetupLog configures default logger
 // Supported levels : info , degug , warn , error
 func SetupLog(logfile string, level string) {
-	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: true})
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: false,TimestampFormat:"2006-01-02T15:04:05.999"})
+	//log.SetFormatter(&log.JSONFormatter{})
 	logLevel, err := log.ParseLevel(level)
 	if err == nil {
 		log.SetLevel(logLevel)
@@ -221,6 +223,23 @@ func main() {
 		}
 		return c.JSON(http.StatusOK, result)
 	})
+
+	e.GET("/fimp/api/get-log", func(c echo.Context) error {
+
+		limitS := c.QueryParam("limit")
+		limit , err := strconv.Atoi(limitS)
+		if err != nil {
+			limit = 10000
+		}
+
+		//out, err := exec.Command("bash", "-c", cmd).Output()
+		//result := map[string]string{"result":"","error":""}
+		result := utils.GetLogs(configs.LogFile,"",int64(limit))
+
+		return c.Blob(http.StatusOK,"text/plain", result)
+	})
+
+
 
 	e.POST("/fimp/api/zwave/products/upload-to-cloud", func(c echo.Context) error {
 		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")

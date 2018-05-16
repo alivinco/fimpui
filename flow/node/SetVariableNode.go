@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
@@ -27,6 +26,7 @@ func NewSetVariableNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaN
 	node := SetVariableNode{ctx:ctx,transport:transport}
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
+	node.SetupBaseNode()
 	return &node
 }
 
@@ -34,7 +34,7 @@ func (node *SetVariableNode) LoadNodeConfig() error {
 	defValue := SetVariableNodeConfig{}
 	err := mapstructure.Decode(node.meta.Config,&defValue)
 	if err != nil{
-		log.Error(node.flowOpCtx.FlowId+"<SetVarNode> Can't decode configuration",err)
+		node.getLog().Error(" Can't decode configuration",err)
 	}else {
 		node.nodeConfig = defValue
 		node.meta.Config = defValue
@@ -43,7 +43,7 @@ func (node *SetVariableNode) LoadNodeConfig() error {
 }
 
 func (node *SetVariableNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info(node.flowOpCtx.FlowId+"<Node> Executing SetVariableNode . Name = ", node.meta.Label)
+	node.getLog().Info(" Executing SetVariableNode . Name = ", node.meta.Label)
 
 	if node.nodeConfig.UpdateInputMsg {
 		// Update input value with value from node config .

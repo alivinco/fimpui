@@ -17,10 +17,10 @@
  <variable-selector [label]="'Input variable'" [variableName]="node.Config.InputVariableName" [isGlobal]="node.Config.IsInputVariableGlobal" [flowId]="flowId" (onSelect)="inputVariableSelected($event)" ></variable-selector>
  <variable-selector [label]="'Output variable'" [variableName]="node.Config.OutputVariableName" [isGlobal]="node.Config.IsOutputVariableGlobal" [flowId]="flowId" (onSelect)="outputVariableSelected($event)" ></variable-selector>
   <div style="margin-bottom: 5px" >
-    <mat-checkbox [(ngModel)]="node.Config.IsInputJson" >Is input to passed as JSON</mat-checkbox>
+    <mat-checkbox [(ngModel)]="node.Config.IsInputJson" >Is input JSON object </mat-checkbox>
   </div>
   <div style="margin-bottom: 5px" >
-    <mat-checkbox [(ngModel)]="node.Config.IsOutputJson" >Is output to passed as JSON</mat-checkbox>
+    <mat-checkbox [(ngModel)]="node.Config.IsOutputJson" >Is output JSON object</mat-checkbox>
   </div>
 
 

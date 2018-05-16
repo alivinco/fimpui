@@ -47,6 +47,7 @@
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button [routerLink]="['/flow/editor','-']" color="primary" > Add new flow</button>
+      <button mat-raised-button (click)="showLog()" color="primary" >Log</button>
       <button mat-raised-button (click)="loadListOfFlows()">Refresh</button>
     </mat-card-actions>
   </mat-card>

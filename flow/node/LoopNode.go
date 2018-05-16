@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
@@ -27,6 +26,7 @@ func NewLoopNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode, c
 	node := LoopNode{ctx: ctx, transport: transport}
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
+	node.SetupBaseNode()
 	return &node
 }
 
@@ -34,7 +34,7 @@ func (node *LoopNode) LoadNodeConfig() error {
 	defValue := LoopNodeConfig{}
 	err := mapstructure.Decode(node.meta.Config, &defValue)
 	if err != nil {
-		log.Error(node.flowOpCtx.FlowId+"<LoopNode> Can't decode configuration", err)
+		node.getLog().Error("Can't decode configuration", err)
 	} else {
 		node.config = defValue
 		if node.config.Step == 0 {
@@ -59,13 +59,13 @@ func (node *LoopNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
 }
 
 func (node *LoopNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
-	log.Debug(node.flowOpCtx.FlowId+"<LoopNode> Executing LoopNode . Name = ", node.meta.Label)
+	node.getLog().Debug("Executing LoopNode . Name = ", node.meta.Label)
 	if node.countUp {
 		node.counter = node.counter + node.config.Step
 	} else {
 		node.counter = node.counter - node.config.Step
 	}
-	log.Debug(node.flowOpCtx.FlowId+"<LoopNode> value = ", node.counter)
+	node.getLog().Debug("Counter = ", node.counter)
 	if (node.countUp && node.counter >= node.config.EndValue) || (!node.countUp && node.counter <= node.config.EndValue) {
 		node.counter = node.config.StartValue
 		return []model.NodeID{node.meta.ErrorTransition}, nil

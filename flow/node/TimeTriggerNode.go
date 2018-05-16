@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/robfig/cron"
@@ -51,13 +50,14 @@ func NewTimeTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.Meta
 	node.config = TimeTriggerConfig{}
 	node.cron = cron.New()
 	node.cronMessageCh = make(model.MsgPipeline)
+	node.SetupBaseNode()
 	return &node
 }
 
 func (node *TimeTriggerNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&node.config)
 	if err != nil{
-		log.Error(err)
+		node.getLog().Error("Can't load config.Err",err)
 	}
 	node.config.TimeZone = 1
 	return err
@@ -72,7 +72,7 @@ func (node *TimeTriggerNode) Init() error {
 	}else {
 		for i := range node.config.Expressions {
 			node.cron.AddFunc(node.config.Expressions[i].Expression,func() {
-				log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> New time event")
+				node.getLog().Debug("New time event")
 				msg := model.Message{Payload:fimpgo.FimpMessage{Value:node.nextAstroEvent,ValueType:fimpgo.VTypeString},
 					Header:map[string]string{"name":node.config.Expressions[i].Name}}
 				node.cronMessageCh <- msg
@@ -124,19 +124,19 @@ func (node *TimeTriggerNode) getTimeUntilNextEvent() (eventTime time.Duration,ev
 }
 
 func (node *TimeTriggerNode) scheduleNextAstroEvent() {
-	log.Debug("Time now ",time.Now().Format(TIME_FORMAT))
-	log.Infof(node.flowOpCtx.FlowId+"<TimeTrigNode> Scheduling next astro event at location Lat = %f,Long = %f ",node.config.Latitude,node.config.Longitude)
+	node.getLog().Debug("Time now ",time.Now().Format(TIME_FORMAT))
+	node.getLog().Infof(" Scheduling next astro event at location Lat = %f,Long = %f ",node.config.Latitude,node.config.Longitude)
 	sunriseTime ,sunsetTime,err := node.getSunriseAndSunset(false)
-	log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> Today Sunrise is at ",sunriseTime.Format(TIME_FORMAT))
-	log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> Today Sunset is  at ",sunsetTime.Format(TIME_FORMAT))
+	node.getLog().Debug(" Today Sunrise is at ",sunriseTime.Format(TIME_FORMAT))
+	node.getLog().Debug(" Today Sunset is  at ",sunsetTime.Format(TIME_FORMAT))
 
 	timeUntilEvent , eventType ,err := node.getTimeUntilNextEvent()
     if err != nil {
-		log.Debugf(node.flowOpCtx.FlowId+"<TimeTrigNode> Event can't be scheduled .Error:",err)
+		node.getLog().Debugf(" Event can't be scheduled .Error:",err)
     	return
 	}
 	node.nextAstroEvent = eventType
-	log.Debugf(node.flowOpCtx.FlowId+"<TimeTrigNode> %f hours  left until next %s . Event will fire at time %s ",timeUntilEvent.Hours(),eventType,time.Now().Add(timeUntilEvent).Format(TIME_FORMAT))
+	node.getLog().Debugf(" %f hours  left until next %s . Event will fire at time %s ",timeUntilEvent.Hours(),eventType,time.Now().Add(timeUntilEvent).Format(TIME_FORMAT))
 	var offset float64
 	if eventType == SUNRISE {
 		offset = node.config.SunriseTimeOffset
@@ -145,17 +145,17 @@ func (node *TimeTriggerNode) scheduleNextAstroEvent() {
 	}
 	if offset != 0 {
 		timeUntilEvent = timeUntilEvent+time.Duration(offset*float64(time.Minute))
-		log.Debugf(node.flowOpCtx.FlowId+"<TimeTrigNode> Applying offset . New time is %s ",time.Now().Add(timeUntilEvent).Format(TIME_FORMAT))
+		node.getLog().Debugf(" Applying offset . New time is %s ",time.Now().Add(timeUntilEvent).Format(TIME_FORMAT))
 	}
 
 	node.astroTimer = time.AfterFunc(timeUntilEvent, func() {
-		log.Debug(node.flowOpCtx.FlowId+"<TimeTrigNode> Astro time event.Event type = ",node.nextAstroEvent)
+		node.getLog().Debug(" Astro time event.Event type = ",node.nextAstroEvent)
 		msg := model.Message{Payload:fimpgo.FimpMessage{Value:node.nextAstroEvent,ValueType:fimpgo.VTypeString},
 			Header:map[string]string{"astroEvent":node.nextAstroEvent}}
 		node.cronMessageCh <- msg
 
 	})
-	log.Info(node.flowOpCtx.FlowId+"<TimeTrigNode> Event scheduled . Type = ",node.nextAstroEvent)
+	node.getLog().Info(" Event scheduled . Type = ",node.nextAstroEvent)
 }
 
 func (node *TimeTriggerNode) ConfigureInStream(activeSubscriptions *[]string,msgInStream model.MsgPipeline) {
@@ -180,7 +180,7 @@ func (node *TimeTriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEven
 	node.isReactorRunning = true
 	defer func() {
 		node.isReactorRunning = false
-		log.Debug("<TimeTriggerNode> Reactor-WaitForEvent is stopped ")
+		node.getLog().Debug(" Reactor-WaitForEvent is stopped ")
 	}()
 
 	if node.config.GenerateAstroTimeEvents {
@@ -198,7 +198,7 @@ func (node *TimeTriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEven
 			return
 		}
 	default:
-		log.Debug("<TimeTriggerNode> Message is dropped (no listeners) ")
+		node.getLog().Debug(" Message is dropped (no listeners) ")
 	}
 
 }

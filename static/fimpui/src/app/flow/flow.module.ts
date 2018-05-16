@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowContextComponent } from './flow-context/flow-context.component';
 import { VariableSelectorComponent } from './flow-context/variable-selector.component';
-import { FlowEditorComponent, FlowSourceDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
+import { FlowEditorComponent, FlowSourceDialog,FlowLogDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
 import { LoopNodeComponent,WaitNodeComponent,VincTriggerNodeComponent,VincActionNodeComponent} from './flow-nodes/flow-nodes.component';
 import { RestActionNodeComponent } from './flow-nodes/rest-action-node/node.component';
@@ -73,6 +73,7 @@ import { MatTableModule,
      FlowEditorComponent,
      FlowSourceDialog,
      FlowRunDialog,
+     FlowLogDialog,
      VariableSelectorComponent,
      NodeEditorDialog,
      FlowNodesComponent,
@@ -95,6 +96,6 @@ import { MatTableModule,
      RecordEditorDialog
 
   ],
-  entryComponents: [FlowSourceDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog,RecordEditorDialog]
+  entryComponents: [FlowSourceDialog,FlowLogDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog,RecordEditorDialog]
 })
 export class FlowModule { }

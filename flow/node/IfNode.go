@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpui/flow/model"
 	"errors"
 	"github.com/alivinco/fimpui/flow/utils"
@@ -36,6 +35,7 @@ func NewIfNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *
 	node := IfNode{ctx:ctx,transport:transport}
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
+	node.SetupBaseNode()
 	return &node
 }
 
@@ -43,7 +43,7 @@ func (node *IfNode) LoadNodeConfig() error {
 	exp := IFExpressions{}
 	err := mapstructure.Decode(node.meta.Config,&exp)
 	if err != nil{
-		log.Error(err)
+		node.getLog().Error("Failed to load node config",err)
 	}else {
 		node.meta.Config = exp
 	}
@@ -75,10 +75,9 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				}
 				conf.Expression[i].LeftVariable ,err = node.ctx.GetVariable(conf.Expression[i].LeftVariableName,flowId)
 				if err != nil {
-					log.Error(node.flowOpCtx.FlowId+"<IfNode> Can't get variable from context.Error : ",err)
+					node.getLog().Error("Can't get variable from context.Error : ",err)
 					return nil,err
 				}
-				log.Debug(conf.Expression[i].LeftVariable)
 			}
 			if conf.Expression[i].LeftVariable.ValueType != conf.Expression[i].RightVariable.ValueType {
 				return nil,errors.New(node.flowOpCtx.FlowId+"<IfNode> Right and left of expression have different types ")
@@ -86,18 +85,18 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 
 			var result bool
-			log.Debug("<IfNode> Operand = ", conf.Expression[i].Operand)
+			node.getLog().Debug("Operand = ", conf.Expression[i].Operand)
 
 			if conf.Expression[i].Operand == "gt" || conf.Expression[i].Operand == "lt"  {
 				if conf.Expression[i].LeftVariable.ValueType == "int" || conf.Expression[i].LeftVariable.ValueType  == "float" {
 					leftNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].LeftVariable.ValueType,conf.Expression[i].LeftVariable.Value)
 					if err != nil {
-						log.Error(node.flowOpCtx.FlowId+"<IfNode> Error while converting left variable to number.Error : ",err)
+						node.getLog().Error("Error while converting left variable to number.Error : ",err)
 						return nil,err
 					}
 					rightNumericValue , err = utils.ConfigValueToNumber(conf.Expression[i].RightVariable.ValueType,conf.Expression[i].RightVariable.Value)
 					if err != nil {
-						log.Error(node.flowOpCtx.FlowId+"<IfNode> Error while converting right variable to number.Error : ",err)
+						node.getLog().Error("Error while converting right variable to number.Error : ",err)
 						return nil,err
 					}
 
@@ -105,8 +104,8 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					return nil,errors.New("Incompatible value type . gt and lt can be used only with numeric types")
 				}
 			}
-			log.Debug(node.flowOpCtx.FlowId+"<IfNode> Left numeric value = ", leftNumericValue)
-			log.Debug(node.flowOpCtx.FlowId+"<IfNode> Right numeric value = ", rightNumericValue)
+			//node.getLog().Debug(node.flowOpCtx.FlowId+"<IfNode> Left numeric value = ", leftNumericValue)
+			//node.getLog().Debug(node.flowOpCtx.FlowId+"<IfNode> Right numeric value = ", rightNumericValue)
 			switch conf.Expression[i].Operand {
 			case "eq":
 				result = conf.Expression[i].LeftVariable.Value == conf.Expression[i].RightVariable.Value
@@ -146,7 +145,7 @@ func (node *IfNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}
 		return nil,nil
 	} else {
-		log.Error(node.meta.Config)
+		node.getLog().Error("Failed to cast IF expression")
 		return nil, errors.New(node.flowOpCtx.FlowId+"Incompatible node configuration format")
 	}
 

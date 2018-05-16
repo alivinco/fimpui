@@ -98,12 +98,17 @@ export class VariableSelectorComponent implements OnInit {
   }
 
   onSelected() {
-     // var event = new ContextVariable();
+      var event = new ContextVariable();
      // event.Name = this.variableName;
      // event.isGlobal = this.isGlobal;
-     var v = this.getVariableByName(this.variableName,this.isGlobal)
-     if (v) {
-       this.onSelect.emit(v);
+     if(this.variableName=="") {
+       var event = new ContextVariable();
+       event.Name = "";
+       this.onSelect.emit(event);
+     }
+     event = this.getVariableByName(this.variableName,this.isGlobal)
+     if (event) {
+       this.onSelect.emit(event);
      }
 
   }

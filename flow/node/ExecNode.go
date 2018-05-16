@@ -1,7 +1,6 @@
 package node
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
@@ -37,13 +36,14 @@ func NewExecNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
 	node.config = ExecNodeConfig{}
+	node.SetupBaseNode()
 	return &node
 }
 
 func (node *ExecNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&node.config)
 	if err != nil{
-		log.Error(node.flowOpCtx.FlowId+"<ExecNode> err")
+		node.getLog().Error("Can't decode config file.Eee:",err)
 	}
 	if node.config.ExecType == "python" {
 		node.scriptFullPath = filepath.Join(node.flowOpCtx.StoragePath,node.flowOpCtx.FlowId+"_"+string(node.meta.Id)+".py")
@@ -65,7 +65,7 @@ func (node *ExecNode) WaitForEvent(responseChannel chan model.ReactorEvent) {
 }
 
 func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
-	log.Info(node.flowOpCtx.FlowId+"<ExecNode> Executing ExecNode . Name = ", node.meta.Label)
+	node.getLog().Info("Executing ExecNode . Name = ", node.meta.Label)
 
 	//log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Input value : ", r)
     var cmd * exec.Cmd
@@ -81,7 +81,7 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				var val interface{}
 				msg.Payload.GetObjectValue(&val)
 				msg.Payload.Value = val
-				log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Input value : ", val)
+				node.getLog().Debug("Input value : ", val)
 			}
 			strMsg,err := json.Marshal(msg)
 			if err != nil {
@@ -93,9 +93,9 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}
 	}
 	output , err := cmd.CombinedOutput()
-	log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Normal Output : ", string(output))
+	node.getLog().Debug("Normal output : ", string(output))
 	if err != nil {
-		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Err Output : ", err.Error())
+		node.getLog().Debug("Err output : ", err.Error())
 	}
 
 
@@ -106,7 +106,7 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 	}
 	if err != nil {
-		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Script output can't be unmarshaled to JSON : ", err.Error())
+		node.getLog().Debug("Script output can't be parsed into JSON object: ", err.Error())
 		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 
@@ -115,7 +115,7 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			flowId = "global"
 		}
 		if node.config.IsOutputJson {
-			log.Debug(node.flowOpCtx.FlowId+"<ExecNode> JSON : ", outputJson["ab"])
+			node.getLog().Debug("Output JSON : ", outputJson["ab"])
 			err = node.ctx.SetVariable(node.config.OutputVariableName,"object",outputJson,"",flowId,false )
 		}else {
 			err = node.ctx.SetVariable(node.config.OutputVariableName,"string",string(output),"",flowId,false )
@@ -132,7 +132,7 @@ func (node *ExecNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
 	if err != nil {
-		log.Debug(node.flowOpCtx.FlowId+"<ExecNode> Failed to save variable : ", err.Error())
+		node.getLog().Debug("Failed to save variable : ", err.Error())
 		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 	return []model.NodeID{node.meta.SuccessTransition},nil
