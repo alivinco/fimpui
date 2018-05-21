@@ -3,6 +3,7 @@ import {Component, Input, OnInit} from "@angular/core";
 import {MatDialog} from "@angular/material";
 import {Http, Response} from "@angular/http";
 import {BACKEND_ROOT} from "../../../globals";
+import {ContextVariable} from "../../flow-context/variable-selector.component";
 
 @Component({
   selector: 'action-node',
@@ -18,10 +19,10 @@ export class ActionNodeComponent implements OnInit {
   complexValueAsString:any; //string representation of node.Config.DefaultValue.Value
   propsAsString:any;
   constructor(public dialog: MatDialog,private http : Http) {
-    this.loadContext();
   }
 
   ngOnInit() {
+    this.loadDefaultConfig();
     // backword compatability
     if (this.node.Config.VariableName=="undefined"){
       this.node["DefaultValue"] = {"Value":"","ValueType":""};
@@ -70,43 +71,42 @@ export class ActionNodeComponent implements OnInit {
     });
   }
 
-  loadContext() {
-    if (this.flowId) {
-      this.http
-        .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flowId)
-        .map(function(res: Response){
-          let body = res.json();
-          return body;
-        }).subscribe ((result) => {
-        this.localVars = [];
-        for (var key in result){
-          this.node
-          this.localVars.push(result[key].Name);
-        }
 
-      });
-    }
-
-
-    this.http
-      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
-      .map(function(res: Response){
-        let body = res.json();
-        return body;
-      }).subscribe ((result) => {
-      this.globalVars = [];
-      for (var key in result){
-        this.globalVars.push(result[key].Name);
-      }
-    });
-  }
   variableSelected(event:any,config:any,isGlobal:boolean){
-    // if (config.VariableName.indexOf("__global__")!=-1) {
-    //   config.VariableName = config.VariableName.replace("__global__","");
-    //   config.VariableIsGlobal = true;
-    // }
     config.IsVariableGlobal = isGlobal;
 
+  }
+
+
+  loadDefaultConfig() {
+    if (this.node.Config==null) {
+      this.node.Config = {
+        "VariableName": "",
+        "IsVariableGlobal": false,
+        "Props": {},
+        "RegisterAsVirtualService": false,
+        "VirtualServiceProps":{}
+      };
+      this.node.Config["DefaultValue"] = {"Value": "", "ValueType": ""};
+      if (this.node.Ui.nodeType) {
+        switch (this.node.Ui.nodeType) {
+          case "vinc_action":
+            this.node.Address = "pt:j1/mt:cmd/rt:app/rn:vinculum/ad:1"
+            this.node.ServiceInterface = "cmd.mode.set"
+            this.node.Service = "home_mode"
+            this.node.Label = "Home action"
+            this.node.Config.DefaultValue.ValueType = "string"
+            break;
+        }
+      }
+    }
+  }
+
+
+  inputVariableSelected(cvar:ContextVariable) {
+    this.node.Config.VariableName = cvar.Name;
+    this.node.Config.IsVariableGlobal = cvar.isGlobal;
+    this.node.Config.VariableType = cvar.Type;
   }
 
 }

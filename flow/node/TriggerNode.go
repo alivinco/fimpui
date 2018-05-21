@@ -22,8 +22,9 @@ type TriggerConfig struct {
 	ValueFilter model.Variable
 	InputVariableType string
 	IsValueFilterEnabled bool
-	RegisterAsVirtualService bool
-	VirtualServiceGroup string
+	RegisterAsVirtualService bool // if true - the node will be exposed as service in inclusion report
+	VirtualServiceGroup string   // is used as service group in inclusion report
+	VirtualServiceProps map[string]interface{} // mostly used to announce supported features of the service , for instance supported modes , states , setpoints , etc...
 }
 
 func NewTriggerNode(flowOpCtx *model.FlowOperationalContext, meta model.MetaNode, ctx *model.Context, transport *fimpgo.MqttTransport) model.Node {
@@ -80,9 +81,9 @@ func (node *TriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 	node.isReactorRunning = true
 	defer func() {
 		node.isReactorRunning = false
-		node.getLog().Debug(" WaitForEvent is stopped ")
+		node.getLog().Debug("Event processed by the node ")
 	}()
-	node.getLog().Debug( "Waiting for event . chan size = ",len(node.msgInStream))
+	node.getLog().Debug( "Waiting for event . Queue size = ",len(node.msgInStream))
 	start := time.Now()
 	timeout := node.config.Timeout
 	if timeout == 0 {
@@ -94,7 +95,7 @@ func (node *TriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 			if newMsg.CancelOp {
 				return
 			}
-			node.getLog().Debug("New message from InStream ")
+			node.getLog().Debug("--New message--")
 			if utils.RouteIncludesTopic(node.meta.Address,newMsg.AddressStr) &&
 				(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
 				(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {

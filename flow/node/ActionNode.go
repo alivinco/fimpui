@@ -21,6 +21,7 @@ type ActionNodeConfig struct {
 	Props fimpgo.Props
 	RegisterAsVirtualService bool
 	VirtualServiceGroup string
+	VirtualServiceProps map[string]interface{} // mostly used to announce supported features of the service , for instance supported modes , states , setpoints , etc...
 }
 
 func NewActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNode,ctx *model.Context,transport *fimpgo.MqttTransport) model.Node {

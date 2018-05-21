@@ -3,23 +3,21 @@ package flow
 import (
 	"github.com/alivinco/fimpgo/fimptype"
 	"strings"
-	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpui/flow/node"
 	"github.com/mitchellh/mapstructure"
 	"github.com/alivinco/fimpgo"
 )
 
-func (mg *Manager) SendInclusionReport(id string) {
-
-	flow := mg.GetFlowById(id)
+func (fl *Flow) SendInclusionReport() {
+	fl.getLog().Info("Generating inclusion report")
 	report := fimptype.ThingInclusionReport{}
 	report.Type = "flow"
-	report.Address = id
-	report.Alias = flow.FlowMeta.Name
+	report.Address = fl.Id
+	report.Alias = fl.FlowMeta.Name
 	report.CommTechnology = "flow"
 	report.PowerSource = "ac"
-	report.ProductName = flow.FlowMeta.Name
-	report.ProductHash = "flow_"+id
+	report.ProductName = fl.FlowMeta.Name
+	report.ProductHash = "flow_"+fl.Id
 	report.SwVersion = "1.0"
 	report.Groups = []string{}
 	report.ProductId = "flow_1"
@@ -57,72 +55,83 @@ func (mg *Manager) SendInclusionReport(id string) {
 		return &service,true
 	}
 
-	for i := range flow.Nodes {
-		if flow.Nodes[i].IsStartNode() {
+	for i := range fl.Nodes {
+		if fl.Nodes[i].IsStartNode() {
 			var config node.TriggerConfig
-			err := mapstructure.Decode(flow.Nodes[i].GetMetaNode().Config,&config)
+			err := mapstructure.Decode(fl.Nodes[i].GetMetaNode().Config,&config)
 			if err==nil {
 				if config.RegisterAsVirtualService{
-					log.Debug("New trigger to add ")
+					fl.getLog().Debug("New trigger to add ")
 					group := config.VirtualServiceGroup
 					if group == "" {
-						group = string(flow.Nodes[i].GetMetaNode().Id)
+						group = string(fl.Nodes[i].GetMetaNode().Id)
 					}
-					service,new := getService(flow.Nodes[i].GetMetaNode().Service,group)
+					service,new := getService(fl.Nodes[i].GetMetaNode().Service,group)
 					intf := fimptype.Interface{}
 					intf.Type = "in"
-					intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
+					intf.MsgType = fl.Nodes[i].GetMetaNode().ServiceInterface
 					intf.ValueType = config.InputVariableType
 					intf.Version = "1"
 					if new {
-						log.Debug("Adding new trigger ")
-						service.Alias = flow.Nodes[i].GetMetaNode().Label
-						address := strings.Replace(flow.Nodes[i].GetMetaNode().Address, "pt:j1/mt:cmd", "", -1)
+						fl.getLog().Debug("Adding new trigger ")
+						service.Alias = fl.Nodes[i].GetMetaNode().Label
+						address := strings.Replace(fl.Nodes[i].GetMetaNode().Address, "pt:j1/mt:cmd", "", -1)
 						address = strings.Replace(address, "pt:j1/mt:evt", "", -1)
 						service.Address = address
 						service.Interfaces = []fimptype.Interface{intf}
-						services = append(services,*service)
+
 					}else {
 						service.Interfaces = append(service.Interfaces,intf)
 					}
 
+					if len(config.VirtualServiceProps)>0 {
+						fl.getLog().Debug("Setting service props from Trigger :",config.VirtualServiceProps)
+						service.Props = config.VirtualServiceProps
+					}
 
 				}
 			}else {
-				log.Error("<FlMan> Fail to register trigger.Error ",err)
+				fl.getLog().Error("Fail to register trigger.Error ",err)
 			}
 		}
-		if flow.Nodes[i].GetMetaNode().Type == "action" {
-			//config,ok := flow.Nodes[i].GetMetaNode().Config.(node.ActionNodeConfig)
+		if fl.Nodes[i].GetMetaNode().Type == "action" {
+			//config,ok := fl.Nodes[i].GetMetaNode().Config.(node.ActionNodeConfig)
 			config := node.ActionNodeConfig{}
-			err := mapstructure.Decode(flow.Nodes[i].GetMetaNode().Config,&config)
+			err := mapstructure.Decode(fl.Nodes[i].GetMetaNode().Config,&config)
 			if err==nil {
 				if config.RegisterAsVirtualService {
 					group := config.VirtualServiceGroup
 					if group == "" {
-						group = string(flow.Nodes[i].GetMetaNode().Id)
+						group = string(fl.Nodes[i].GetMetaNode().Id)
 					}
-					service,new := getService(flow.Nodes[i].GetMetaNode().Service,group)
+					service,new := getService(fl.Nodes[i].GetMetaNode().Service,group)
 
 					intf := fimptype.Interface{}
 					intf.Type = "out"
-					intf.MsgType = flow.Nodes[i].GetMetaNode().ServiceInterface
+					intf.MsgType = fl.Nodes[i].GetMetaNode().ServiceInterface
 					intf.ValueType = config.VariableType
 					intf.Version = "1"
 
 					if new {
-						service.Alias = flow.Nodes[i].GetMetaNode().Label
-						address := strings.Replace( flow.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
+						service.Alias = fl.Nodes[i].GetMetaNode().Label
+						address := strings.Replace( fl.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
 						address = strings.Replace( address,"pt:j1/mt:evt","",-1)
 						service.Address = address
 						service.Interfaces = []fimptype.Interface{intf}
-						services = append(services,*service)
 					}
 					service.Interfaces = append(service.Interfaces,intf)
+					if len(config.VirtualServiceProps)>0 {
+						fl.getLog().Debug("Setting service props from Action :",config.VirtualServiceProps)
+						service.Props = config.VirtualServiceProps
+					}
+					if new {
+						services = append(services,*service)
+					}
+
 				}
 
 			}else {
-				log.Error("<FlMan> Fail to register action .Error  ",err)
+				fl.getLog().Error("Fail to register action .Error  ",err)
 			}
 		}
 
@@ -131,13 +140,14 @@ func (mg *Manager) SendInclusionReport(id string) {
 	msg := fimpgo.NewMessage("evt.thing.inclusion_report", "flow","object", report, nil,nil,nil)
 	addrString := "pt:j1/mt:evt/rt:ad/rn:flow/ad:1"
 	addr, _ := fimpgo.NewAddressFromString(addrString)
-	mg.msgTransport.Publish(addr,msg)
+	fl.msgTransport.Publish(addr,msg)
+	fl.getLog().Info("Inclusion report is sent")
 }
 
-func (mg *Manager) SendExclusionReport(id string) {
-	report := fimptype.ThingExclusionReport{Address:id}
+func (fl *Flow) SendExclusionReport() {
+	report := fimptype.ThingExclusionReport{Address:fl.Id}
 	msg := fimpgo.NewMessage("evt.thing.exclusion_report", "flow","object", report, nil,nil,nil)
 	addrString := "pt:j1/mt:evt/rt:ad/rn:flow/ad:1"
 	addr, _ := fimpgo.NewAddressFromString(addrString)
-	mg.msgTransport.Publish(addr,msg)
+	fl.msgTransport.Publish(addr,msg)
 }

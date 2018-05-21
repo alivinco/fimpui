@@ -41,8 +41,8 @@ type SystemInfo struct {
 // SetupLog configures default logger
 // Supported levels : info , degug , warn , error
 func SetupLog(logfile string, level string) {
-	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: false,TimestampFormat:"2006-01-02T15:04:05.999"})
-	//log.SetFormatter(&log.JSONFormatter{})
+	//log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: false,TimestampFormat:"2006-01-02T15:04:05.999"})
+	log.SetFormatter(&log.JSONFormatter{TimestampFormat:"2006-01-02 15:04:05.999"})
 	logLevel, err := log.ParseLevel(level)
 	if err == nil {
 		log.SetLevel(logLevel)
@@ -231,10 +231,12 @@ func main() {
 		if err != nil {
 			limit = 10000
 		}
+		flowId := c.QueryParam("flowId")
 
 		//out, err := exec.Command("bash", "-c", cmd).Output()
 		//result := map[string]string{"result":"","error":""}
-		result := utils.GetLogs(configs.LogFile,"",int64(limit))
+		filter := utils.LogFilter{FlowId:flowId}
+		result := utils.GetLogs(configs.LogFile,&filter,int64(limit),true)
 
 		return c.Blob(http.StatusOK,"text/plain", result)
 	})
@@ -659,9 +661,9 @@ func main() {
 
 		switch op {
 		case "send-inclusion-report" :
-			flowManager.SendInclusionReport(id)
+			flowManager.GetFlowById(id).SendInclusionReport()
 		case "send-exclusion-report" :
-			flowManager.SendExclusionReport(id)
+			flowManager.GetFlowById(id).SendExclusionReport()
 		}
 
 		return c.NoContent(http.StatusOK)

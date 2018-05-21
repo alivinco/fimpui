@@ -97,23 +97,10 @@
             </span>
 
             <p>
-              <mat-form-field class="value-selector" >
-                <mat-select  (change)="variableSelected($event,node.Config,false)" placeholder="Use flow local variable as input" [(ngModel)]="node.Config.VariableName" >
-                        <mat-option value = "">Default Input</mat-option>
-                        <mat-option *ngFor="let vari of localVars" [value]="vari" >{{vari}}</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-form-field class="value-selector" >
-                <mat-select  (change)="variableSelected($event,node.Config,true)" placeholder="Use shared variable as input" [(ngModel)]="node.Config.VariableName" >
-                        <mat-option value = "">Default Input</mat-option>
-                        <mat-option *ngFor="let vari of globalVars" [value]="vari" >{{vari}}</mat-option>
-                </mat-select>
-              </mat-form-field>
+              <variable-selector [label]="'Input variable'" [variableName]="node.Config.VariableName" [isGlobal]="node.Config.IsVariableGlobal" [flowId]="flowId" (onSelect)="inputVariableSelected($event)" ></variable-selector>
             </p>
             <p>
-                <mat-input-container class="node-transition-field" style="width:250px">
-                    <input matInput [(ngModel)]="propsAsString" (change)="updateProps()"  placeholder="Props format : {&quot;a&quot;:&quot;b&quot;,&quot;b&quot;:3}">
-                </mat-input-container>
+                <json-input [label] = "'Properties'"  [(jData)]="node.Config.Props"></json-input>
             </p>
 
         </mat-expansion-panel>

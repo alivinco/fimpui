@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FlowOverviewComponent } from './flow-overview/flow-overview.component';
 import { FlowContextComponent } from './flow-context/flow-context.component';
 import { VariableSelectorComponent } from './flow-context/variable-selector.component';
+import { JsonInputComponent } from './ui-elements/json-input.component';
 import { FlowEditorComponent, FlowSourceDialog,FlowLogDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
 import { LoopNodeComponent,WaitNodeComponent,VincTriggerNodeComponent,VincActionNodeComponent} from './flow-nodes/flow-nodes.component';
@@ -75,6 +76,7 @@ import { MatTableModule,
      FlowRunDialog,
      FlowLogDialog,
      VariableSelectorComponent,
+     JsonInputComponent,
      NodeEditorDialog,
      FlowNodesComponent,
      ActionNodeComponent,

@@ -39,6 +39,7 @@
                   <mat-input-container style="width: 200px">
                     <input matInput [(ngModel)]="node.Config.VirtualServiceGroup" placeholder="Service group">
                   </mat-input-container>
+                  <json-input style="min-width: 400px" [label] = "'Service properties'"  [(jData)]="node.Config.VirtualServiceProps"></json-input>
         </mat-expansion-panel>
         <mat-expansion-panel>
            <mat-expansion-panel-header>

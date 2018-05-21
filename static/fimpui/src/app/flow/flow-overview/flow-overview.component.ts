@@ -39,7 +39,7 @@ export class FlowOverviewComponent implements OnInit {
     let dialogRef = this.dialog.open(FlowLogDialog,{
       // height: '95%',
       width: '95%',
-      data:""
+      data:{flowId:"",mode:"all_flows"}
     });
     dialogRef.afterClosed().subscribe(result => {
 

@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"github.com/oliveagle/jsonpath"
 	"bytes"
-	"os"
 )
 
 func GenerateId(len int) string {
@@ -150,20 +149,4 @@ func GetValueByPath(msg *model.Message,pathType string,path string,targetVariabl
 }
 
 
-func GetLogs(logFile string,flowId string,limit int64) []byte {
-	file, err := os.Open(logFile)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	buf := make([]byte, limit)
-	stat, err := os.Stat(logFile)
-	start := stat.Size() - limit
-	_, err = file.ReadAt(buf, start)
-	if err == nil {
-		return buf
-	}
-	return nil
-}
 

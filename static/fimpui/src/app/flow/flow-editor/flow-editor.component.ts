@@ -415,19 +415,6 @@ findInputSocketPosition(htmlElement):any {
       case "trigger":
         break;
       case "action":
-        node.Config = {"VariableName":"","IsVariableGlobal":false,"Props":{},"RegisterAsVirtualService":false};
-        node.Config["DefaultValue"] = {"Value":"","ValueType":""};
-        if (node.Ui.nodeType) {
-          switch (node.Ui.nodeType) {
-            case "vinc_action":
-              node.Address = "pt:j1/mt:cmd/rt:app/rn:vinculum/ad:1"
-              node.ServiceInterface = "cmd.mode.set"
-              node.Service = "home_mode"
-              node.Label = "Home action"
-              node.Config.DefaultValue.ValueType = "string"
-              break;
-          }
-        }
         break;
       // case "rest_action":
       //   node.Config = {"Url":"http://","Method":"GET","RequestPayloadType":"json","RequestTemplate":"","LogResponse":false,
@@ -507,8 +494,9 @@ findInputSocketPosition(htmlElement):any {
   showLog() {
     let dialogRef = this.dialog.open(FlowLogDialog,{
       // height: '95%',
-      width: '95%',
-      data:this.flow
+      width: '100vw',
+      maxWidth: '97vw',
+      data:{flowId:this.flow.Id,mode:"flow"}
     });
     dialogRef.afterClosed().subscribe(result => {
 
@@ -642,23 +630,44 @@ export class FlowSourceDialog {
   }
 }
 
+export interface LogEntry {
+  level :string;
+  msg :string;
+  time :string;
+  comp:string;
+  fid:string;
+  ntype:string;
+  nid:string;
+
+}
+
 @Component({
   selector: 'flow-log-dialog',
   templateUrl: 'flow-log-dialog.html',
   styleUrls: ['flow-editor.component.css']
 })
 export class FlowLogDialog {
-  flowLog :string ;
+  flowLog :LogEntry[] ;
   limit : number;
-  constructor(public dialogRef: MatDialogRef<FlowSourceDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow,private http : Http) {
-    this.limit = 10000;
+  flowId : string ;
+  mode : string;
+  constructor(public dialogRef: MatDialogRef<FlowSourceDialog>,@Inject(MAT_DIALOG_DATA) public data: any,private http : Http) {
+    this.limit = 100000;
+    this.flowId = data.flowId;
+    this.mode = data.mode;
     this.reload();
   }
   reload(){
+    let rurl:string;
+    if(this.mode=="flow")
+      rurl = BACKEND_ROOT+'/fimp/api/get-log?limit='+this.limit+"&flowId="+this.flowId;
+    else
+      rurl = BACKEND_ROOT+'/fimp/api/get-log?limit='+this.limit;
+
     this.http
-      .get(BACKEND_ROOT+'/fimp/api/get-log?limit='+this.limit)
+      .get(rurl)
       .map(function(res: Response){
-        let body = res.text();
+        let body = res.json()
         return body;
       }).subscribe ((result) => {
         this.flowLog = result;

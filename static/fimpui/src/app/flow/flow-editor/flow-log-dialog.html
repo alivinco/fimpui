@@ -1,8 +1,30 @@
 <h1 mat-dialog-title> Log </h1>
-<mat-dialog-content >
-<mat-input-container   style="width: 100%;font-family: monospace;font-size: medium;">
-    <textarea mat-autosize  minRows="6" matInput [(ngModel)]="flowLog" > </textarea>
-</mat-input-container>
+<mat-dialog-content style="max-width: 99vw">
+<div>
+  <table>
+    <thead>
+      <tr>
+        <th>time</th>
+        <th>level</th>
+        <th>comp</th>
+        <th>ntype</th>
+        <th>nid</th>
+        <th>msg</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of flowLog">
+        <td style="width: 180px">{{item.time}}</td>
+        <td>{{item.level}}</td>
+        <td>{{item.comp}}</td>
+        <td>{{item.ntype}}</td>
+        <td>{{item.nid}}</td>
+        <td>{{item.msg}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 </mat-dialog-content>
 <mat-dialog-actions >
 <button mat-raised-button color="warn" (click)="reload()" >Reload</button>

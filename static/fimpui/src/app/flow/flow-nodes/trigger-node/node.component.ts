@@ -37,6 +37,10 @@ export class TriggerNodeComponent implements OnInit {
     if (this.node.Config==null) {
       this.node.Config = {};
       this.node.Config["Timeout"] = 0;
+      this.node.Config["VirtualServiceGroup"] = "";
+      this.node.Config["VirtualServiceProps"] = {};
+      this.node.Config["RegisterAsVirtualService"] = false;
+
       this.node.Config["ValueFilter"] = {"Value":"","ValueType":"bool"};
       this.node.Config["IsValueFilterEnabled"] = false;
       if (this.node.Ui.nodeType) {
