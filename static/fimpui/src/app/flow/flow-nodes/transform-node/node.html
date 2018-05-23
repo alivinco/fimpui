@@ -3,7 +3,8 @@
         <span *ngIf="node.Config.TargetVariableName==''"> Input variable </span>
         {{node.Config.TargetVariableName}} = <span *ngIf="node.Config.LVariableName==''"> Input variable </span>  {{ node.Config.LVariableName }}
         <span *ngIf="node.Config.TransformType=='calc'" ><b>{{ node.Config.Operation }}</b></span>
-        <span *ngIf="node.Config.TransformType=='map'" ><b> is mapped</b></span>
+        <span *ngIf="node.Config.TransformType=='map'" ><b> is mapped using mapping below</b></span>
+        <span *ngIf="node.Config.TransformType=='template'" ><b> is used in template </b></span>
         <span *ngIf="node.Config.RType=='var'"> {{node.Config.RVariableName }} </span>
         <span *ngIf="node.Config.RType=='const'"> {{node.Config.RValue.Value }} </span>
 
@@ -16,6 +17,7 @@
             <mat-option value = "map">Map</mat-option>
             <mat-option value = "jpath">Json Path</mat-option>
             <mat-option value = "xpath">Xml Path</mat-option>
+            <mat-option value = "template">Template</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -183,6 +185,11 @@
            <button style="margin-left: 20px;max-height: 40px;" mat-raised-button (click)="deleteXPathRecord(vmap)" >Delete</button>
          </div>
          <button mat-raised-button (click)="addXPathMapping(node)" >Add </button>
+      </div>
+      <div *ngIf="node.Config.TransformType=='template'">
+        <mat-input-container  style="width: 100%">
+          <textarea  mat-autosize  minRows="4" matInput placeholder="Template body" [(ngModel)]="node.Config.Template" > </textarea>
+        </mat-input-container>
       </div>
   <br>
  </div>

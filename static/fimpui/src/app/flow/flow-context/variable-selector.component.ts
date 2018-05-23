@@ -73,7 +73,10 @@ export class VariableSelectorComponent implements OnInit {
 
   showContextVariableDialog(ctxRec:TableContextRec) {
     var ctxRec = new TableContextRec();
-    ctxRec.FlowId = this.flowId;
+    if (this.isGlobal)
+      ctxRec.FlowId == "global";
+    else
+      ctxRec.FlowId = this.flowId;
     let dialogRef = this.dialog.open(RecordEditorDialog,{
       width: '450px',
       data:ctxRec

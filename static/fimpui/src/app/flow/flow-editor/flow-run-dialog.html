@@ -17,7 +17,7 @@
                     </mat-input-container>
                 </div>
                 <div *ngSwitchCase="''">
-        
+
                 </div>
                 <div *ngSwitchCase="'bool'">
                     <mat-radio-group class="example-radio-group" placeholder="Default value" [(ngModel)]="value">
@@ -30,9 +30,7 @@
                     </mat-radio-group>
                 </div>
                  <div *ngSwitchCase="'str_array'">
-                    <mat-input-container class="node-transition-field">
-                        <input matInput [(ngModel)]="value" placeholder="Default value : ['abc','cde']">
-                    </mat-input-container>
+                       <json-input [label] = "'Default value : [\'1\',\'3\']'"  [(jData)]="value" ></json-input>
                 </div>
                 <div *ngSwitchCase="'int_array'">
                     <mat-input-container class="node-transition-field">
@@ -50,9 +48,7 @@
                     </mat-input-container>
                 </div>
                 <div *ngSwitchCase="'str_map'">
-                    <mat-input-container class="node-transition-field">
-                        <input matInput [(ngModel)]="value" placeholder="Default value : {'a':'a1','b':'b2'}">
-                    </mat-input-container>
+                    <json-input [label] = "'Default value : {\'a\':\'a1\',\'b\':\'b2\'}'"  [(jData)]="value" ></json-input>
                 </div>
                 <div *ngSwitchCase="'int_map'">
                     <mat-input-container class="node-transition-field">
@@ -79,4 +75,4 @@
 <mat-dialog-actions>
 <button mat-raised-button color="warn" (click)="run()" >Run</button>
 <button mat-raised-button mat-dialog-close>Close</button>
-</mat-dialog-actions> 
+</mat-dialog-actions>

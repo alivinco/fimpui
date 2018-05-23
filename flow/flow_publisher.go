@@ -88,6 +88,9 @@ func (fl *Flow) SendInclusionReport() {
 						fl.getLog().Debug("Setting service props from Trigger :",config.VirtualServiceProps)
 						service.Props = config.VirtualServiceProps
 					}
+					if new {
+						services = append(services,*service)
+					}
 
 				}
 			}else {

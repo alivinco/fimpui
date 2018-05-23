@@ -26,6 +26,7 @@ export class TransformNodeComponent implements OnInit {
     if (this.node.Config==null) {
       this.node.Config = {
         "TargetVariableName":"",
+        "TargetVariableType":"",
         "IsTargetVariableGlobal":false,
         "TransformType":"calc",
         "Rtype":"var","IsRVariableGlobal":false,
@@ -35,7 +36,8 @@ export class TransformNodeComponent implements OnInit {
         "RVariableName":"",
         "LVariableName":"",
         "ValueMapping":[],
-        "XPathMapping":[]
+        "XPathMapping":[],
+        "Template":{}
       };
     }
   }
@@ -66,6 +68,7 @@ export class TransformNodeComponent implements OnInit {
 
   resultVariableSelected(cvar:ContextVariable) {
     this.node.Config.TargetVariableName = cvar.Name;
+    this.node.Config.TargetVariableType = cvar.Type;
     this.node.Config.IsTargetVariableGlobal = cvar.isGlobal;
   }
 

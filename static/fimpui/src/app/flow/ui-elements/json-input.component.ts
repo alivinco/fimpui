@@ -7,9 +7,20 @@ import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 export class JsonInputComponent implements OnInit {
   jDataValue:any;
   jDataStr:string;
+  inputTypeValue:string;
 
   @Input()
   label:string
+
+  @Input()
+  set inputType(val) {
+    if(val) {
+      this.inputTypeValue = val
+    }else {
+      this.inputTypeValue = "text"
+    }
+  }
+
 
   @Input()
   set jData(val) {

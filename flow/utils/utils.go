@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"github.com/oliveagle/jsonpath"
 	"bytes"
+	"strconv"
 )
 
 func GenerateId(len int) string {
@@ -28,12 +29,6 @@ func ConfigValueToNumber(valueType string,value interface{})(float64,error){
 			return 0, errors.New("Can't convert interface{} to int64")
 
 		}
-		//intVal,ok := value.(int64)
-		//if ok {
-		//	return float64(intVal),nil
-		//}else {
-		//	return 0, errors.New("Can't convert interface{} to int64")
-		//}
 	}else
 	if valueType == "float" {
 		floatVal,ok := value.(float64)
@@ -140,6 +135,63 @@ func GetValueByPath(msg *model.Message,pathType string,path string,targetVariabl
 		json.Unmarshal(msg.RawPayload, &jData)
 		varValue, err := jsonpath.JsonPathLookup(jData, path)
 		if err == nil {
+			switch targetVariableType {
+			case "string":
+				switch val := varValue.(type) {
+				case string:
+					return varValue,nil
+				case int64:
+					return strconv.Itoa(int(val)),nil
+				case float64:
+					return strconv.FormatFloat(val, 'f', -1, 64), nil
+				case float32:
+					return strconv.FormatFloat(float64(val), 'f', -1, 32), nil
+				default:
+					return "", errors.New("Can't convert interface{} to string")
+				}
+			case "bool":
+				switch val := varValue.(type) {
+				case string:
+					return strconv.ParseBool(val)
+				case int64,float64,float32:
+					if val==0 {
+						return false,nil
+					}else {
+						return true,nil
+					}
+				default:
+					return 0, errors.New("Can't convert interface{} to int")
+				}
+
+			case "int":
+				switch val := varValue.(type) {
+				case string:
+					return strconv.Atoi(val)
+				case int64:
+					return val,nil
+				case float64:
+					return int(val), nil
+				case float32:
+					return int(val),nil
+				default:
+					return 0, errors.New("Can't convert interface{} to int")
+				}
+
+			case "float":
+				switch val := varValue.(type) {
+				case string:
+					return strconv.ParseFloat(val, 64)
+				case int64:
+					return float64(val),nil
+				case float64:
+					return val,nil
+				case float32:
+					return float64(val),nil
+				default:
+					return 0, errors.New("Can't convert interface{} to int")
+				}
+			}
+
 			return varValue,nil
 		}else {
 			return nil,err

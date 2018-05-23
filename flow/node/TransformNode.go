@@ -5,6 +5,9 @@ import (
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
 	"github.com/alivinco/fimpui/flow/utils"
+	"text/template"
+	"bytes"
+	"encoding/json"
 )
 
 type TransformNode struct {
@@ -12,13 +15,14 @@ type TransformNode struct {
 	ctx *model.Context
 	nodeConfig TransformNodeConfig
 	transport *fimpgo.MqttTransport
+	template *template.Template
 }
 
 type TransformNodeConfig struct {
 	TargetVariableName string  // Variable
 	TargetVariableType string
 	IsTargetVariableGlobal bool
-	TransformType string       // map , calc , str-to-json ,json-to-str , jpath , xpath
+	TransformType string       // map , calc , str-to-json ,json-to-str , jpath , xpath , template
 	IsRVariableGlobal bool                    // true - update global variable ; false - update local variable
 	IsLVariableGlobal bool                    // true - update global variable ; false - update local variable
 	Operation string 			// type of transform operation , flip , add , subtract , multiply , divide , to_bool
@@ -28,6 +32,8 @@ type TransformNodeConfig struct {
  	LVariableName string  		// Update input message if LVariable is empty
  	ValueMapping []ValueMappingRecord // ["LValue":1,"RValue":"mode-1"]
  	XPathMapping []TransformXPathRecord
+ 	Template string // template used in jtemplate transformation
+
  	//value mapping
 }
 
@@ -49,6 +55,7 @@ func NewTransformNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNod
 	node := TransformNode{ctx:ctx,transport:transport}
 	node.meta = meta
 	node.flowOpCtx = flowOpCtx
+	node.SetupBaseNode()
 	return &node
 }
 
@@ -57,15 +64,25 @@ func (node *TransformNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&defValue)
 	if err != nil{
 		node.getLog().Error(" Can't decode configuration",err)
+		return err
 	}else {
 		node.nodeConfig = defValue
 		node.meta.Config = defValue
 	}
+	if node.nodeConfig.TransformType == "template" {
+		node.template,err = template.New("transform").Parse(node.nodeConfig.Template)
+		if err != nil {
+			node.getLog().Error(" Failed while parsing request template.Error:",err)
+			return err
+		}
+	}
+
 	return nil
 }
 
 func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	node.getLog().Info(" Executing TransformNode . Name = ", node.meta.Label)
+	node.getLog().Info(" Transform type  = ", node.nodeConfig.TransformType)
 
 	// There are 3 possible sources for RVariable : default value , inputMessage , variable from context
 	// There are 2 possible destinations for LVariable : inputMessage , variable from context
@@ -89,7 +106,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 	if err != nil {
 		node.getLog().Warn(" Error 1 : ",err)
-		return nil , err
+		return []model.NodeID{node.meta.ErrorTransition} , err
 	}
 
     if node.nodeConfig.RType == "var" {
@@ -110,10 +127,12 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 
 	if err != nil {
-		return nil , err
+		node.getLog().Warn(" Error 2 : ",err)
+		return []model.NodeID{node.meta.ErrorTransition} , err
 	}
 
-    if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber()) || (node.nodeConfig.TransformType == "xpath" || node.nodeConfig.TransformType == "jpath" )  {
+    if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber()) ||
+		(node.nodeConfig.TransformType == "xpath" || node.nodeConfig.TransformType == "jpath"|| node.nodeConfig.TransformType == "template" )  {
 
     	if node.nodeConfig.TransformType == "calc" {
 			switch node.nodeConfig.Operation {
@@ -125,9 +144,11 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 						result.ValueType = rValue.ValueType
 					}else {
 						node.getLog().Error(" Value type is not bool. Has to bool")
+						return []model.NodeID{node.meta.ErrorTransition},err
 					}
 				}else {
 					node.getLog().Warn(" Only bool variable can be flipped")
+					return []model.NodeID{node.meta.ErrorTransition},err
 				}
 			case "to_bool":
 				if lValue.IsNumber() {
@@ -144,6 +165,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					}
 				}else {
 					node.getLog().Warn(" Only numeric value can be converted into bool")
+					return []model.NodeID{node.meta.ErrorTransition},err
 				}
 			case "add","subtract","multiply","divide":
 				if lValue.IsNumber(){
@@ -172,9 +194,11 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 
 					}else {
 						node.getLog().Error(" Value type is not number.")
+						return []model.NodeID{node.meta.ErrorTransition},err
 					}
 				}else {
 					node.getLog().Warn(" Only numeric value can be used for arithmetic operations")
+					return []model.NodeID{node.meta.ErrorTransition},err
 				}
 
 			}
@@ -186,6 +210,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					varsAreEqual , err :=  lValue.IsEqual(&node.nodeConfig.ValueMapping[i].LValue)
 					if err != nil {
 						node.getLog().Warn(" Error while comparing map vars : ",err)
+						return []model.NodeID{node.meta.ErrorTransition},err
 					}
 					if varsAreEqual {
 						result = node.nodeConfig.ValueMapping[i].RValue
@@ -198,7 +223,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			node.getLog().Info(" Doing XPATH transformation ")
 			for i := range node.nodeConfig.XPathMapping {
 				result.Value,err = utils.GetValueByPath(msg,node.nodeConfig.TransformType,node.nodeConfig.XPathMapping[i].Path,node.nodeConfig.XPathMapping[i].TargetVariableType)
-				result.ValueType = node.nodeConfig.TargetVariableType
+				result.ValueType = node.nodeConfig.XPathMapping[i].TargetVariableType
 				node.getLog().Info(" Extracted value : ",result.Value)
 				if err != nil {
 					node.getLog().Warn(" Error while processing path in variable : ",err)
@@ -221,7 +246,25 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 				}
 			}
 			return []model.NodeID{node.meta.SuccessTransition},nil
+		}else if node.nodeConfig.TransformType == "template" {
+			node.getLog().Info(" Doing template transformation ")
+			var templateBuffer bytes.Buffer
+			var template = struct {
+				Variable interface{}
+			}{Variable:lValue.Value}
+			node.template.Execute(&templateBuffer,template)
+
+			err = json.Unmarshal(templateBuffer.Bytes(),&result.Value)
+			if err != nil {
+				node.getLog().Warn("Error Unmarshaling template output",err)
+				return []model.NodeID{node.meta.ErrorTransition},err
+			}
+			node.getLog().Debug("Template output:",templateBuffer.String())
+			result.ValueType = node.nodeConfig.TargetVariableType
 		}
+	}else {
+		node.getLog().Warn("Transformation can't be executed , one or several parameters are wrong. ")
+		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 
 	if node.nodeConfig.TargetVariableName == "" {
