@@ -85,6 +85,7 @@ export class ActionNodeComponent implements OnInit {
         "IsVariableGlobal": false,
         "Props": {},
         "RegisterAsVirtualService": false,
+        "VirtualServiceGroup":"",
         "VirtualServiceProps":{}
       };
       this.node.Config["DefaultValue"] = {"Value": "", "ValueType": ""};

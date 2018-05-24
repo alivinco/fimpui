@@ -8,6 +8,7 @@ import (
 	"text/template"
 	"bytes"
 	"encoding/json"
+	"errors"
 )
 
 type TransformNode struct {
@@ -70,7 +71,30 @@ func (node *TransformNode) LoadNodeConfig() error {
 		node.meta.Config = defValue
 	}
 	if node.nodeConfig.TransformType == "template" {
-		node.template,err = template.New("transform").Parse(node.nodeConfig.Template)
+		funcMap := template.FuncMap{
+			"variable": func(varName string,isGlobal bool)(interface{},error) {
+				//node.getLog().Debug("Getting variable by name ",varName)
+				var vari model.Variable
+				var err error
+				if isGlobal {
+					vari , err = node.ctx.GetVariable(varName,"global")
+				}else {
+					vari , err = node.ctx.GetVariable(varName,node.flowOpCtx.FlowId)
+				}
+
+				if vari.IsNumber() {
+					return vari.ToNumber()
+				}
+				vstr , ok := vari.Value.(string)
+				if ok {
+					return vstr,err
+				}else {
+					return "",errors.New("Only simple types are supported ")
+				}
+
+			},
+		}
+		node.template,err = template.New("transform").Funcs(funcMap).Parse(node.nodeConfig.Template)
 		if err != nil {
 			node.getLog().Error(" Failed while parsing request template.Error:",err)
 			return err
@@ -255,11 +279,12 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 			node.template.Execute(&templateBuffer,template)
 
 			err = json.Unmarshal(templateBuffer.Bytes(),&result.Value)
+			node.getLog().Debug("Template output:",templateBuffer.String())
 			if err != nil {
 				node.getLog().Warn("Error Unmarshaling template output",err)
 				return []model.NodeID{node.meta.ErrorTransition},err
 			}
-			node.getLog().Debug("Template output:",templateBuffer.String())
+
 			result.ValueType = node.nodeConfig.TargetVariableType
 		}
 	}else {

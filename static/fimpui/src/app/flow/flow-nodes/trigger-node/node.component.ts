@@ -15,7 +15,9 @@ export class TriggerNodeComponent implements OnInit {
   flowPublishService: string;
   flowPublishInterface : string;
   flowPublishAddress : string;
-  constructor(public dialog: MatDialog) { }
+  constructor(public dialog: MatDialog) {
+
+  }
 
   ngOnInit() {
 
@@ -28,13 +30,11 @@ export class TriggerNodeComponent implements OnInit {
   }
 
   loadDefaultConfig() {
-    if (this.flowPublishService == null) {
-      this.flowPublishService = "out_bin_switch";
-      this.flowPublishInterface = "cmd.binary.set";
-      this.node.Config["ValueFilter"] = {"Value":"","ValueType":"bool"};
-      this.onPublishServiceChange();
-    }
+
+    console.log("Initializing config 1");
+    console.dir(this.node.Config);
     if (this.node.Config==null) {
+      console.log("Initializing config 2");
       this.node.Config = {};
       this.node.Config["Timeout"] = 0;
       this.node.Config["VirtualServiceGroup"] = "";
@@ -54,6 +54,12 @@ export class TriggerNodeComponent implements OnInit {
             break;
         }
       }
+    }
+    if (this.flowPublishService == null) {
+      this.flowPublishService = "out_bin_switch";
+      this.flowPublishInterface = "cmd.binary.set";
+      this.node.Config["ValueFilter"] = {"Value":"","ValueType":"bool"};
+      this.onPublishServiceChange();
     }
   }
 

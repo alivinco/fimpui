@@ -506,7 +506,7 @@ findInputSocketPosition(htmlElement):any {
   showNodeEditorDialog(flow:Flow,node:MetaNode) {
     let dialogRef = this.dialog.open(NodeEditorDialog,{
       // height: '95%',
-      //width: '95%',
+      // width: '90vw',
       data:{"flow":flow,"node":node}
     });
     dialogRef.afterClosed().subscribe(result => {

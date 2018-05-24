@@ -36,7 +36,7 @@ export class JsonInputComponent implements OnInit {
   }
 
   constructor() {
-
+    this.inputTypeValue = "text"
   }
 
   onChange(event) {

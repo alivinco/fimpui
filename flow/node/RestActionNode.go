@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"strings"
 	"time"
+	"errors"
 )
 type RestActionNode struct {
 	BaseNode
@@ -93,15 +94,40 @@ func NewRestActionNode(flowOpCtx *model.FlowOperationalContext,meta model.MetaNo
 
 func (node *RestActionNode) LoadNodeConfig() error {
 	err := mapstructure.Decode(node.meta.Config,&node.config)
+
+	funcMap := template.FuncMap{
+		"variable": func(varName string,isGlobal bool)(interface{},error) {
+			//node.getLog().Debug("Getting variable by name ",varName)
+			var vari model.Variable
+			var err error
+			if isGlobal {
+				vari , err = node.ctx.GetVariable(varName,"global")
+			}else {
+				vari , err = node.ctx.GetVariable(varName,node.flowOpCtx.FlowId)
+			}
+
+			if vari.IsNumber() {
+				return vari.ToNumber()
+			}
+			vstr , ok := vari.Value.(string)
+			if ok {
+				return vstr,err
+			}else {
+				return "",errors.New("Only simple types are supported ")
+			}
+
+		},
+	}
+
 	if err != nil{
 		node.getLog().Error(" Failed while loading configurations.Error:",err)
 
 	}else {
-		node.reqTemplate,err = template.New("request").Parse(node.config.RequestTemplate)
+		node.reqTemplate,err = template.New("request").Funcs(funcMap).Parse(node.config.RequestTemplate)
 		if err != nil {
 			node.getLog().Error(" Failed while parsing request template.Error:",err)
 		}
-		node.urlTemplate,err = template.New("url").Parse(node.config.Url)
+		node.urlTemplate,err = template.New("url").Funcs(funcMap).Parse(node.config.Url)
 		if err != nil {
 			node.getLog().Error(" Failed while parsing url template.Error:",err)
 		}

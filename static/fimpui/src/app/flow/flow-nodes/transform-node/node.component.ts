@@ -25,19 +25,19 @@ export class TransformNodeComponent implements OnInit {
   loadDefaultConfig() {
     if (this.node.Config==null) {
       this.node.Config = {
-        "TargetVariableName":"",
-        "TargetVariableType":"",
-        "IsTargetVariableGlobal":false,
-        "TransformType":"calc",
-        "Rtype":"var","IsRVariableGlobal":false,
-        "IsLVariableGlobal":false,
-        "Operation":"add",
-        "RValue":{"ValueType":"int","Value":0},
-        "RVariableName":"",
-        "LVariableName":"",
-        "ValueMapping":[],
-        "XPathMapping":[],
-        "Template":{}
+        "TargetVariableName": "",
+        "TargetVariableType": "",
+        "IsTargetVariableGlobal": false,
+        "TransformType": "calc",
+        "Rtype": "var", "IsRVariableGlobal": false,
+        "IsLVariableGlobal": false,
+        "Operation": "add",
+        "RValue": {"ValueType": "int", "Value": 0},
+        "RVariableName": "",
+        "LVariableName": "",
+        "ValueMapping": [],
+        "XPathMapping": [],
+        "Template": ""
       };
     }
   }
