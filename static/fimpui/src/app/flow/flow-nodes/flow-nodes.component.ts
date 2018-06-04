@@ -29,6 +29,7 @@ export class FlowNodesComponent implements OnInit {
 export class SetVariableNodeComponent implements OnInit {
   @Input() node :MetaNode;
   @Input() nodes:MetaNode[];
+  @Input() flowId:string;
   constructor(public dialog: MatDialog) { }
   ngOnInit() {
   }

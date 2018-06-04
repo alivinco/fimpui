@@ -58,7 +58,6 @@ export class TriggerNodeComponent implements OnInit {
     if (this.flowPublishService == null) {
       this.flowPublishService = "out_bin_switch";
       this.flowPublishInterface = "cmd.binary.set";
-      this.node.Config["ValueFilter"] = {"Value":"","ValueType":"bool"};
       this.onPublishServiceChange();
     }
   }

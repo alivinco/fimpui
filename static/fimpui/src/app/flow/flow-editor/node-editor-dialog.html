@@ -13,14 +13,14 @@
       <wait-node [node]="node" [nodes]="flow.Nodes" > </wait-node>
     </div>
     <div *ngSwitchCase="'action'">
-         <action-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" > </action-node>
+         <action-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" > </action-node>
          <vinc-action-node *ngIf="node.Ui.nodeType=='vinc_action'" [node]="node" [nodes]="flow.Nodes" ></vinc-action-node>
     </div>
     <div *ngSwitchCase="'rest_action'">
       <rest-action-node *ngIf="node.Ui.nodeType==''" [node]="node" [nodes]="flow.Nodes" > </rest-action-node>
     </div>
     <div *ngSwitchCase="'set_variable'">
-         <set-variable-node [node]="node" [nodes]="flow.Nodes" > </set-variable-node>
+         <set-variable-node [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" > </set-variable-node>
     </div>
     <div *ngSwitchCase="'transform'">
       <transform-node [node]="node" [nodes]="flow.Nodes" [flowId]="flow.Id" > </transform-node>

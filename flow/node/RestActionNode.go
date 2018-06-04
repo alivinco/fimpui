@@ -287,14 +287,14 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	}
 
 	if err != nil {
-		return []model.NodeID{},err
+		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 	if node.config.Auth.Enabled {
 		req.Header.Add("Authorization","Bearer "+node.accessToken)
 	}
 	resp, err := node.httpClient.Do(req)
 	if err != nil {
-		return []model.NodeID{},err
+		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 	if node.config.Auth.Enabled {
 		if resp.StatusCode == 401 || resp.StatusCode == 403 || resp.StatusCode == 400 {
@@ -303,7 +303,7 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 			req.Header.Set("Authorization","Bearer "+node.accessToken)
 			resp, err = node.httpClient.Do(req)
 			if err != nil {
-				return []model.NodeID{},err
+				return []model.NodeID{node.meta.ErrorTransition},err
 			}
 		}
 	}
