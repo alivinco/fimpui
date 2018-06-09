@@ -111,3 +111,51 @@ export class ActionNodeComponent implements OnInit {
   }
 
 }
+
+
+@Component({
+  selector: 'vinc-action-node',
+  templateUrl: './vinc-action-node.html',
+  styleUrls: ['../flow-nodes.component.css']
+})
+export class VincActionNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  shortcuts:any[];
+  constructor(public dialog: MatDialog , private http : Http) {
+
+  }
+  ngOnInit() {
+    this.loadDefaultConfig()
+    this.loadShortcuts()
+  }
+  loadShortcuts() {
+    this.http
+      .get(BACKEND_ROOT+'/fimp/api/vinculum/shortcuts')
+      .map(function(res: Response){
+        let body = res.json();
+        return body;
+      }).subscribe ((result) => {
+      this.shortcuts = result
+    });
+  }
+
+  loadDefaultConfig() {
+    if (this.node.Config==null) {
+      this.node.Config = {
+        "VariableName": "",
+        "IsVariableGlobal": false,
+        "Props": {},
+        "RegisterAsVirtualService": false,
+        "VirtualServiceGroup":"",
+        "VirtualServiceProps":{}
+      };
+      this.node.Config["DefaultValue"] = {"Value": "", "ValueType": "string"};
+      this.node.Address = "pt:j1/mt:cmd/rt:app/rn:vinculum/ad:1"
+      this.node.ServiceInterface = "cmd.mode.set"
+      this.node.Service = "home_mode"
+      this.node.Label = "Home action"
+    }
+  }
+
+}

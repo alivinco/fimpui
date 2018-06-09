@@ -1,7 +1,6 @@
 package tsdb
 
 import (
-	"time"
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/alivinco/fimpgo"
 )
@@ -17,8 +16,8 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 	var fields map[string]interface{}
 	var vInt int64
 	var err error
-	switch iotMsg.Type {
-	case "evt.sensor.report","evt.meter.report":
+	switch iotMsg.ValueType {
+	case "float":
 		val ,err := iotMsg.GetFloatValue()
 		if err == nil {
 			fields = map[string]interface{}{
@@ -27,7 +26,7 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 			}
 		}
 
-	case "evt.binary.report","evt.presence.report","evt.open.report":
+	case "bool":
 		val ,err := iotMsg.GetBoolValue()
 		if err == nil {
 			fields = map[string]interface{}{
@@ -35,7 +34,7 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 			}
 		}
 
-	case "evt.lvl.report":
+	case "int":
 		vInt, err = iotMsg.GetIntValue()
 		if err == nil {
 			return nil, err
@@ -43,11 +42,27 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 		fields = map[string]interface{}{
 			"value": vInt,
 		}
+	case "string":
+		vStr, err := iotMsg.GetStringValue()
+		if err == nil {
+			return nil, err
+		}
+		fields = map[string]interface{}{
+			"value": vStr,
+		}
+	case "null":
+		fields = map[string]interface{}{
+			"value": 0,
+		}
+	default:
+		fields = map[string]interface{}{
+			"value": iotMsg.Value,
+		}
 
 	}
 
 	if fields != nil {
-		point, err := influx.NewPoint(context.measurementName, tags, fields, time.Now())
+		point, err := influx.NewPoint(context.measurementName, tags, fields, context.time)
 		return point, err
 	}
 

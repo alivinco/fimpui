@@ -48,7 +48,7 @@
     ".",
     "fimptype"
   ]
-  revision = "9b68137e063e36dbc52d8a043370620d7af4de62"
+  revision = "5d27627b26b8ed2bde6ca18545b71729ad7dcd11"
 
 [[projects]]
   name = "github.com/asdine/storm"

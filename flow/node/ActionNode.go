@@ -50,6 +50,7 @@ func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	node.getLog().Info("Executing ActionNode . Name = ", node.meta.Label)
 	fimpMsg := fimpgo.FimpMessage{Type: node.meta.ServiceInterface, Service: node.meta.Service,Properties:node.config.Props}
 	if node.config.VariableName != "" {
+		node.getLog().Debug("Using variable as input :",node.config.VariableName)
 		flowId := node.flowOpCtx.FlowId
 		if node.config.IsVariableGlobal {
 			flowId = "global"

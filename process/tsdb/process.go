@@ -91,9 +91,10 @@ func (pr *Process) Init() error {
 // The code is executed in callers goroutine
 func (pr *Process) OnMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
 	// log.Debugf("New msg of class = %s", iotMsg.Class
-	context := &MsgContext{}
+	context := &MsgContext{time:time.Now()}
 	if pr.filter(context, topic, iotMsg, addr.GlobalPrefix, 0) {
 		msg, err := pr.transform(context, topic, iotMsg, addr.GlobalPrefix)
+
 		if err != nil {
 			log.Errorf("<tsdb> Transformation error: %s", err)
 		} else {
@@ -109,9 +110,44 @@ func (pr *Process) OnMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo
 	}
 }
 
+// AddMessage is invoked by an adapter on every new message
+// The code is executed in callers goroutine
+func (pr *Process) AddMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo.FimpMessage, modTime time.Time) {
+	// log.Debugf("New msg of class = %s", iotMsg.Class
+	context := &MsgContext{time:modTime}
+	if pr.filter(context, topic, iotMsg, addr.GlobalPrefix, 0) {
+		msg, err := pr.transform(context, topic, iotMsg, addr.GlobalPrefix)
+
+		if err != nil {
+			log.Errorf("<tsdb> Transformation error: %s", err)
+		} else {
+			if msg != nil {
+				pr.write(context, msg)
+			} else {
+				log.Debug("<tsdb> Message can't be mapped .Skipping .")
+			}
+
+		}
+	} else {
+		log.Debugf("<tsdb> Message from topic %s is skiped .", topic)
+	}
+}
+
+
 // Filter - transforms IotMsg into DB compatable struct
 func (pr *Process) filter(context *MsgContext, topic string, iotMsg *fimpgo.FimpMessage, domain string, filterID IDt) bool {
 	var result bool
+	// no filters defines , everything is allowed
+	if len(pr.Config.Filters)==0 {
+		measure := pr.Config.getMeasurementByID("default")
+		context.measurementName = iotMsg.Service+"."+iotMsg.Type
+		if measure == nil {
+			log.Errorf("<tsdb> Measurement either is not defined or provided ID is wrong.")
+			return false
+		}
+		context.measurement = measure
+		return true
+	}
 	for i := range pr.Config.Filters {
 		if (pr.Config.Filters[i].IsAtomic && filterID == 0) || (pr.Config.Filters[i].ID == filterID) {
 

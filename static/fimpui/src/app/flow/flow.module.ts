@@ -6,13 +6,13 @@ import { VariableSelectorComponent } from './flow-context/variable-selector.comp
 import { JsonInputComponent } from './ui-elements/json-input.component';
 import { FlowEditorComponent, FlowSourceDialog,FlowLogDialog, FlowRunDialog, ServiceLookupDialog,ContextDialog,NodeEditorDialog } from './flow-editor/flow-editor.component';
 import { FlowNodesComponent ,SetVariableNodeComponent,TimeTriggerNodeComponent } from './flow-nodes/flow-nodes.component';
-import { LoopNodeComponent,WaitNodeComponent,VincTriggerNodeComponent,VincActionNodeComponent} from './flow-nodes/flow-nodes.component';
+import { LoopNodeComponent,WaitNodeComponent} from './flow-nodes/flow-nodes.component';
 import { RestActionNodeComponent } from './flow-nodes/rest-action-node/node.component';
-import { TriggerNodeComponent } from './flow-nodes/trigger-node/node.component';
+import { TriggerNodeComponent,VincTriggerNodeComponent } from './flow-nodes/trigger-node/node.component';
 import { IfNodeComponent } from './flow-nodes/if-node/node.component';
 import { TransformNodeComponent  } from './flow-nodes/transform-node/node.component';
 import { ExecNodeComponent  } from './flow-nodes/exec-node/node.component';
-import { ActionNodeComponent } from './flow-nodes/action-node/node.component';
+import { ActionNodeComponent,VincActionNodeComponent } from './flow-nodes/action-node/node.component';
 import { ReceiveNodeComponent } from './flow-nodes/flow-nodes.component';
 import { FlowRoutingModule } from "app/flow/flow-routing.module";
 import { FormsModule } from '@angular/forms';

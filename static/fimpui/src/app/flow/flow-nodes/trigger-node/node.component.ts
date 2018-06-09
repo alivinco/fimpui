@@ -43,17 +43,6 @@ export class TriggerNodeComponent implements OnInit {
 
       this.node.Config["ValueFilter"] = {"Value":"","ValueType":"bool"};
       this.node.Config["IsValueFilterEnabled"] = false;
-      if (this.node.Ui.nodeType) {
-        switch (this.node.Ui.nodeType) {
-          case "vinc_trigger":
-            this.node.Address = "pt:j1/mt:evt/rt:app/rn:vinculum/ad:1"
-            this.node.ServiceInterface = "evt.mode.report"
-            this.node.Service = "home_mode"
-            this.node.Label = "Home mode trigger"
-            this.node.Config.ValueFilter.ValueType = "string"
-            break;
-        }
-      }
     }
     if (this.flowPublishService == null) {
       this.flowPublishService = "out_bin_switch";
@@ -113,4 +102,40 @@ export class TriggerNodeComponent implements OnInit {
         });
     });
   }
+}
+
+
+@Component({
+  selector: 'vinc-trigger-node',
+  templateUrl: './vinc-trigger-node.html',
+  styleUrls: ['../flow-nodes.component.css']
+})
+export class VincTriggerNodeComponent implements OnInit {
+  @Input() node :MetaNode;
+  @Input() nodes:MetaNode[];
+  @Input() flowId:string;
+  constructor(public dialog: MatDialog) {
+
+  }
+  ngOnInit() {
+    this.loadDefaultConfig()
+  }
+
+  loadDefaultConfig() {
+
+    if (this.node.Config==null) {
+      this.node.Config = {};
+      this.node.Config["Timeout"] = 0;
+      this.node.Config["VirtualServiceGroup"] = "";
+      this.node.Config["VirtualServiceProps"] = {};
+      this.node.Config["RegisterAsVirtualService"] = false;
+      this.node.Config["ValueFilter"] = {"Value":"","ValueType":"string"};
+      this.node.Config["IsValueFilterEnabled"] = false;
+      this.node.Address = "pt:j1/mt:evt/rt:app/rn:vinculum/ad:1"
+      this.node.ServiceInterface = "evt.mode.report"
+      this.node.Service = "home_mode"
+      this.node.Label = "Home mode trigger"
+    }
+  }
+
 }

@@ -399,6 +399,7 @@ findInputSocketPosition(htmlElement):any {
     let node  = new MetaNode()
     node.Id = this.getNewNodeId();
     node.Type = nodeType;
+    node.Label = "";
     node.Address = "";
     node.Service = "";
     node.ServiceInterface = "";

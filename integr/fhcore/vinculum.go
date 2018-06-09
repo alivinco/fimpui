@@ -42,10 +42,17 @@ func (vc *VinculumClient) Connect() error {
 	}
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Error("<VincClient> Process CRASHED with error : ",r)
+				vc.isRunning = false
+			}
+		}()
 		defer vc.client.Close()
-		defer close(vc.inboundMsgCh)
+		//defer close(vc.inboundMsgCh)
 		for {
 			vincMsg := VinculumMsg{}
+
 			err := vc.client.ReadJSON(&vincMsg)
 
 			if err != nil {

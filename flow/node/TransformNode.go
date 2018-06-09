@@ -293,6 +293,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
 	if node.nodeConfig.TargetVariableName == "" {
+		node.getLog().Debug("Updating input variable.")
 		// Update input message
 		msg.Payload.Value = result.Value
 		msg.Payload.ValueType = result.ValueType

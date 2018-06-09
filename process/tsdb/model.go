@@ -20,6 +20,7 @@ type MsgContext struct {
 	filterID IDt
 	measurement *Measurement
 	measurementName string
+	time time.Time
 }
 
 // Selector defines message selector.
