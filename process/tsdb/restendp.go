@@ -39,12 +39,17 @@ func (endp *IntegrationAPIRestEndp) SetupRoutes() {
 	endp.Echo.PUT("/fimproc/tsdb/api/proc", endp.addProcessEndpoint)
 	endp.Echo.POST("/fimproc/tsdb/api/proc/:id", endp.updateProcessConfigEndpoint)
 	endp.Echo.POST("/fimproc/tsdb/api/proc/:id/ctl", endp.ctlProcessEndpoint)
+
 	endp.Echo.GET("/fimproc/tsdb/api/proc/:id/filters", endp.getFiltersEndpoint)
 	endp.Echo.PUT("/fimproc/tsdb/api/proc/:id/filters", endp.addFilterEndpoint)
 	endp.Echo.DELETE("/fimproc/tsdb/api/proc/:id/filters/:fid", endp.removeFilterEndpoint)
+
 	endp.Echo.GET("/fimproc/tsdb/api/proc/:id/selectors", endp.getSelectorsEndpoint)
 	endp.Echo.PUT("/fimproc/tsdb/api/proc/:id/selectors", endp.addSelectorEndpoint)
 	endp.Echo.DELETE("/fimproc/tsdb/api/proc/:id/selectors/:sid", endp.removeSelectorEndpoint)
+
+	endp.Echo.PUT("/fimproc/tsdb/api/proc/:id/measurements", endp.addMeasurementEndpoint)
+	endp.Echo.DELETE("/fimproc/tsdb/api/proc/:id/measurements/:sid", endp.removeMeasurementEndpoint)
 }
 func (endp *IntegrationAPIRestEndp) ctlProcessEndpoint(c echo.Context) error {
 	log.Info("ctlProcessEndpoint")
@@ -211,6 +216,35 @@ func (endp *IntegrationAPIRestEndp) removeSelectorEndpoint(c echo.Context) error
 	proc.RemoveSelector(IDt(selectorID))
 	endp.integr.SaveConfigs()
 	return c.JSON(http.StatusOK, DefaultResponse{ID: IDt(procID), Msg: "Selector removed."})
+}
+
+func (endp *IntegrationAPIRestEndp) addMeasurementEndpoint(c echo.Context) error {
+	log.Info("addMeasurementEndpoint")
+	selector := Measurement{}
+	procID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	if err := c.Bind(&selector); err != nil {
+		return err
+	}
+	proc := endp.integr.GetProcessByID(IDt(procID))
+	proc.AddMeasurement(selector)
+	endp.integr.SaveConfigs()
+	return c.JSON(http.StatusOK, DefaultResponse{ID: -1, Msg: "Measurement added."})
+}
+
+func (endp *IntegrationAPIRestEndp) removeMeasurementEndpoint(c echo.Context) error {
+	log.Info("removeMeasurementEndpoint")
+	procID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return err
+	}
+	selectorID := c.Param("sid")
+	proc := endp.integr.GetProcessByID(IDt(procID))
+	proc.RemoveMeasurement(selectorID)
+	endp.integr.SaveConfigs()
+	return c.JSON(http.StatusOK, DefaultResponse{ID: IDt(procID), Msg: "Measurement removed."})
 }
 
 func (endp *IntegrationAPIRestEndp) addProcessEndpoint(c echo.Context) error {

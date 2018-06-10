@@ -202,7 +202,7 @@ func (pr *Process) filter(context *MsgContext, topic string, iotMsg *fimpgo.Fimp
 				}
 				context.measurement = measure
 				if measure.UseServiceAsMeasurementName {
-					context.measurementName = iotMsg.Service
+					context.measurementName = iotMsg.Service+"."+iotMsg.Type
 				}else {
 					context.measurementName = measure.Name
 				}

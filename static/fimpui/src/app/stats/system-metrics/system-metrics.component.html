@@ -1,20 +1,21 @@
 <nav mat-tab-nav-bar>
   <a mat-tab-link [routerLink]="['/stats/event-log']" >System events</a>
   <a mat-tab-link active [routerLink]="['/stats/system-metrics']" >System metrics</a>
+  <a mat-tab-link [routerLink]="['/stats/tsdb-config']" >Time series config</a>
 </nav>
 
 <br/>
 
 <div class="table-container mat-elevation-z8">
   <div class="example-header">
-    
+
   </div>
 
   <mat-table #table [dataSource]="dataSource" matSort>
 
     <!--- Note that these columns can be defined in any order.
           The actual rendered columns are set as a property on the row definition" -->
-  
+
     <!-- Progress Column -->
     <ng-container cdkColumnDef="name">
       <mat-header-cell  *cdkHeaderCellDef> Name </mat-header-cell>
@@ -40,12 +41,12 @@
       <mat-header-cell *cdkHeaderCellDef mat-sort-header>Avg msg/sec</mat-header-cell>
       <mat-cell *cdkCellDef="let row">{{row.meanRate}} </mat-cell>
     </ng-container>
-    
+
     <mat-header-row *cdkHeaderRowDef="displayedColumns"></mat-header-row>
     <mat-row *cdkRowDef="let row; columns: displayedColumns ;"></mat-row>
   </mat-table>
-  
+
 <div style="width:100%;height:60px">&nbsp; </div>
 
- 
+
 </div>
