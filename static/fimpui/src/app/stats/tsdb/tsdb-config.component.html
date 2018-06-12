@@ -9,11 +9,11 @@
 
 <mat-card>
   <mat-card-header>
-    <mat-card-title><h3> Processes </h3></mat-card-title>
+    <mat-card-title><h3>List of processes </h3></mat-card-title>
   </mat-card-header>
   <mat-card-content>
     <mat-list>
-      <mat-list-item *ngFor="let proc of procList" > Name :{{proc.ProcName}} State : {{ proc.State }} </mat-list-item>
+      <mat-list-item *ngFor="let proc of procList" ><b> Name :</b> {{proc.ProcName}} <b>State</b> : {{ proc.State }} </mat-list-item>
     </mat-list>
   </mat-card-content>
 </mat-card>
@@ -22,7 +22,7 @@
 <mat-card>
     <mat-card-header>
       <!--<div mat-card-avatar class="example-header-image"></div>-->
-      <mat-card-title><h3>Message stream - TimeseriesDB integration process configurator</h3></mat-card-title>
+      <mat-card-title><h3>Time series integration process configurator</h3></mat-card-title>
       <!--<mat-card-subtitle>Dog Breed</mat-card-subtitle>-->
     </mat-card-header>
     <mat-card-content *ngIf="procData">

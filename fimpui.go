@@ -528,6 +528,7 @@ func main() {
 		}
 	})
 
+
 	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
 		//thingAddr := c.QueryParam("thingAddr")
 		//thingTech := c.QueryParam("thingTech")

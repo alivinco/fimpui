@@ -307,6 +307,7 @@ func (pr *Process) WriteIntoDb() {
 // Start starts the process by starting MQTT adapter ,
 // starting scheduler
 func (pr *Process) Start() error {
+	log.Info("<tsdb> Starting process...")
 	// try to initialize process first if current state is not INITIALIZED
 	if pr.State == "INIT_FAILED" || pr.State == "LOADED" {
 		if err := pr.Init(); err != nil {
@@ -328,6 +329,7 @@ func (pr *Process) Start() error {
 		pr.mqttTransport.Subscribe(selector.Topic)
 	}
 	pr.State = "RUNNING"
+	log.Info("<tsdb> Process started. State = RUNNING ")
 	return nil
 
 }
@@ -335,6 +337,7 @@ func (pr *Process) Start() error {
 // Stop stops the process by unsubscribing from all topics ,
 // stops scheduler and stops adapter.
 func (pr *Process) Stop() error {
+	log.Info("<tsdb> Stopping process...")
 	pr.ticker.Stop()
 
 	for _, selector := range pr.Config.Selectors {
@@ -343,5 +346,6 @@ func (pr *Process) Stop() error {
 	pr.influxC.Close()
 	pr.mqttTransport.Stop()
 	pr.State = "STOPPED"
+	log.Info("<tsdb> Process stopped")
 	return nil
 }

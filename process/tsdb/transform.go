@@ -19,10 +19,11 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 	switch iotMsg.ValueType {
 	case "float":
 		val ,err := iotMsg.GetFloatValue()
+		unit , _ := iotMsg.Properties["unit"]
 		if err == nil {
 			fields = map[string]interface{}{
 				"value": val,
-				"unit":  iotMsg.Properties["unit"],
+				"unit":  unit,
 			}
 		}
 
@@ -37,19 +38,19 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 	case "int":
 		vInt, err = iotMsg.GetIntValue()
 		if err == nil {
-			return nil, err
+			fields = map[string]interface{}{
+				"value": vInt,
+			}
 		}
-		fields = map[string]interface{}{
-			"value": vInt,
-		}
+
 	case "string":
 		vStr, err := iotMsg.GetStringValue()
 		if err == nil {
-			return nil, err
+			fields = map[string]interface{}{
+				"value": vStr,
+			}
 		}
-		fields = map[string]interface{}{
-			"value": vStr,
-		}
+
 	case "null":
 		fields = map[string]interface{}{
 			"value": 0,
