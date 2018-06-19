@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {Http, Response} from "@angular/http";
 import {BACKEND_ROOT} from "../../globals";
-import {TableContextRec} from "./flow-context.component";
+import {TableContextRec} from "./model";
 import {RecordEditorDialog} from "./record-editor-dialog.component";
 import {MatDialog} from "@angular/material";
 
@@ -71,7 +71,7 @@ export class VariableSelectorComponent implements OnInit {
     });
   }
 
-  showContextVariableDialog(ctxRec:TableContextRec) {
+  showContextVariableDialog() {
     var ctxRec = new TableContextRec();
     if (this.isGlobal)
       ctxRec.FlowId == "global";

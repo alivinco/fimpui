@@ -138,4 +138,16 @@ export class VincTriggerNodeComponent implements OnInit {
     }
   }
 
+  runFlow(node:MetaNode) {
+    let dialogRef = this.dialog.open(FlowRunDialog,{
+      // height: '95%',
+      width: '500px',
+      data:node
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      // this.flow = result;
+      // this.loadContext();
+    });
+  }
+
 }

@@ -17,15 +17,15 @@ import { getFimpServiceList} from "app/fimp/service-lookup"
 import {ThingIntfUiComponent} from 'app/registry/thing-intf-ui/thing-intf-ui.component'
 import {ServiceEditorDialog} from 'app/registry/services/service-editor.component'
 
- 
+
 @Component({
   selector: 'reg-services-main',
   templateUrl: './services-main.component.html',
   styleUrls: ['./services.component.css']
 })
 export class ServicesMainComponent {
-  constructor() { 
-    
+  constructor() {
+
   }
 
 }
@@ -37,18 +37,18 @@ export class ServicesMainComponent {
 })
 export class ServiceSelectorWizardComponent implements OnInit {
   @Input() msgFlowDirection : string;
-  private services : any;
-  private locations : any;
-  private selectedLocationId :string;
-  private selectedService:any;
-  private selectedInterface:any;
-  private fimpServiceList :any;
+  public services : any;
+  public locations : any;
+  public selectedLocationId :string;
+  public selectedService:any;
+  public selectedInterface:any;
+  public fimpServiceList :any;
   @Output() onSelect = new EventEmitter<ServiceInterface>();
   ngOnInit() {
     this.loadLocations();
   }
-  constructor(private http : Http,private route: ActivatedRoute) { 
-    this.fimpServiceList = getFimpServiceList();  
+  constructor(private http : Http,private route: ActivatedRoute) {
+    this.fimpServiceList = getFimpServiceList();
   }
   selectInterface(intf:ServiceInterface) {
     console.dir(intf);
@@ -91,7 +91,7 @@ export class ServiceSelectorWizardComponent implements OnInit {
     }else {
       intf.intfAddress = "pt:j1/mt:evt"+service.address
     }
-    
+
     this.onSelect.emit(intf);
   }
 
@@ -106,14 +106,14 @@ export class ServiceSelectorWizardComponent implements OnInit {
 export class ServicesComponent implements OnInit {
   displayedColumns = ['name','alias','locationAlias','address','action'];
   thingId : string ;
-  dataSource: ServicesDataSource | null; 
+  dataSource: ServicesDataSource | null;
   // usage (onSelect)="onSelected($event)">
   @Output() onSelect = new EventEmitter<ServiceInterface>();
   @ViewChild('filterThingAddr') filterThingAddr: ElementRef;
   @ViewChild('filterServiceName') filterServiceName: ElementRef;
 
-  constructor(private http : Http,private route: ActivatedRoute,public dialog: MatDialog) { 
-    
+  constructor(private http : Http,private route: ActivatedRoute,public dialog: MatDialog) {
+
   }
 
   ngOnInit() {
@@ -134,8 +134,8 @@ export class ServicesComponent implements OnInit {
         .subscribe(() => {
           if (!this.dataSource) { return; }
           this.dataSource.getData(this.filterThingAddr.nativeElement.value,this.filterServiceName.nativeElement.value,"")
-        }); 
-           
+        });
+
   }
   showServiceEditorDialog(service:Service) {
     let dialogRef = this.dialog.open(ServiceEditorDialog,{
@@ -145,9 +145,9 @@ export class ServicesComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result)
         {
-           this.dataSource.getData("","",this.thingId) 
+           this.dataSource.getData("","",this.thingId)
         }
-    });      
+    });
   }
   selectInterface(intf:ServiceInterface) {
     console.dir(intf);
@@ -159,7 +159,7 @@ export class ServicesComponent implements OnInit {
 export class ServicesDataSource extends DataSource<any> {
   services : Service[] = [];
   servicesObs = new BehaviorSubject<Service[]>([]);
-  
+
   constructor(private http : Http) {
     super();
   }
@@ -181,7 +181,7 @@ export class ServicesDataSource extends DataSource<any> {
         });
 
   }
-  
+
   connect(): Observable<Service[]> {
     return this.servicesObs;
   }
@@ -194,7 +194,7 @@ export class ServicesDataSource extends DataSource<any> {
             service.id = result[key].id
             service.name = result[key].name;
             service.alias = result[key].alias;
-            service.address = result[key].address; 
+            service.address = result[key].address;
             service.groups = result[key].groups;
             service.locationId = result[key].location_id;
             service.locationAlias = result[key].location_alias;
@@ -202,6 +202,6 @@ export class ServicesDataSource extends DataSource<any> {
             service.interfaces = result[key].interfaces;
             services.push(service)
      }
-     return services;     
+     return services;
   }
 }

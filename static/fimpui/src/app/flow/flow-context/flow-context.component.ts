@@ -14,15 +14,8 @@ import {ThingEditorDialog} from "../../registry/things/thing-editor.component";
 import {Thing} from "../../registry/model";
 import {MatDialog} from "@angular/material";
 import {RecordEditorDialog} from "./record-editor-dialog.component";
+import {TableContextRec} from "./model"
 
-export class TableContextRec {
-  FlowId : string ;
-  Name :string;
-  Description:string;
-  UpdatedAt:string;
-  Value:any;
-  ValueType:string;
-}
 
 @Component({
   selector: 'flow-context',

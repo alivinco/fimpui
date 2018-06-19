@@ -8,8 +8,8 @@ import { ThingsDbService} from '../things-db.service'
 })
 export class ThingsTableComponent implements OnInit {
 
-  constructor(private thingsDb:ThingsDbService) { }
-  
+  constructor(public thingsDb:ThingsDbService) { }
+
   ngOnInit() {
   }
 

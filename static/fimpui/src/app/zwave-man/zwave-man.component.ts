@@ -502,7 +502,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   templateUrl: './dialog-add-node.html',
 })
 export class AddDeviceDialog implements OnInit, OnDestroy  {
-  private messages:string[]=[];
+  messages:string[]=[];
   globalSub : Subscription;
   customTemplateName : string;
   forceInterview : boolean;
@@ -570,7 +570,7 @@ export class AddDeviceDialog implements OnInit, OnDestroy  {
   templateUrl: './dialog-remove-node.html',
 })
 export class RemoveDeviceDialog implements OnInit, OnDestroy  {
-  private messages:string[]=[];
+  public messages:string[]=[];
   globalSub : Subscription;
   customTemplateName : string;
   forceInterview : boolean;

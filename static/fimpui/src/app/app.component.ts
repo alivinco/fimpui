@@ -10,7 +10,7 @@ import { FimpService} from 'app/fimp/fimp.service';
 })
 export class AppComponent {
   showHeading = true;
-  private version :String;
+  public version :String;
   constructor (private http : Http){
     this.loadSystemInfo();
   }
@@ -23,16 +23,16 @@ export class AppComponent {
   //        hostname:mqttHost,
   //        port: mqttPort,
   //        path: '/mqtt'
-         
+
   //     };
   //    this.fimpService.mqtt.connect(MQTT_SERVICE_OPTIONS_1);
-    
-    
+
+
   // }
 
   loadSystemInfo() {
      console.log("Loading system info")
-     
+
      this.http
       .get('/fimp/system-info')
       .map(function(res: Response){
@@ -42,7 +42,7 @@ export class AppComponent {
       }).subscribe ((result)=>{
          console.log(result.Version);
          this.version = result.Version;
-         
+
       });
   }
 

@@ -4,15 +4,8 @@ import { MatDialog, MatDialogRef,MatSnackBar} from '@angular/material';
 import { MAT_DIALOG_DATA} from '@angular/material';
 import { BACKEND_ROOT } from "app/globals";
 import {Variable} from "../flow-editor/flow-editor.component";
-import {TableContextRec} from "./flow-context.component";
-
-class ContextRecord{
-  Name : string;
-  Description : string;
-  UpdatedAt : string;
-  Variable : Variable;
-  FlowId:string;
-}
+import {TableContextRec} from "./model";
+import {ContextRecord} from "./model"
 
 @Component({
     selector: 'record-editor-dialog',

@@ -4,7 +4,7 @@
     <h4> Message stream </h4>
  </mat-card-header>
  <mat-card-content >
-    
+
 <div>
     <mat-form-field style="width:300px ">
         <input matInput #topicFilterInput type="text" [(ngModel)] = "topicFilter"  placeholder="Topic filter" >
@@ -17,7 +17,7 @@
     </mat-form-field>
     <button mat-raised-button (click)="filter()" >Filter</button>
     <button mat-raised-button (click)="resetFilter()" >Reset</button>
-   
+
     <p>
        <mat-form-field style="width:250px ">
           <input matInput #maxLogSizeInput type="number" [(ngModel)] = "fimpService.maxLogSize"  placeholder="Max log size" >
@@ -26,21 +26,21 @@
     </p>
 </div>
 <br/>
- <div #settings hidden > 
+ <div #settings hidden >
      <mat-form-field style="width:300px" class="node-transition-field">
          <input matInput #topicInput [(ngModel)]="topic"  placeholder="Topic">
      </mat-form-field>
      <mat-form-field   style="width: 100%">
-     <textarea class="sourceEditor" mat-autosize [(ngModel)]="payload"  minRows="6" matInput #payloadInput placeholder="Payload" > </textarea> 
+     <textarea class="sourceEditor" mat-autosize [(ngModel)]="payload"  minRows="6" matInput #payloadInput placeholder="Payload" > </textarea>
      </mat-form-field>
      <br/>
      <button mat-raised-button (click)="sendMessage(topicInput.value,payloadInput.value)" >Send</button>
  </div>
-<mat-table #table [dataSource]="dataSource" [trackBy]="localId">
-      
+<mat-table #table [dataSource]="dataSource" >
+
           <!--- Note that these columns can be defined in any order.
                 The actual rendered columns are set as a property on the row definition" -->
-        
+
           <!-- Progress Column -->
           <ng-container cdkColumnDef="time">
             <mat-header-cell  *cdkHeaderCellDef> Timestamp </mat-header-cell>
@@ -73,6 +73,6 @@
  </mat-card-content>
  </mat-card>
 
- 
- 
+
+
  </div>

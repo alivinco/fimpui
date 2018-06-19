@@ -9,11 +9,11 @@ import { BACKEND_ROOT } from "app/globals";
   styleUrls: ['./flight-recorder.component.css']
 })
 export class FlightRecorderComponent implements OnInit {
-  private reportLogFiles:string[]=[];
-  private reportLogMaxSize:number = 0;
-  private hostAlias:string = localStorage.getItem("hostAlias") ;
-  private cmdResult:any;
-  private cmdLog:string[]=[];
+  reportLogFiles:string[]=[];
+  reportLogMaxSize:number = 0;
+  hostAlias:string = localStorage.getItem("hostAlias") ;
+  cmdResult:any;
+  cmdLog:string[]=[];
   constructor(private http : Http,private configs:ConfigsService) { }
 
   ngOnInit() {

@@ -32,7 +32,7 @@
       <mat-expansion-panel-header>
         <mat-panel-title> Headers </mat-panel-title>
       </mat-expansion-panel-header>
-    <div *ngFor="let exp of node.Config.Headers;let index2 = index;trackBy:trackByIndex;">
+    <div *ngFor="let exp of node.Config.Headers;let index2 = index;">
       <mat-form-field class="node-transition-field">
         <input matInput [(ngModel)]="node.Config.Headers[index2].Name" placeholder="Name" >
       </mat-form-field>
@@ -86,7 +86,7 @@
         <mat-panel-title> Response mapping </mat-panel-title>
       </mat-expansion-panel-header>
 
-      <div *ngFor="let exp of node.Config.ResponseMapping;let index2 = index;trackBy:trackByIndex;" style="margin-bottom: 10px">
+      <div *ngFor="let exp of node.Config.ResponseMapping;let index2 = index;" style="margin-bottom: 10px">
         <mat-form-field class="node-transition-field">
           <input matInput [(ngModel)]="node.Config.ResponseMapping[index2].Name" placeholder="Name" >
         </mat-form-field>

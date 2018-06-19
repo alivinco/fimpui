@@ -1,6 +1,6 @@
 <div>
-    <div #nodebody > 
-        <div *ngFor="let nod of node.Config.Expressions;let index = index;trackBy:trackByIndex;">
+    <div #nodebody >
+        <div *ngFor="let nod of node.Config.Expressions;let index = index;">
             <mat-input-container style="width: 150px">
                 <input matInput [(ngModel)]="node.Config.Expressions[index].Name" placeholder="Name">
             </mat-input-container>
@@ -14,7 +14,7 @@
         </div>
         <div style="margin-bottom: 30px" >
                 <mat-checkbox [(ngModel)]="node.Config.GenerateAstroTimeEvents" > Generate Astro time events </mat-checkbox>
-       </div> 
+       </div>
         <mat-input-container style="width: 150px">
             <input matInput [(ngModel)]="node.Config.Latitude" type="number" placeholder="Latitude">
         </mat-input-container>
@@ -30,6 +30,6 @@
         </mat-input-container>
         </div>
     </div>
-   
- 
+
+
 </div>

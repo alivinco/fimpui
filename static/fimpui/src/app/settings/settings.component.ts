@@ -9,9 +9,11 @@ export class SettingsComponent implements OnInit {
   mqttHost:string = localStorage.getItem("mqttHost") ;
   mqttPort:number = parseInt(localStorage.getItem("mqttPort"));
   connStatus:string = "disconnected";
-  constructor(private fimpService:FimpService) { 
+  fimpService:FimpService
+  constructor(fimpService:FimpService) {
+    this.fimpService = fimpService;
     let statusMap = {0:"disconnected",1:"connecting",2:"conneted"};
-    this.connStatus = statusMap[this.fimpService.mqtt.state.getValue().toString()];  
+    this.connStatus = statusMap[this.fimpService.mqtt.state.getValue().toString()];
   }
 
   save(mqttHost:string , mqttPort:number) {
@@ -25,13 +27,13 @@ export class SettingsComponent implements OnInit {
     //     port: mqttPort,
     //     path: '/mqtt'
     //   };
-    
+
     // this.fimpService.mqtt.onConnect.subscribe((message: any) => {
     //        this.connStatus = "connected";
     //  });
     // this.fimpService.mqtt.disconnect();
     // this.fimpService.mqtt.connect(MQTT_SERVICE_OPTIONS_1);
-    
+
   }
 
   ngOnInit() {

@@ -67,7 +67,7 @@
 
       <div id="flowEditorCanvasId" class="drag-area" (drop)="nodeDrop($event)" (dragstart)="nodeDragStart($event)" (dragover)="allowNodeDrop($event)"  >
           <svg id="flow-connections" class = "connections" ></svg>
-          <mat-card id = "nodeId_{{node.Id}}" *ngFor="let node of flow.Nodes;let index = index;trackBy:trackByIndex;" class="node-card" [style.left.px]="node.Ui.x" [style.top.px]="node.Ui.y" draggable="true" >
+          <mat-card id = "nodeId_{{node.Id}}" *ngFor="let node of flow.Nodes;let index = index;" class="node-card" [style.left.px]="node.Ui.x" [style.top.px]="node.Ui.y" draggable="true" >
               <div id = "in_socket_nodeid_{{node.Id}}" *ngIf="node.Type!='trigger' && node.Type!='time_trigger' " class="socket socket-input" (drop)="lineDrop($event)" (dragstart)="lineDragStart($event)" (dragover)="allowLineDrop($event)"></div>
               <mat-card-header >
                 <mat-card-title>

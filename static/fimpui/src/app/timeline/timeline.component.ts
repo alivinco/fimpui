@@ -1,5 +1,5 @@
 import { FimpService} from 'app/fimp/fimp.service'
-import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message'; 
+import { FimpMessage,NewFimpMessageFromString } from '../fimp/Message';
 import {Component, ElementRef, ViewChild,OnInit,Input,Output,EventEmitter,Inject} from '@angular/core';
 import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
@@ -21,22 +21,22 @@ import {MatDialog, MatDialogRef,MAT_DIALOG_DATA,MatSnackBar, MatTableDataSource}
   styleUrls: ['./timeline.component.css']
 })
 export class TimelineComponent implements OnInit {
-  private topic :string;
-  private payload:string;
-  private topicFilter:string;
-  private serviceFilter:string;
-  private msgTypeFilter:string;
-  private fimpService:FimpService;
+  topic :string;
+  payload:string;
+  topicFilter:string;
+  serviceFilter:string;
+  msgTypeFilter:string;
+  fimpService:FimpService;
   displayedColumns = ['time','topic','service','msgType','value'];
   // dataSource: MatTableDataSource<FimpMessage>;
   dataSource: TimelineDataSource|null;
-  constructor(private fimp: FimpService,public dialog: MatDialog) { 
+  constructor(private fimp: FimpService,public dialog: MatDialog) {
     this.fimpService = fimp;
     var filter = fimp.getFilter();
     this.topicFilter = filter.topicFilter;
     this.serviceFilter = filter.serviceFilter;
-    this.msgTypeFilter = filter.msgTypeFilter; 
-    // this.messages = this.fimp.getFilteredMessagLog();  
+    this.msgTypeFilter = filter.msgTypeFilter;
+    // this.messages = this.fimp.getFilteredMessagLog();
   }
 
   ngOnInit() {
@@ -44,25 +44,25 @@ export class TimelineComponent implements OnInit {
     // this.dataSource = new MatTableDataSource();
     // this.dataSource.data = this.fimpService.getMessagLog();
   }
-  
+
   filter() {
-    this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);  
+    this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);
     this.dataSource.setFilter();
-  } 
+  }
   resetFilter(){
     this.topicFilter = "";
     this.serviceFilter = "";
     this.msgTypeFilter = "";
-    this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);  
+    this.fimp.setFilter(this.topicFilter,this.serviceFilter,this.msgTypeFilter);
     this.dataSource.resetFilter();
   }
   copyToMqttClient(topic:string ,payload:string) {
     this.topic = topic ;
-    this.payload = JSON.stringify(JSON.parse(payload),null,2); 
-  } 
+    this.payload = JSON.stringify(JSON.parse(payload),null,2);
+  }
   sendMessage(topic:string,payload:string) {
     this.fimp.publish(topic,payload);
-  } 
+  }
 
   openDialog(fimpMsg:FimpMessage): void {
     let dialogRef = this.dialog.open(MsgDetailsDialog, {
@@ -78,11 +78,11 @@ export class TimelineComponent implements OnInit {
 export class TimelineDataSource extends DataSource<any> {
   events : FimpMessage[] = [];
   eventsObs = new BehaviorSubject<FimpMessage[]>([]);
-  
+
   constructor(private fimp: FimpService) {
     super();
     this.events = fimp.getMessagLog();
-    
+
     this.eventsObs.next(this.events);
 
     this.fimp.getGlobalObservable().subscribe((msg) => {
@@ -97,7 +97,7 @@ export class TimelineDataSource extends DataSource<any> {
     this.events = this.fimp.getMessagLog();
     this.eventsObs.next(this.events);
   }
-   
+
   connect(): Observable<FimpMessage[]> {
     return this.eventsObs;
   }
@@ -114,7 +114,7 @@ export class MsgDetailsDialog {
   parentComp : TimelineComponent;
   constructor(
     public dialogRef: MatDialogRef<MsgDetailsDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: any) { 
+    @Inject(MAT_DIALOG_DATA) public data: any) {
       this.fimpMsg = data.fimp;
       this.parentComp = data.parent;
     }

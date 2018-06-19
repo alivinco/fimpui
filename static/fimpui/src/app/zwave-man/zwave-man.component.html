@@ -68,7 +68,7 @@
      <mat-progress-bar  [mode]="progressBarMode" ></mat-progress-bar>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button (click)="addDevice(True)" color="primary" > Add device</button>
+      <button mat-raised-button (click)="addDevice()" color="primary" > Add device</button>
       <button mat-raised-button (click)="removeDevice()" color="warn" >Exclude device</button>
       <button mat-raised-button (click)="reloadNodes()">Reload list</button>
       <button mat-raised-button (click)="topology.hidden = !topology.hidden" >Network stats</button>

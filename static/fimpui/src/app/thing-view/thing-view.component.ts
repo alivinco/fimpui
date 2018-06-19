@@ -15,7 +15,7 @@ import { BACKEND_ROOT } from "app/globals";
 })
 export class ThingViewComponent implements OnInit ,OnDestroy{
   globalSub : Subscription;
-  private thing : Thing;
+  thing : Thing;
 
   rows = [
   ];
@@ -50,17 +50,17 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
   subscribeForFimpMsg(techAdapterName:string,address:string) {
     let serviceName = this.getServiceName(techAdapterName);
     this.globalSub = this.fimp.getGlobalObservable().subscribe((msg) => {
-      
+
       let fimpMsg = NewFimpMessageFromString(msg.payload.toString());
-      // adapter topic 
+      // adapter topic
       if (fimpMsg.service == serviceName )
         {
         if(fimpMsg.mtype == "evt.thing.inclusion_report" )
-        { 
+        {
           console.log("New thing")
           this.thing = MapFimpInclusionReportToThing(fimpMsg);
           this.rows = this.thing.services;
-        } 
+        }
 
       }else {
         // device topic
@@ -117,7 +117,7 @@ export class ThingViewComponent implements OnInit ,OnDestroy{
           this.thing = MapJsonToThingObject(result);
           console.dir(this.thing)
           this.rows = this.thing.services;
-          this.subscribeForFimpMsg(techAdapterName,address);                
+          this.subscribeForFimpMsg(techAdapterName,address);
       },err=> {
         console.log("Registry failed , requesting from adapter instead.")
         this.subscribeForFimpMsg(techAdapterName,address);

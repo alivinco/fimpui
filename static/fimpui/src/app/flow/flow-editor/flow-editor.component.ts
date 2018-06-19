@@ -611,6 +611,7 @@ export class Flow {
     Id :string ;
     Name : string ;
     Description : string ;
+    Group:string;
     Nodes : MetaNode[] ;
 }
 

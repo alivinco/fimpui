@@ -27,13 +27,13 @@ displayedColumns = ['id','type','alias','address','geo','action'];
 // 'serviceName','serviceAlias','intfMsgType'];
   dataSource: LocationsDataSource | null;
 
-  constructor(private http : Http,public dialog: MatDialog) { 
-    
+  constructor(private http : Http,public dialog: MatDialog) {
+
   }
 
   ngOnInit() {
     this.dataSource = new LocationsDataSource(this.http);
-   
+
   }
   deleteLocation(id:string) {
     this.http
@@ -41,7 +41,7 @@ displayedColumns = ['id','type','alias','address','geo','action'];
      .subscribe ((result) => {
         this.dataSource.getData();
      });
-   } 
+   }
   showLocationEditorDialog(service:Location) {
     let dialogRef = this.dialog.open(LocationEditorDialog,{
             width: '400px',
@@ -50,9 +50,9 @@ displayedColumns = ['id','type','alias','address','geo','action'];
     dialogRef.afterClosed().subscribe(result => {
       if (result)
         {
-           this.dataSource.getData() 
+           this.dataSource.getData()
         }
-    });      
+    });
   }
 }
 
@@ -60,7 +60,7 @@ displayedColumns = ['id','type','alias','address','geo','action'];
 export class LocationsDataSource extends DataSource<any> {
   locations : Location[] = [];
   locationsObs = new BehaviorSubject<Location[]>([]);
-  
+
   constructor(private http : Http) {
     super();
     this.getData();
@@ -78,25 +78,25 @@ export class LocationsDataSource extends DataSource<any> {
         });
 
   }
-  
+
   connect(): Observable<Location[]> {
     return this.locationsObs;
   }
   disconnect() {}
-  
+
   mapThings(result:any):Location[] {
     let locations : Location[] = [];
     for (var key in result){
             let loc = new Location();
             loc.id = result[key].id;
             loc.type = result[key].type;
-            loc.alias = result[key].alias; 
-            loc.address = result[key].address; 
-            loc.long = result[key].long; 
-            loc.lat = result[key].lat; 
+            loc.alias = result[key].alias;
+            loc.address = result[key].address;
+            loc.long = result[key].long;
+            loc.lat = result[key].lat;
             locations.push(loc)
      }
-     return locations;     
+     return locations;
   }
 }
 
@@ -107,16 +107,16 @@ export class LocationsDataSource extends DataSource<any> {
 })
 export class LocationSelectorWizardComponent implements OnInit {
   @Input() currentLocation : number;
-  private locations : Location[];
+  public locations : Location[];
   selectedLocationId :number;
   @Output() onSelect = new EventEmitter<number>();
   ngOnInit() {
     this.loadLocations();
     this.selectedLocationId = this.currentLocation;
   }
-  constructor(private http : Http,) { 
+  constructor(private http : Http,) {
   }
-  
+
   loadLocations() {
     this.http.get(BACKEND_ROOT+'/fimp/api/registry/locations',{})
     .map((res: Response)=>{
