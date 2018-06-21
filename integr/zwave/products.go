@@ -35,7 +35,7 @@ func NewProductCloudStore(productDir string,bucketName string) (*ProductCloudSto
 	pcs.client, err = storage.NewClient(pcs.ctx)
 	if err != nil {
 		fmt.Println("Failed to create client: %v", err)
-		return nil, err
+		return &pcs, err
 	}
 	pcs.bucket = pcs.client.Bucket(bucketName)
 	return &pcs,err

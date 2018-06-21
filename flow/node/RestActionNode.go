@@ -178,8 +178,13 @@ func (node *RestActionNode) Authenticate(username string,password string ) {
 	data.Add("client_id", node.config.Auth.ClientID)
 	data.Add("client_secret", node.config.Auth.ClientSecret)
 	data.Add("scope", node.config.Auth.Scope)
-	data.Add("username", node.config.Auth.Username)
-	data.Add("password", node.config.Auth.Password)
+	if node.config.Auth.GrantType == "authorization_code"{
+		data.Add("code", node.config.Auth.Password)
+	}
+	if node.config.Auth.GrantType == "password"{
+		data.Add("username", node.config.Auth.Username)
+		data.Add("password", node.config.Auth.Password)
+	}
 
 	client := &http.Client{}
 	r, _ := http.NewRequest("POST", node.config.Auth.Url, strings.NewReader(data.Encode()))
@@ -223,6 +228,10 @@ func (node *RestActionNode) refreshToken() {
 		node.accessToken = ""
 		return
 	}
+	if refreshTokenVar.Value == "" {
+		node.getLog().Debug(" Refresh token is empty ")
+		return
+	}
 	refreshToken ,ok := refreshTokenVar.Value.(string)
 	if !ok {
 		node.getLog().Info(" Error , can't load refresh token from context,variable is not a string .Err",err)
@@ -254,7 +263,7 @@ func (node *RestActionNode) refreshToken() {
 		node.tokenExpiresAt = time.Now().Add(time.Second* time.Duration(jresp.ExpiresIn))
 
 		node.getLog().Infof(" Token refreshed successfully . Access toke expires after %d seconds , at ", jresp.ExpiresIn,node.tokenExpiresAt.Format("2006-01-02 15:04:05"))
-		node.ctx.SetVariable("access_token","object",jresp.AccessToken,"",node.flowOpCtx.FlowId,false )
+		node.ctx.SetVariable("access_token","string",jresp.AccessToken,"",node.flowOpCtx.FlowId,false )
 		node.ctx.SetVariable("refresh_token","string",jresp.RefreshToken,"",node.flowOpCtx.FlowId,false )
 		node.ctx.SetVariable("expires_at","string",node.tokenExpiresAt,"",node.flowOpCtx.FlowId,false )
 	}
@@ -264,7 +273,7 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	node.getLog().Info(" Executing RestActionNode . Name = ", node.meta.Label)
 
 	if node.accessToken != "" {
-		if time.Now().Before(node.tokenExpiresAt) {
+		if time.Now().After(node.tokenExpiresAt) {
 			node.refreshToken()
 		}
 	}
@@ -292,12 +301,29 @@ func (node *RestActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) 
 	if node.config.Auth.Enabled {
 		req.Header.Add("Authorization","Bearer "+node.accessToken)
 	}
+
+	node.httpClient.CheckRedirect = func(redirRequest *http.Request, via []*http.Request) error {
+		// Go's http.DefaultClient does not forward headers when a redirect 3xx
+		// response is received. Thus, the header (which in this case contains the
+		// Authorization token) needs to be passed forward to the redirect
+		// destinations.
+		redirRequest.Header = req.Header
+
+		// Go's http.DefaultClient allows 10 redirects before returning an
+		// an error. We have mimicked this default behavior.
+		if len(via) >= 10 {
+			return errors.New("stopped after 10 redirects")
+		}
+		return nil
+	}
+
 	resp, err := node.httpClient.Do(req)
 	if err != nil {
 		return []model.NodeID{node.meta.ErrorTransition},err
 	}
 	if node.config.Auth.Enabled {
 		if resp.StatusCode == 401 || resp.StatusCode == 403 || resp.StatusCode == 400 {
+			node.getLog().Infof(" Done . Name = %s,Status = %s", node.meta.Label,resp.Status)
 			// Maybe token is not valid anymore , refreshing token and reDoing request.
 			node.refreshToken()
 			req.Header.Set("Authorization","Bearer "+node.accessToken)

@@ -265,7 +265,8 @@ func main() {
 
 		cloud,err  := zwave.NewProductCloudStore( configs.ZwaveProductTemplates,"fh-products")
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err)
+			//return c.JSON(http.StatusInternalServerError, err)
+			log.Error("<main> Can't connect to cloud store ")
 		}
 
 		templates,err := cloud.ListTemplates(returnStable)
