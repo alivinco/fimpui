@@ -125,6 +125,44 @@
   <button mat-raised-button color="primary" (click)="addNewBinarySwitchMapping()">Add binary switch mapping</button>
 
 
+  <h3>Scene Activation CC mapping</h3>
+  <mat-list>
+    <mat-list-item *ngFor="let serv of template.dev_custom.scene_activation_mapping">
+      <mat-input-container class="node-label-field" style="width: 50px">
+        <input matInput type="number" [(ngModel)]="serv.endp" placeholder="Endpoint id" >
+      </mat-input-container>
+
+
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.cc_value" placeholder="Scene name" >
+      </mat-input-container>
+
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.service" placeholder="Service" >
+      </mat-input-container>
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.msg_type" placeholder="Message type" >
+      </mat-input-container>
+      <mat-input-container class="node-label-field" style="width:85px">
+        <input matInput type="text" [(ngModel)]="serv.fimp_value.val_t" placeholder="Fimp value type" >
+      </mat-input-container>
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.fimp_value.val" placeholder="Fimp value" >
+      </mat-input-container>
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.location" placeholder="Location(optional)" >
+      </mat-input-container>
+      <div style="margin-bottom: 15px;width:155px ;margin-right: 5px" >
+        <mat-checkbox [(ngModel)]="serv.is_get_report_cmd" >Get Report Cmd</mat-checkbox>
+      </div>
+      <mat-input-container class="node-label-field">
+        <input matInput type="text" [(ngModel)]="serv.comment" placeholder="Comment " >
+      </mat-input-container>
+      <button mat-raised-button color="primary" (click)="deleteSceneActivationMapping(serv)">Delete</button>
+    </mat-list-item>
+  </mat-list>
+  <button mat-raised-button color="primary" (click)="addNewSceneActivationMapping()">Add scene activation mapping</button>
+
 
 <h3>Service grouping</h3>
 <mat-list>
@@ -177,9 +215,8 @@
                                 <mat-option value = "replace" > Replace </mat-option>
                     </mat-select>
 
-                    <mat-input-container style="width:500px"  >
-                                <textarea style="height:150px"  matInput  minRows="6"  [(ngModel)]="serv.descriptor" > </textarea>
-                    </mat-input-container>
+                    <json-input style="width:500px" [label] = "'Service descriptor'" [inputType]="'textarea'"  [(jData)]="serv.descriptor"></json-input>
+
                     <button mat-raised-button color="primary" (click)="deleteServiceDescriptor(serv)">Delete</button>
 
      </mat-list-item>

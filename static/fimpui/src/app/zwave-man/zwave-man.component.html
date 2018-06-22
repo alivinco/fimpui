@@ -75,7 +75,8 @@
       <button mat-raised-button (click)="settings.hidden = !settings.hidden" >Advanced</button>
       <br/>
       <div #topology hidden >
-        <p><button mat-raised-button color="accent" (click)="requestImaStats()">Reload</button>
+        <p>
+        <button mat-raised-button color="accent" (click)="requestImaStats()">Reload</button>
         <button mat-raised-button color="accent" (click)="resetImaStats()">Reset</button></p>
         <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in the network </button>
         <table>

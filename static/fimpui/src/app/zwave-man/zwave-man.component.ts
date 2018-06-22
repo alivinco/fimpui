@@ -668,9 +668,9 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
           this.template["docs_ref"] = "";
          }
          // Converting json object into string, needed for editor
-         this.template.dev_custom.service_descriptor.forEach(element => {
-           element.descriptor = JSON.stringify(element.descriptor, null, 2);
-         });
+         // this.template.dev_custom.service_descriptor.forEach(element => {
+         //   element.descriptor = JSON.stringify(element.descriptor, null, 2);
+         // });
         //  this.templateStr = JSON.stringify(result, null, 2);
     });
   }
@@ -748,8 +748,8 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
         "sup_modes":["on","off","fire"]
       }
     }
-    var strDescriptor = JSON.stringify(sampleDescriptor,null, 2);
-    this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":strDescriptor,"comment":""});
+    // var strDescriptor = JSON.stringify(sampleDescriptor,null, 2);
+    this.template.dev_custom.service_descriptor.push({"endp":0,"operation":"add","descriptor":sampleDescriptor,"comment":""});
   }
   deleteServiceDescriptor(serviceDescriptor:any) {
     var i = this.template.dev_custom.service_descriptor.indexOf(serviceDescriptor);
@@ -781,10 +781,30 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
 
   }
 
+  addNewSceneActivationMapping() {
+    if (this.template.dev_custom.scene_activation_mapping == undefined) {
+      this.template.dev_custom.scene_activation_mapping = [];
+    }
+    this.template.dev_custom.scene_activation_mapping.push(
+      {"endp":0,"service":"","msg_type":"",
+        "cc_value":"","location":"",
+        "fimp_value":{"val":"","val_t":"string"},
+        "is_get_report_cmd":false,"comment":"" });
+
+  }
+
+
   deleteBinarySwitchMapping(binSwMapping:any) {
     var i = this.template.dev_custom.bin_switch_mapping.indexOf(binSwMapping);
     if(i != -1) {
       this.template.dev_custom.bin_switch_mapping.splice(i, 1);
+    }
+  }
+
+  deleteSceneActivationMapping(binSwMapping:any) {
+    var i = this.template.dev_custom.scene_activation_mapping.indexOf(binSwMapping);
+    if(i != -1) {
+      this.template.dev_custom.scene_activation_mapping.splice(i, 1);
     }
   }
 
@@ -811,23 +831,23 @@ export class TemplateEditorDialog implements OnInit, OnDestroy  {
 
   prepareTemplate(){
     // Converting descriptor back from string to object
-    this.template.dev_custom.service_descriptor.forEach(element => {
-      element.descriptor = JSON.parse(element.descriptor);
-    });
+    // this.template.dev_custom.service_descriptor.forEach(element => {
+    //   element.descriptor = JSON.parse(element.descriptor);
+    // });
   }
 
   showSource() {
      this.prepareTemplate();
      this.templateStr = JSON.stringify(this.template, null, 2);
-     this.template.dev_custom.service_descriptor.forEach(element => {
-        element.descriptor = JSON.stringify(element.descriptor,null,2);
-     });
+     // this.template.dev_custom.service_descriptor.forEach(element => {
+     //    element.descriptor = JSON.stringify(element.descriptor,null,2);
+     // });
   }
   saveSource() {
     this.template = JSON.parse(this.templateStr);
-    this.template.dev_custom.service_descriptor.forEach(element => {
-      element.descriptor = JSON.stringify(element.descriptor,null,2);
-   });
+   //  this.template.dev_custom.service_descriptor.forEach(element => {
+   //    element.descriptor = JSON.stringify(element.descriptor,null,2);
+   // });
   }
 
 

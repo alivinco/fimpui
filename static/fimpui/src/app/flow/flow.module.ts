@@ -98,6 +98,7 @@ import { MatTableModule,
      RecordEditorDialog
 
   ],
+  exports:[JsonInputComponent],
   entryComponents: [FlowSourceDialog,FlowLogDialog,FlowRunDialog,ServiceLookupDialog,ContextDialog,NodeEditorDialog,RecordEditorDialog]
 })
 export class FlowModule { }

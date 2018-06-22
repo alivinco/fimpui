@@ -14,7 +14,7 @@ import { MatTableModule,
   MatSliderModule,
   MatCheckboxModule,
   MatListModule,
-  MatSelectModule, 
+  MatSelectModule,
   MatOptionModule,
   MatDialogModule,
   MatCardModule,
@@ -132,7 +132,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     MatButtonModule,
     MatPaginatorModule,
     MatInputModule,
-    MatFormFieldModule, 
+    MatFormFieldModule,
     MatTableModule,
     MatChipsModule,
     MatOptionModule,
@@ -156,7 +156,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     StatsModule,
     RegistryModule,
     CdkTableModule
-    
+
   ],
   providers: [FimpService,ThingsDbService,ConfigsService,{
     // Provider for APP_INITIALIZER
@@ -165,7 +165,7 @@ export function startupServiceFactory(startupService: ConfigsService): Function 
     deps: [ConfigsService],
     multi: true
 }],
-  entryComponents:[AddDeviceDialog,RemoveDeviceDialog,TemplateEditorDialog,MsgDetailsDialog], 
+  entryComponents:[AddDeviceDialog,RemoveDeviceDialog,TemplateEditorDialog,MsgDetailsDialog],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
