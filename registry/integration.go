@@ -35,6 +35,11 @@ func (mg *MqttIntegration) InitMessagingTransport() {
 
 }
 
+func (mg *MqttIntegration)RequestInclusionReport(addr string) {
+
+
+}
+
 func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
 	defer func() {
 		if r := recover(); r != nil {

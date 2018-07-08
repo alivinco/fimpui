@@ -65,6 +65,7 @@ func (node *LoopNode) OnInput(msg *model.Message) ([]model.NodeID, error) {
 	} else {
 		node.counter = node.counter - node.config.Step
 	}
+	node.ctx.SetVariable("loop_counter","int",node.counter,"auto",node.flowOpCtx.FlowId,true)
 	node.getLog().Debug("Counter = ", node.counter)
 	if (node.countUp && node.counter >= node.config.EndValue) || (!node.countUp && node.counter <= node.config.EndValue) {
 		node.counter = node.config.StartValue

@@ -49,7 +49,6 @@ func (vc *VinculumClient) Connect() error {
 			}
 		}()
 		defer vc.client.Close()
-		//defer close(vc.inboundMsgCh)
 		for {
 			vincMsg := VinculumMsg{}
 

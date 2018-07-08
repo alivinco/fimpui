@@ -5,22 +5,23 @@ import (
 	"github.com/alivinco/fimpui/registry"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
+	"time"
 )
 
-func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistryStore, vincClient *fhcore.VinculumClient) error {
+func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistryStore, vincClient *fhcore.VinculumClient,integrProc *registry.MqttIntegration) error {
 
 	commTechMap := map[string]string{"zwave-ad": "zw", "ikea": "ikea"}
-	vincToServiceNameMap := map[string]string{
-		"power":"out_bin_switch",
-		"dimValue":"out_lvl_switch",
-		"batteryPercentage":"battery",
-		"illuminance":"sensor_lumin",
-		"presence":"sensor_presence",
-		"temperature":"sensor_temp",
-		"targetTemperature":"thermostat",
-		"openState":"sensor_contact",
-
-	}
+	//vincToServiceNameMap := map[string]string{
+	//	"power":"out_bin_switch",
+	//	"dimValue":"out_lvl_switch",
+	//	"batteryPercentage":"battery",
+	//	"illuminance":"sensor_lumin",
+	//	"presence":"sensor_presence",
+	//	"temperature":"sensor_temp",
+	//	"targetTemperature":"thermostat",
+	//	"openState":"sensor_contact",
+	//
+	//}
 
 	msg, err := vincClient.GetMessage([]string{"device","room"})
 	if err != nil {
@@ -60,12 +61,11 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 
 			if err != nil {
 				log.Infof("Device %s not found in registry. Generate inclusion report first",devices[i].Client.Name)
-				//newThing := registry.Thing{}
-				//newThing.Address = devices[i].Fimp.Address
-				//newThing.CommTechnology = tech
-				//newThing.Alias = devices[i].Client.Name
-				//newThing.IntegrationId = strconv.Itoa(devices[i].ID)
-				//thingRegistryStore.UpsertThing(newThing)
+				//TODO:request inclusion report and try again .
+				integrProc.RequestInclusionReport(devices[i].Fimp.Address);
+				time.Sleep(2*time.Second)
+
+
 			}else {
 				thing.Alias = devices[i].Client.Name
 				services,err := thingRegistryStore.GetExtendedServices("",false,thing.ID,registry.IDnil)
@@ -76,8 +76,8 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 			    for si := range services {
 					for _,group := range services[si].Groups {
 						if group == devices[i].Fimp.Group {
-							for k,_ := range devices[i].Param {
-								if services[si].Name == vincToServiceNameMap[k] {
+							//for k,_ := range devices[i].Param {
+								//if services[si].Name == vincToServiceNameMap[k] {
 									services[si].IntegrationId = strconv.Itoa(devices[i].ID)
 									services[si].Alias = devices[i].Client.Name
 									location,err := thingRegistryStore.GetLocationByIntegrationId(strconv.Itoa(devices[i].Room))
@@ -87,8 +87,8 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 									}else {
 										log.Debug("Can't find location with integration ID = ",devices[i].Room)
 									}
-								}
-							}
+								//}
+							//}
 						}
 					}
 				}

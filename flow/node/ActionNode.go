@@ -4,6 +4,9 @@ import (
 	"github.com/alivinco/fimpgo"
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/mitchellh/mapstructure"
+	"text/template"
+	"errors"
+	"bytes"
 )
 
 type ActionNode struct {
@@ -11,6 +14,7 @@ type ActionNode struct {
 	ctx *model.Context
 	transport *fimpgo.MqttTransport
 	config ActionNodeConfig
+	addressTemplate *template.Template
 }
 
 type ActionNodeConfig struct {
@@ -38,6 +42,34 @@ func (node *ActionNode) LoadNodeConfig() error {
 	if err != nil{
 		node.getLog().Error("Can't decode config.Err:",err)
 
+	}
+
+	funcMap := template.FuncMap{
+		"variable": func(varName string,isGlobal bool)(interface{},error) {
+			//node.getLog().Debug("Getting variable by name ",varName)
+			var vari model.Variable
+			var err error
+			if isGlobal {
+				vari , err = node.ctx.GetVariable(varName,"global")
+			}else {
+				vari , err = node.ctx.GetVariable(varName,node.flowOpCtx.FlowId)
+			}
+
+			if vari.IsNumber() {
+				return vari.ToNumber()
+			}
+			vstr , ok := vari.Value.(string)
+			if ok {
+				return vstr,err
+			}else {
+				node.getLog().Debug("Only simple types are supported ")
+				return "",errors.New("Only simple types are supported ")
+			}
+		},
+	}
+	node.addressTemplate,err = template.New("address").Funcs(funcMap).Parse(node.meta.Address)
+	if err != nil {
+		node.getLog().Error(" Failed while parsing url template.Error:",err)
 	}
 	return err
 }
@@ -76,8 +108,13 @@ func (node *ActionNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	if err != nil {
 		return nil,err
 	}
-	node.getLog().Debug(" Action message :", fimpMsg)
-	node.transport.PublishRaw(node.meta.Address, msgBa)
+	var addrTemplateBuffer bytes.Buffer
+	node.addressTemplate.Execute(&addrTemplateBuffer,nil)
+	address:= addrTemplateBuffer.String()
+	node.getLog().Debug(" Address: ",address)
+	node.getLog().Debug(" Action message : ", fimpMsg)
+
+	node.transport.PublishRaw(address, msgBa)
 	return []model.NodeID{node.meta.SuccessTransition},nil
 }
 

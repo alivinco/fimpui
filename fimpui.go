@@ -626,7 +626,7 @@ func main() {
 	})
 
 	e.GET("/fimp/vinculum/import_to_registry", func(c echo.Context) error {
-		process.LoadVinculumDeviceInfoToStore(thingRegistryStore, vinculumClient)
+		process.LoadVinculumDeviceInfoToStore(thingRegistryStore, vinculumClient,mqttRegInt)
 		return c.NoContent(http.StatusOK)
 	})
 

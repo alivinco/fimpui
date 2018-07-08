@@ -10,6 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"encoding/gob"
 	"github.com/pkg/errors"
+	"sync"
 )
 
 type Variable struct {
@@ -88,14 +89,14 @@ type ContextRecord struct {
 type Context struct {
 	storageLocation string
 	db *bolt.DB
-	inMemoryStore map[string][]ContextRecord
+	inMemoryStore sync.Map
 }
 
 func NewContextDB(storageLocation string) (*Context , error) {
 	var err error
 	gob.Register(map[string]interface{}{})
 	ctx := Context{}
-	ctx.inMemoryStore = make(map[string][]ContextRecord)
+	//ctx.inMemoryStore = make(map[string][]ContextRecord)
 	ctx.db, err = bolt.Open(storageLocation, 0600, nil)
 	if err != nil {
 		log.Error(err)
@@ -142,7 +143,8 @@ func (ctx *Context) SetVariable(name string,valueType string,value interface{},d
 
 func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) error {
 	if inMemory {
-		//ctx.inMemoryStore[flowId] = *rec
+		ctx.inMemoryStore.Store(flowId+"."+rec.Name,*rec)
+
 	} else {
 		err := ctx.db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
@@ -160,7 +162,7 @@ func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) e
 
 func (ctx *Context) DeleteRecord(name string,flowId string,inMemory bool ) error {
 	if inMemory {
-		//ctx.inMemoryStore[flowId] = *rec
+		ctx.inMemoryStore.Delete(flowId+"."+name)
 	} else {
 		err := ctx.db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
@@ -192,10 +194,14 @@ func (ctx *Context) GetVariableType(name string ,flowId string) (string,error) {
 }
 
 func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) {
-	//rec , ok := ctx.inMemoryRecords[name]
-	//if ok {
-	//		return &rec,nil
-	//}
+	// check memmory first
+	recI , ok := ctx.inMemoryStore.Load(flowId+"."+name)
+	if ok {
+		rec,ok := recI.(ContextRecord)
+		if ok {
+			return &rec,nil
+		}
+	}
 
 	var ctxRec *ContextRecord
 	var err error
@@ -243,6 +249,14 @@ func (ctx *Context) GetRecords(flowId string) []ContextRecord  {
 		}
 
 		return nil
+	})
+
+	ctx.inMemoryStore.Range(func(key, value interface{}) bool {
+		rec , ok := value.(ContextRecord)
+		if ok {
+			result = append(result,rec)
+		}
+		return true
 	})
 
 	return result

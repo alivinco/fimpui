@@ -156,7 +156,8 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 	}
 
     if lValue.ValueType == rValue.ValueType || (lValue.IsNumber() && rValue.IsNumber()) ||
-		(node.nodeConfig.TransformType == "xpath" || node.nodeConfig.TransformType == "jpath"|| node.nodeConfig.TransformType == "template" )  {
+		(node.nodeConfig.TransformType == "xpath" || node.nodeConfig.TransformType == "jpath"||
+			node.nodeConfig.TransformType == "template" || node.nodeConfig.TransformType == "map" )  {
 
     	if node.nodeConfig.TransformType == "calc" {
 			switch node.nodeConfig.Operation {
@@ -229,7 +230,7 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 		}else if node.nodeConfig.TransformType == "map" {
 			for i := range node.nodeConfig.ValueMapping {
 				//node.getLog().Debug(" record Value ",node.nodeConfig.ValueMapping[i].LValue.Value)
-				node.getLog().Debug(" record input Value = ",lValue.Value )
+				//node.getLog().Debug(" record input Value = ",lValue.Value )
 				if lValue.ValueType == node.nodeConfig.ValueMapping[i].LValue.ValueType {
 					varsAreEqual , err :=  lValue.IsEqual(&node.nodeConfig.ValueMapping[i].LValue)
 					if err != nil {
@@ -238,7 +239,6 @@ func (node *TransformNode) OnInput( msg *model.Message) ([]model.NodeID,error) {
 					}
 					if varsAreEqual {
 						result = node.nodeConfig.ValueMapping[i].RValue
-						node.getLog().Debug(" Result is set")
 						break
 					}
 				}

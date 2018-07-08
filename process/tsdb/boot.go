@@ -39,75 +39,79 @@ func (it *Integration) GetDefaultIntegrConfig() []ProcessConfig {
 
 	selector := []Selector{
 		{ID: 1, Topic: "pt:j1/mt:evt/rt:dev/#"},
+		{ID: 2, Topic: "pt:j1/mt:cmd/rt:dev/#"},
 	}
-	filters := []Filter{
-		{
-			ID:            1,
-			MsgType:       "evt.sensor.report",
-			IsAtomic:      true,
-			MeasurementID: "sensor",
-		},
-		{
-			ID:            2,
-			MsgType:       "evt.binary.report",
-			IsAtomic:      true,
-			MeasurementID: "binary",
-		},
-		{
-			ID:       3,
-			MsgType:  "evt.meter.report",
-			IsAtomic: true,
-			MeasurementID: "meter",
-		}, {
-			ID:       4,
-			MsgType:  "evt.open.report",
-			IsAtomic: true,
-			MeasurementID: "open",
-		}, {
-			ID:       5,
-			MsgType:  "evt.presence.report",
-			IsAtomic: true,
-			MeasurementID: "presence",
-		},
-		{
-			ID:            6,
-			MsgType:       "evt.lvl.report",
-			IsAtomic:      true,
-			MeasurementID: "binary",
-		},
-	}
+	//filters := []Filter{
+	//	{
+	//		ID:            1,
+	//		MsgType:       "evt.sensor.report",
+	//		IsAtomic:      true,
+	//		MeasurementID: "sensor",
+	//	},
+	//	{
+	//		ID:            2,
+	//		MsgType:       "evt.binary.report",
+	//		IsAtomic:      true,
+	//		MeasurementID: "binary",
+	//	},
+	//	{
+	//		ID:       3,
+	//		MsgType:  "evt.meter.report",
+	//		IsAtomic: true,
+	//		MeasurementID: "meter",
+	//	}, {
+	//		ID:       4,
+	//		MsgType:  "evt.open.report",
+	//		IsAtomic: true,
+	//		MeasurementID: "open",
+	//	}, {
+	//		ID:       5,
+	//		MsgType:  "evt.presence.report",
+	//		IsAtomic: true,
+	//		MeasurementID: "presence",
+	//	},
+	//	{
+	//		ID:            6,
+	//		MsgType:       "evt.lvl.report",
+	//		IsAtomic:      true,
+	//		MeasurementID: "binary",
+	//	},
+	//}
+
+	var filters []Filter
+
 
 	measurements := []Measurement{
-		{
-			ID:                      "sensor",
-			RetentionPolicyDuration: "8w",
-			RetentionPolicyName:     "sensor_8w",
-			UseServiceAsMeasurementName:true,
-		},
-		{
-			ID:                      "binary",
-			RetentionPolicyDuration: "8w",
-			RetentionPolicyName:     "binary_8w",
-			UseServiceAsMeasurementName:true,
-		},
-		{
-			ID:                      "presence",
-			RetentionPolicyDuration: "8w",
-			RetentionPolicyName:     "presence_8w",
-			UseServiceAsMeasurementName:true,
-		},
-		{
-			ID:                      "contact",
-			RetentionPolicyDuration: "8w",
-			RetentionPolicyName:     "contact_8w",
-			UseServiceAsMeasurementName:true,
-		},
-		{
-			ID:                      "meter",
-			RetentionPolicyDuration: "8w",
-			RetentionPolicyName:     "meter_8w",
-			UseServiceAsMeasurementName:true,
-		},
+		//{
+		//	ID:                      "sensor",
+		//	RetentionPolicyDuration: "8w",
+		//	RetentionPolicyName:     "sensor_8w",
+		//	UseServiceAsMeasurementName:true,
+		//},
+		//{
+		//	ID:                      "binary",
+		//	RetentionPolicyDuration: "8w",
+		//	RetentionPolicyName:     "binary_8w",
+		//	UseServiceAsMeasurementName:true,
+		//},
+		//{
+		//	ID:                      "presence",
+		//	RetentionPolicyDuration: "8w",
+		//	RetentionPolicyName:     "presence_8w",
+		//	UseServiceAsMeasurementName:true,
+		//},
+		//{
+		//	ID:                      "contact",
+		//	RetentionPolicyDuration: "8w",
+		//	RetentionPolicyName:     "contact_8w",
+		//	UseServiceAsMeasurementName:true,
+		//},
+		//{
+		//	ID:                      "meter",
+		//	RetentionPolicyDuration: "8w",
+		//	RetentionPolicyName:     "meter_8w",
+		//	UseServiceAsMeasurementName:true,
+		//},
 		{
 			ID:                      "default",
 			RetentionPolicyDuration: "8w",

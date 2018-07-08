@@ -115,7 +115,6 @@ func (node *RestActionNode) LoadNodeConfig() error {
 			}else {
 				return "",errors.New("Only simple types are supported ")
 			}
-
 		},
 	}
 
