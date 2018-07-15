@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"github.com/paulhammond/tai64"
 	log "github.com/Sirupsen/logrus"
+	"flag"
+	"fmt"
 )
 
 type TsdbBatchLoader struct{
@@ -85,14 +87,22 @@ func (tl *TsdbBatchLoader)parseLineAndLoad(line string)error {
 }
 
 func main() {
+	var mdir string
+	flag.StringVar(&mdir, "c", "", "Config file")
+	flag.Parse()
+	if mdir == "" {
+		mdir = "./"
+	} else {
+		fmt.Println("Loading mqtt log from ", mdir)
+	}
 	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, ForceColors: true,TimestampFormat:"2006-01-02T15:04:05.999"})
 	log.SetLevel(log.DebugLevel)
 	configs := model.FimpUiConfigs{ProcConfigStorePath:"./"}
 	integr := tsdb.Boot(&configs,nil)
 	proc := integr.GetProcessByID(1)
 	tsl := NewTsdbBactchLoader(proc)
-	dir := "/Users/alivinco/DevProjects/APPS/Futurehome/zipgateway-debug/MDU-305A3436-B0B5-4D3B-9825-D6E9661870CF/2018-06-04/tmp/var/log/futurehome/mqtt"
-	tsl.LoadAllFiles(dir)
-	select{}
+	//dir := "/Users/alivinco/DevProjects/APPS/Futurehome/zipgateway-debug/stianhub-mqtt/mqtt"
+	tsl.LoadAllFiles(mdir)
+	proc.Stop()
 
 }

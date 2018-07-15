@@ -1,24 +1,18 @@
 package fhcore
 
-import "time"
+import (
+	"time"
+	"encoding/json"
+	log "github.com/Sirupsen/logrus"
+)
 
-type Data struct {
-	Errors    interface{} `json:"errors"`
-	Cmd       string      `json:"cmd"`
-	Component interface{} `json:"component"`
-	Param     Param       `json:"param"`
-	RequestID int         `json:"requestId"`
-	Success   bool        `json:"success"`
-	Id        interface{}       `json:"id,omitempty"`
+type VinculumMsg struct {
+	Ver string `json:"ver"`
+	Msg Msg    `json:"msg"`
 }
-
-type Param struct {
-	Mode       string   `json:"mode"`
-	Components []string `json:"components"`
-	Device     []Device `json:"device,omitempty"`
-	Room       []Room   `json:"room,omitempty"`
-	House      House    `json:"house,omitempty"`
-	Shortcut   []Shortcut `json:"shortcut,omitempty"`
+type VinculumMsgRequest struct {
+	Ver string `json:"ver"`
+	Msg MsgRequest `json:"msg"`
 }
 
 type Msg struct {
@@ -28,9 +22,99 @@ type Msg struct {
 	Data Data   `json:"data"`
 }
 
-type VinculumMsg struct {
-	Ver string `json:"ver"`
-	Msg Msg    `json:"msg"`
+type MsgRequest struct {
+	Type string `json:"type"`
+	Src  string `json:"src"`
+	Dst  string `json:"dst"`
+	Data DataRequest `json:"data"`
+}
+
+// Used to avoid recursion in UnmarshalJSON below.
+type msg Msg
+func (m *Msg) UnmarshalJSON(b []byte) (err error) {
+	jmsg := msg{}
+	log.Debug("Unmarshaling JSON ")
+	if err := json.Unmarshal(b, &jmsg); err == nil {
+		*m = Msg(jmsg)
+		return m.UnmarshalDataParam()
+	}else {
+		return err
+	}
+}
+
+func (m *Msg) UnmarshalDataParam() error {
+	log.Debug("Unmarshaling DataParam ")
+	log.Debug("Type = ",m.Type)
+	if m.Type == "notify" {
+		switch m.Data.Component {
+		case "device":
+			devices := []Device{{}}
+			if err := json.Unmarshal(m.Data.ParamRaw, &devices[0]); err != nil {
+				return err
+			}
+			log.Debug("Notify from device ")
+			m.Data.Param.Device = devices
+		case "room":
+			rooms := []Room{{}}
+			if err := json.Unmarshal(m.Data.ParamRaw, &rooms[0]); err != nil {
+				return err
+			}
+			m.Data.Param.Room = rooms
+		case "shortcut":
+			shortcut := []Shortcut{{}}
+			if err := json.Unmarshal(m.Data.ParamRaw, &shortcut[0]); err != nil {
+				return err
+			}
+			m.Data.Param.Shortcut = shortcut
+		case "mode":
+			//mode := []Mode{{}}
+			//if err := json.Unmarshal(m.Data.ParamRaw, &shortcut[0]); err != nil {
+			//	return err
+			//}
+			//m.Data.Param.Shortcut = shortcut
+		}
+
+	}else {
+		var param Param
+		if err := json.Unmarshal([]byte(m.Data.ParamRaw), &param); err != nil {
+			log.Debug("Unmarshaling Error ",err)
+			return err
+		}
+
+		m.Data.Param = param
+	}
+	return nil
+}
+
+type Data struct {
+	Errors    interface{} `json:"errors"`
+	Cmd       string      `json:"cmd"`
+	Component interface{} `json:"component"`
+	ParamRaw  json.RawMessage `json:"param"`
+	Param     Param       `json:"-"`
+	RequestID int         `json:"requestId"`
+	Success   bool        `json:"success"`
+	Id        interface{} `json:"id,omitempty"`
+}
+
+type DataRequest struct {
+	Errors    interface{} `json:"errors"`
+	Cmd       string      `json:"cmd"`
+	Component interface{} `json:"component"`
+	Param     Param       `json:"param"`
+	RequestID int         `json:"requestId"`
+	Success   bool        `json:"success"`
+	Id        interface{} `json:"id,omitempty"`
+}
+
+
+type Param struct {
+	Mode       string   `json:"mode"`
+	Components []string `json:"components"`
+	Device     []Device `json:"device,omitempty"`
+	Room       []Room   `json:"room,omitempty"`
+	House      House    `json:"house,omitempty"`
+	Shortcut   []Shortcut `json:"shortcut,omitempty"`
 }
 
 type Fimp struct {

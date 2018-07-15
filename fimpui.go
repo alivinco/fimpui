@@ -135,7 +135,7 @@ func main() {
 	//----------VINCULUM CLIENT------------
 	log.Info("<main>-------------- Starting VinculumClient ")
 	vinculumClient := fhcore.NewVinculumClient(configs.VinculumAddress)
-	err = vinculumClient.Connect()
+	err = vinculumClient.Start()
 	if err != nil {
 		log.Error("<main> Can't connect to Vinculum")
 	} else {

@@ -17,20 +17,21 @@ type VinculumClient struct {
 	isRunning       bool
 	runningRequests map[int]chan VinculumMsg
 	subscribers     []chan VinculumMsg
+	connectionRetryCounter int
+	maxConnRetry int
 }
 
 func NewVinculumClient(host string) *VinculumClient {
-	vc := VinculumClient{host: host, isRunning: true}
+	vc := VinculumClient{host: host, isRunning: true,maxConnRetry:10}
 	return &vc
 }
 
-func (vc *VinculumClient) Connect() error {
+func (vc *VinculumClient) connect() error {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("<VincClient> Process CRASHED with error : ",r)
 		}
 	}()
-	vc.runningRequests = make(map[int]chan VinculumMsg)
 	u := url.URL{Scheme: "ws", Host: vc.host, Path: "/ws"}
 	log.Infof("<VincClient> Connecting to %s", u.String())
 	var err error
@@ -40,7 +41,13 @@ func (vc *VinculumClient) Connect() error {
 		vc.isRunning = false
 		return err
 	}
+	return err
+}
 
+func (vc *VinculumClient) Start() error {
+	vc.connectionRetryCounter = 0
+	vc.runningRequests = make(map[int]chan VinculumMsg)
+	err := vc.connect()
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
@@ -55,10 +62,23 @@ func (vc *VinculumClient) Connect() error {
 			err := vc.client.ReadJSON(&vincMsg)
 
 			if err != nil {
-				//if vincMsg.Msg.Data. != "notify" {
-				//	fmt.Println("read:", err)
-				//}
-				continue
+				if websocket.IsCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure,websocket.CloseNormalClosure) {
+					log.Error("<VincClient> CloseError : %v", err)
+					if vc.connectionRetryCounter < vc.maxConnRetry {
+						log.Info("<VincClient> Reconnecting after 6 seconds...")
+						vc.connectionRetryCounter++
+						time.Sleep(time.Second*6)
+						vc.connect()
+						continue
+					}else {
+						vc.connectionRetryCounter = 0
+						break
+					}
+				}else {
+					//log.Errorf(" Other error (cmd:%s,comp:%s) : %v",vincMsg.Msg.Data.Cmd,vincMsg.Msg.Data.Component, err)
+					continue
+				}
+
 			}
 			if vincMsg.Msg.Type == "response" {
 				for k, vchan := range vc.runningRequests {
@@ -68,6 +88,7 @@ func (vc *VinculumClient) Connect() error {
 					}
 				}
 			}else {
+				//log.Infof(" New msg.Room = %d |  %v",vincMsg.Msg.Data.Param.RoomID, vincMsg)
 				for i := range vc.subscribers{
 					select {
 					case vc.subscribers[i] <- vincMsg:
@@ -82,7 +103,7 @@ func (vc *VinculumClient) Connect() error {
 			}
 		}
 	}()
-	return nil
+	return err
 }
 
 func (vc *VinculumClient) RegisterSubscriber() chan VinculumMsg {
@@ -94,13 +115,13 @@ func (vc *VinculumClient) RegisterSubscriber() chan VinculumMsg {
 
 func (vc *VinculumClient) GetMessage(components []string) (VinculumMsg, error) {
 	if !vc.isRunning {
-		err := vc.Connect()
+		err := vc.Start()
 		if err != nil {
 			return VinculumMsg{}, errors.New("Vinculum is Not connected ")
 		}
 	}
 	reqId := rand.Intn(1000)
-	msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "get",RequestID: reqId, Param: Param{Components: components}}}}
+	msg := VinculumMsgRequest{Ver: "sevenOfNine", Msg: MsgRequest{Type: "request", Src: "fimpui", Dst: "vinculum", Data: DataRequest{Cmd: "get",RequestID: reqId, Param: Param{Components: components}}}}
 	vc.runningRequests[reqId] = make(chan VinculumMsg)
 	vc.client.WriteJSON(msg)
 
@@ -119,7 +140,7 @@ func (vc *VinculumClient) GetMessage(components []string) (VinculumMsg, error) {
 
 func (vc *VinculumClient) SetMode(mode string) error {
 	reqId := rand.Intn(1000)
-	msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "set", RequestID: reqId,Component:"mode",Id:mode}}}
+	msg := VinculumMsgRequest{Ver: "sevenOfNine", Msg: MsgRequest{Type: "request", Src: "fimpui", Dst: "vinculum", Data: DataRequest{Cmd: "set", RequestID: reqId,Component:"mode",Id:mode}}}
 	return vc.client.WriteJSON(msg)
 }
 
@@ -127,7 +148,7 @@ func (vc *VinculumClient) SetShortcut(shortcutId string) error {
 	reqId := rand.Intn(1000)
 	numId,err := strconv.ParseInt(shortcutId,10,64)
 	if err == nil {
-		msg := VinculumMsg{Ver: "sevenOfNine", Msg: Msg{Type: "request", Src: "fimpui", Dst: "vinculum", Data: Data{Cmd: "set", RequestID: reqId,Component:"shortcut",Id:numId}}}
+		msg := VinculumMsgRequest{Ver: "sevenOfNine", Msg: MsgRequest{Type: "request", Src: "fimpui", Dst: "vinculum", Data: DataRequest{Cmd: "set", RequestID: reqId,Component:"shortcut",Id:numId}}}
 		return vc.client.WriteJSON(msg)
 	}
 	return err
