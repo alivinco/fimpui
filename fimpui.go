@@ -17,6 +17,7 @@ import (
 	"github.com/alivinco/fimpui/model"
 	"github.com/alivinco/fimpui/process"
 	"github.com/alivinco/fimpui/registry"
+	regapi "github.com/alivinco/fimpui/registry/api"
 	"github.com/koding/websocketproxy"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -175,6 +176,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	api.NewContextApi(flowManager.GetGlobalContext(),e)
+	regapi.NewRegistryApi(thingRegistryStore,e)
 	// Uncomment the line below to enable Time Series exporter.
 	tsdb.Boot(configs,e)
 
@@ -435,45 +437,9 @@ func main() {
 
 	})
 
-	e.GET("/fimp/api/registry/things", func(c echo.Context) error {
 
-		var things []registry.Thing
-		var locationId int
-		locationIdStr := c.QueryParam("locationId")
-		locationId, _ = strconv.Atoi(locationIdStr)
 
-		if locationId != 0 {
-			things, err = thingRegistryStore.GetThingsByLocationId(registry.ID(locationId))
-		} else {
-			things, err = thingRegistryStore.GetAllThings()
-		}
-		thingsWithLocation := thingRegistryStore.ExtendThingsWithLocation(things)
-		if err == nil {
-			return c.JSON(http.StatusOK, thingsWithLocation)
-		} else {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
 
-	})
-
-	e.GET("/fimp/api/registry/services", func(c echo.Context) error {
-		serviceName := c.QueryParam("serviceName")
-		locationIdStr := c.QueryParam("locationId")
-		thingIdStr := c.QueryParam("thingId")
-		thingId, _ := strconv.Atoi(thingIdStr)
-		locationId , _ := strconv.Atoi(locationIdStr)
-		filterWithoutAliasStr:= c.QueryParam("filterWithoutAlias")
-		var filterWithoutAlias bool
-		if filterWithoutAliasStr == "true" {
-			filterWithoutAlias = true
-		}
-		services, err := thingRegistryStore.GetExtendedServices(serviceName,filterWithoutAlias,registry.ID(thingId),registry.ID(locationId))
-		if err == nil {
-			return c.JSON(http.StatusOK, services)
-		} else {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
 
 	//e.POST("/fimp/api/registry/service-fields", func(c echo.Context) error {
 	//	// The service update only selected fields and not entire object
@@ -502,118 +468,6 @@ func main() {
 	//		return c.JSON(http.StatusInternalServerError, err)
 	//	}
 	//})
-
-	e.PUT("/fimp/api/registry/service", func(c echo.Context) error {
-		service := registry.Service{}
-		err := c.Bind(&service)
-		if err == nil {
-			log.Info("<REST> Saving service")
-			thingRegistryStore.UpsertService(&service)
-			return c.NoContent(http.StatusOK)
-		} else {
-			log.Info("<REST> Can't bind service")
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
-
-	e.PUT("/fimp/api/registry/location", func(c echo.Context) error {
-		location := registry.Location{}
-		err := c.Bind(&location)
-		if err == nil {
-			log.Info("<REST> Saving location")
-			thingRegistryStore.UpsertLocation(&location)
-			return c.NoContent(http.StatusOK)
-		} else {
-			log.Info("<REST> Can't bind location")
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
-
-
-	e.GET("/fimp/api/registry/interfaces", func(c echo.Context) error {
-		//thingAddr := c.QueryParam("thingAddr")
-		//thingTech := c.QueryParam("thingTech")
-		//serviceName := c.QueryParam("serviceName")
-		//intfMsgType := c.QueryParam("intfMsgType")
-		//locationIdStr := c.QueryParam("locationId")
-		//var locationId int
-		//locationId, _ = strconv.Atoi(locationIdStr)
-		//var thingId int
-		//thingIdStr := c.QueryParam("thingId")
-		//thingId, _ = strconv.Atoi(thingIdStr)
-		//services, err := thingRegistryStore.GetFlatInterfaces(thingAddr, thingTech, serviceName, intfMsgType, registry.ID(locationId), registry.ID(thingId))
-		services := []registry.ServiceExtendedView{}
-		if err == nil {
-			return c.JSON(http.StatusOK, services)
-		} else {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
-
-	e.GET("/fimp/api/registry/locations", func(c echo.Context) error {
-		locations, err := thingRegistryStore.GetAllLocations()
-		if err == nil {
-			return c.JSON(http.StatusOK, locations)
-		} else {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-	})
-
-	e.GET("/fimp/api/registry/thing/:tech/:address", func(c echo.Context) error {
-		things, err := thingRegistryStore.GetThingExtendedViewByAddress(c.Param("tech"), c.Param("address"))
-		if err == nil {
-			return c.JSON(http.StatusOK, things)
-		} else {
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-
-	})
-	e.DELETE("/fimp/api/registry/clear_all", func(c echo.Context) error {
-		thingRegistryStore.ClearAll()
-		return c.NoContent(http.StatusOK)
-	})
-
-	e.POST("/fimp/api/registry/reindex", func(c echo.Context) error {
-		thingRegistryStore.ReindexAll()
-		return c.NoContent(http.StatusOK)
-	})
-
-	e.PUT("/fimp/api/registry/thing", func(c echo.Context) error {
-		thing := registry.Thing{}
-		err := c.Bind(&thing)
-		fmt.Println(err)
-		if err == nil {
-			log.Info("<REST> Saving thing")
-			thingRegistryStore.UpsertThing(&thing)
-			return c.NoContent(http.StatusOK)
-		} else {
-			log.Info("<REST> Can't bind thing")
-			return c.JSON(http.StatusInternalServerError, err)
-		}
-		return c.NoContent(http.StatusOK)
-	})
-
-	e.DELETE("/fimp/api/registry/thing/:id", func(c echo.Context) error {
-		idStr := c.Param("id")
-		thingId, _ := strconv.Atoi(idStr)
-		err := thingRegistryStore.DeleteThing(registry.ID(thingId))
-		if err == nil {
-			return c.NoContent(http.StatusOK)
-		}
-		log.Error("<REST> Can't delete thing ")
-		return c.JSON(http.StatusInternalServerError, err)
-	})
-
-	e.DELETE("/fimp/api/registry/location/:id", func(c echo.Context) error {
-		idStr := c.Param("id")
-		thingId, _ := strconv.Atoi(idStr)
-		err := thingRegistryStore.DeleteLocation(registry.ID(thingId))
-		if err == nil {
-			return c.NoContent(http.StatusOK)
-		}
-		log.Error("<REST> Failed to delete thing . Error : ",err)
-		return c.JSON(http.StatusInternalServerError, err)
-	})
 
 	e.GET("/fimp/vinculum/devices", func(c echo.Context) error {
 		resp, _ := vinculumClient.GetMessage([]string{"device"})

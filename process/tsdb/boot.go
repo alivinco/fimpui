@@ -40,6 +40,9 @@ func (it *Integration) GetDefaultIntegrConfig() []ProcessConfig {
 	selector := []Selector{
 		{ID: 1, Topic: "pt:j1/mt:evt/rt:dev/#"},
 		{ID: 2, Topic: "pt:j1/mt:cmd/rt:dev/#"},
+		{ID: 3, Topic: "pt:j1/mt:evt/rt:app/#"},
+		{ID: 4, Topic: "pt:j1/mt:cmd/rt:app/#"},
+
 	}
 	//filters := []Filter{
 	//	{

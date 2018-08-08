@@ -60,21 +60,30 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 			thing ,err := thingRegistryStore.GetThingByAddress(tech,devices[i].Fimp.Address)
 
 			if err != nil {
-				log.Infof("Device %s not found in registry. Generate inclusion report first",devices[i].Client.Name)
-				//TODO:request inclusion report and try again .
-				integrProc.RequestInclusionReport(devices[i].Fimp.Address);
+				log.Infof("<VincMigration> Device %s not found in registry. Requesting inclusion report",devices[i].Client.Name)
+				//TODO:Implemented but not tested
+				integrProc.RequestInclusionReport(devices[i].Fimp.Adapter,devices[i].Fimp.Address);
 				time.Sleep(2*time.Second)
-
-
-			}else {
-				thing.Alias = devices[i].Client.Name
-				services,err := thingRegistryStore.GetExtendedServices("",false,thing.ID,registry.IDnil)
+				thing ,err = thingRegistryStore.GetThingByAddress(tech,devices[i].Fimp.Address)
 				if err != nil {
+					log.Infof("<VincMigration> No device found , moving to next device")
+					continue
+				}else {
+					log.Infof("<VincMigration> Device synchronized")
+				}
+
+
+			}
+
+			thing.Alias = devices[i].Client.Name
+			services,err := thingRegistryStore.GetExtendedServices("",false,thing.ID,registry.IDnil)
+			if err != nil {
 					log.Error("<VincMigration> Can't get services from registry")
 					continue
-				}
-			    for si := range services {
-					for _,group := range services[si].Groups {
+			}
+
+			for si := range services {
+				for _,group := range services[si].Groups {
 						if group == devices[i].Fimp.Group {
 							//for k,_ := range devices[i].Param {
 								//if services[si].Name == vincToServiceNameMap[k] {
@@ -90,11 +99,10 @@ func LoadVinculumDeviceInfoToStore(thingRegistryStore *registry.ThingRegistrySto
 								//}
 							//}
 						}
-					}
 				}
-				thingRegistryStore.UpsertThing(thing)
-
 			}
+			thingRegistryStore.UpsertThing(thing)
+
 
 		}
 	}

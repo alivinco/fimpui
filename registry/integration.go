@@ -35,9 +35,13 @@ func (mg *MqttIntegration) InitMessagingTransport() {
 
 }
 
-func (mg *MqttIntegration)RequestInclusionReport(addr string) {
-
-
+func (mg *MqttIntegration)RequestInclusionReport(adapter string ,addr string) {
+	reqMsg := fimpgo.NewStringMessage("cmd.thing.get_inclusion_report",adapter,addr,nil,nil,nil)
+	if adapter == "zwave-ad" {
+		adapter = "zw"
+	}
+	tAddr := fimpgo.Address{MsgType:fimpgo.MsgTypeCmd,ResourceType:fimpgo.ResourceTypeAdapter,ResourceName:adapter,ResourceAddress:"1"}
+	mg.msgTransport.Publish(&tAddr,reqMsg)
 }
 
 func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fimpgo.FimpMessage, rawMessage []byte) {

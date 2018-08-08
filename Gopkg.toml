@@ -116,3 +116,7 @@ required = ["github.com/eclipse/paho.mqtt.golang"]
 [[constraint]]
   branch = "master"
   name = "github.com/oliveagle/jsonpath"
+
+[[constraint]]
+  name = "github.com/imdario/mergo"
+  version = "0.3.5"
