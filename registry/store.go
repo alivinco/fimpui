@@ -183,7 +183,7 @@ func (st *ThingRegistryStore) GetServiceByAddress(serviceName string ,serviceAdd
 			return &st.services[i],nil
 		}
 	}
-	return nil,nil
+	return nil,errors.New("Not found")
 }
 
 
@@ -268,7 +268,7 @@ func (st *ThingRegistryStore) GetThingByAddress(technology string, address strin
 			return &st.things[i],nil
 		}
 	}
-	return nil, nil
+	return nil,  errors.New("Not found")
 }
 
 func (st *ThingRegistryStore) GetThingExtendedViewByAddress(technology string, address string) (*ThingExtendedView, error) {
@@ -300,7 +300,7 @@ func (st *ThingRegistryStore) GetThingByIntegrationId(id string) (*Thing, error)
 			return &st.things[i],nil
 		}
 	}
-	return nil, nil
+	return nil, errors.New("Not found")
 }
 
 func (st *ThingRegistryStore) GetLocationByIntegrationId(id string) (*Location, error) {
@@ -313,7 +313,7 @@ func (st *ThingRegistryStore) GetLocationByIntegrationId(id string) (*Location, 
 			return &st.locations[i],nil
 		}
 	}
-	return nil, nil
+	return nil, errors.New("Not found")
 }
 
 //func (st *ThingRegistryStore) GetFlatInterfaces(thingAddr string, thingTech string, serviceName string, intfMsgType string, locationId ID, thingId ID) ([]InterfaceFlatView, error) {
@@ -438,13 +438,12 @@ func (st *ThingRegistryStore) UpsertService(service *Service) (ID, error) {
 	var err error
 	// Check if service is already registered in system , if record already exits , updating the record
 	if service.ID == IDnil {
-		serviceCheck,_ := st.GetServiceByAddress(service.Name,service.Address)
-		service.ID = serviceCheck.ID
+		serviceCheck,err := st.GetServiceByAddress(service.Name,service.Address)
 		//serviceCheck := Service{}
 		//err = st.db.Select(q.And(q.Eq("Name", service.Name), q.Eq("Address", service.Address))).First(&serviceCheck)
-		//if err == nil {
-		//	service.ID = serviceCheck.ID
-		//}
+		if err == nil {
+			service.ID = serviceCheck.ID
+		}
 	}
 	if service.ID == IDnil {
 		// Create new service

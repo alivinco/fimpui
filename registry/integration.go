@@ -48,7 +48,7 @@ func (mg *MqttIntegration) onMqttMessage(topic string, addr *fimpgo.Address, iot
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error("<MqRegInt> MqttIntegration process CRASHED with error : ", r)
-			log.Errorf("<MqRegInt> Crashed while processing message from topic = %s msgType = ", r, addr.MsgType)
+			log.Errorf("<MqRegInt> Crashed while processing message from topic = %s msgType = %s", r, addr.MsgType)
 		}
 	}()
 

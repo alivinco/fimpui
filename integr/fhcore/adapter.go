@@ -75,7 +75,7 @@ func (mg *VinculumAdapter) dispatchVinculumMessages() {
 			switch msg.Msg.Data.Component {
 			case "house":
 				log.Info("<VincAd> Vinculum changed house mode")
-				fimpMsg := fimpgo.NewStringMessage("evt.mode.report","home_mode",msg.Msg.Data.Param.Mode,nil,nil,nil)
+				fimpMsg := fimpgo.NewStringMessage("evt.mode.report","home_mode",msg.Msg.Data.Param.House.Mode,nil,nil,nil)
 				addr,err:= fimpgo.NewAddressFromString("pt:j1/mt:evt/rt:app/rn:vinculum/ad:1")
 				if err == nil {
 					mg.msgTransport.Publish(addr,fimpMsg)

@@ -59,6 +59,12 @@ func (m *Msg) UnmarshalDataParam() error {
 				return err
 			}
 			m.Data.Param.Room = rooms
+		case "house":
+			house := House{}
+			if err := json.Unmarshal(m.Data.ParamRaw, &house); err != nil {
+				return err
+			}
+			m.Data.Param.House = house
 		case "shortcut":
 			shortcut := []Shortcut{{}}
 			if err := json.Unmarshal(m.Data.ParamRaw, &shortcut[0]); err != nil {
