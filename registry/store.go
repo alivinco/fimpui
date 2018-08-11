@@ -6,9 +6,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/asdine/storm"
 	gobcodec "github.com/asdine/storm/codec/gob"
-	"github.com/asdine/storm/q"
 	"github.com/imdario/mergo"
 	"github.com/alivinco/fimpui/flow/utils"
+	"github.com/pkg/errors"
 )
 
 type ThingRegistryStore struct {
@@ -102,13 +102,20 @@ func (st *ThingRegistryStore) GetServiceById(Id ID) (*Service, error) {
 	return nil, nil
 }
 
-func (st *ThingRegistryStore) GetServiceByFullAddress(address string) (*Service, error) {
+func (st *ThingRegistryStore) GetServiceByFullAddress(address string) (*ServiceExtendedView, error) {
+	var serv ServiceExtendedView
+
 	for i := range st.services {
-		if utils.RouteIncludesTopic("+/+/"+st.things[i].Address,address)  {
-			return &st.services[i],nil
+		if utils.RouteIncludesTopic("+/+"+st.services[i].Address,address)  {
+			serv.Service = st.services[i]
+			location , _ := st.GetLocationById(st.services[i].LocationId)
+			if location != nil {
+				serv.LocationAlias = location.Alias
+			}
+			return &serv,nil
 		}
 	}
-	return nil, nil
+	return &serv, errors.New("Not found")
 }
 
 func (st *ThingRegistryStore) GetLocationById(Id ID) (*Location, error) {
@@ -169,9 +176,14 @@ func (st *ThingRegistryStore) GetThingExtendedViewById(Id ID) (*ThingExtendedVie
 }
 
 func (st *ThingRegistryStore) GetServiceByAddress(serviceName string ,serviceAddress string) (*Service, error) {
-	service := Service{}
-	err := st.db.Select(q.And(q.Eq("Name", serviceName), q.Eq("Address", serviceAddress))).First(&service)
-	return &service, err
+	//service := Service{}
+	//err := st.db.Select(q.And(q.Eq("Name", serviceName), q.Eq("Address", serviceAddress))).First(&service)
+	for i := range st.services {
+		if st.services[i].Name == serviceName && st.services[i].Address == serviceAddress{
+			return &st.services[i],nil
+		}
+	}
+	return nil,nil
 }
 
 
@@ -407,14 +419,14 @@ func (st *ThingRegistryStore) UpsertThing(thing *Thing) (ID, error) {
 	var isChanged bool;
 	for i := range services{
 		isChanged = false
-		if services[i].Alias == "" {
+		//if services[i].Alias == "" {
 			services[i].Alias = thing.Alias
 			isChanged = true
-		}
-		if services[i].LocationId == IDnil {
+		//}
+		//if services[i].LocationId == IDnil {
 			services[i].LocationId = thing.LocationId
-			isChanged = true
-		}
+			//isChanged = true
+		//}
 		if isChanged {
 			st.UpsertService(&services[i].Service)
 		}

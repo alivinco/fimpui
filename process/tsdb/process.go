@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/alivinco/fimpgo"
+	"github.com/alivinco/fimpui/registry"
 )
 
 // Process implements integration flow between messaging system and influxdb timeseries database.
@@ -23,14 +24,16 @@ type Process struct {
 	transform   Transform
 	State       string
 	LastError   string
+	registry *registry.ThingRegistryStore
 }
 
 // NewProcess is a constructor
-func NewProcess(config *ProcessConfig) *Process {
+func NewProcess(config *ProcessConfig,registry *registry.ThingRegistryStore) *Process {
 	proc := Process{Config: config, transform: DefaultTransform}
 	proc.writeMutex = &sync.Mutex{}
 	proc.apiMutex = &sync.Mutex{}
 	proc.State = "LOADED"
+	proc.registry = registry
 	return &proc
 }
 
@@ -92,6 +95,9 @@ func (pr *Process) Init() error {
 func (pr *Process) OnMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo.FimpMessage, rawMessage []byte) {
 	// log.Debugf("New msg of class = %s", iotMsg.Class
 	context := &MsgContext{time:time.Now()}
+	if pr.registry != nil {
+		context.service, _ = pr.registry.GetServiceByFullAddress(topic)
+	}
 	if pr.filter(context, topic, iotMsg, addr.GlobalPrefix, 0) {
 		msg, err := pr.transform(context, topic, iotMsg, addr.GlobalPrefix)
 
@@ -111,6 +117,7 @@ func (pr *Process) OnMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo
 }
 
 // AddMessage is invoked by an adapter on every new message
+// Is used by batch loader
 // The code is executed in callers goroutine
 func (pr *Process) AddMessage(topic string, addr *fimpgo.Address , iotMsg *fimpgo.FimpMessage, modTime time.Time) {
 	// log.Debugf("New msg of class = %s", iotMsg.Class

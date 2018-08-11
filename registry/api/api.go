@@ -62,6 +62,17 @@ func (api * RegistryApi) RegisterRestApi() {
 		}
 	})
 
+	api.echo.GET("/fimp/api/registry/service", func(c echo.Context) error {
+		serviceAddress := c.QueryParam("address")
+		log.Info("<REST> Service search , address =  ",serviceAddress)
+		services, err := api.reg.GetServiceByFullAddress(serviceAddress)
+		if err == nil {
+			return c.JSON(http.StatusOK, services)
+		} else {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+	})
+
 	api.echo.PUT("/fimp/api/registry/service", func(c echo.Context) error {
 		service := registry.Service{}
 		err := c.Bind(&service)

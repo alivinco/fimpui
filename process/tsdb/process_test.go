@@ -76,7 +76,7 @@ func MsgGenerator(config ProcessConfig, numberOfMsg int) {
 
 func CleanUpDB(influxC influx.Client, config *ProcessConfig) {
 	// Delete measurments
-	q := influx.NewQuery(fmt.Sprintf("DROP MEASUREMENT sensor"), config.InfluxDB, "")
+	q := influx.NewQuery(fmt.Sprintf("DROP MEASUREMENT \"sensor_temp.evt.sensor.report\""), config.InfluxDB, "")
 	if response, err := influxC.Query(q); err == nil && response.Error() == nil {
 		log.Info("Datebase was deleted with status :", response.Results)
 
@@ -85,7 +85,7 @@ func CleanUpDB(influxC influx.Client, config *ProcessConfig) {
 }
 
 func Count(influxC influx.Client, config *ProcessConfig) int {
-	q := influx.NewQuery(fmt.Sprintf("select count(value) from bf_sensor_temp.sensor_temp"), config.InfluxDB, "")
+	q := influx.NewQuery(fmt.Sprintf("select count(value) from \"bf_default\".\"sensor_temp.evt.sensor.report\""), config.InfluxDB, "")
 	if response, err := influxC.Query(q); err == nil && response.Error() == nil {
 		if len(response.Results[0].Series) > 0 {
 			countN, ok := response.Results[0].Series[0].Values[0][1].(json.Number)
@@ -99,6 +99,9 @@ func Count(influxC influx.Client, config *ProcessConfig) int {
 		log.Error("No Results")
 		return 0
 
+	}else {
+		log.Error(err)
+		log.Error(response.Error())
 	}
 	return 0
 }
@@ -107,17 +110,19 @@ func TestProcess(t *testing.T) {
 	Setup()
 	//Start container : docker run --name influxdb -d -p 8084:8083 -p 8086:8086 -v influxdb:/var/lib/influxdb influxdb:1.1.0-rc1-alpine
 	//Start mqtt broker
-	NumberOfMessagesToSend := 1000
+	NumberOfMessagesToSend := 100
 	selector := []Selector{
-		Selector{Topic: "j1/evt/#"},
+		Selector{Topic: "pt:j1/mt:evt/#"},
 	}
-	filters := []Filter{
-		Filter{
-			ID:       1,
-		        Service: "sensor_temp",
-			IsAtomic: true,
-		},
-	}
+	//filters := []Filter{
+	//	Filter{
+	//		ID:       1,
+	//	    Service: "sensor_temp",
+	//		IsAtomic: true,
+	//		MeasurementID:"default",
+	//	},
+	//}
+	filters := []Filter{}
 	config := ProcessConfig{
 		MqttBrokerAddr:     "tcp://localhost:1883",
 		MqttBrokerUsername: "",
@@ -144,7 +149,7 @@ func TestProcess(t *testing.T) {
 	}
 
 	CleanUpDB(influxC, &config)
-	proc := NewProcess(&config)
+	proc := NewProcess(&config,nil)
 	proc.Init()
 	err = proc.Start()
 	if err != nil {

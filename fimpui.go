@@ -178,7 +178,7 @@ func main() {
 	api.NewContextApi(flowManager.GetGlobalContext(),e)
 	regapi.NewRegistryApi(thingRegistryStore,e)
 	// Uncomment the line below to enable Time Series exporter.
-	tsdb.Boot(configs,e)
+	tsdb.Boot(configs,e,thingRegistryStore)
 
 	e.GET("/fimp/system-info", func(c echo.Context) error {
 

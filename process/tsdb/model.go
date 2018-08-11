@@ -7,6 +7,7 @@ import (
 
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/alivinco/fimpgo"
+	"github.com/alivinco/fimpui/registry"
 )
 
 // Transform defines function which converts IotMsg into influx data point
@@ -21,6 +22,7 @@ type MsgContext struct {
 	measurement *Measurement
 	measurementName string
 	time time.Time
+	service *registry.ServiceExtendedView // service full info from registry
 }
 
 // Selector defines message selector.

@@ -3,6 +3,7 @@ package tsdb
 import (
 	influx "github.com/influxdata/influxdb/client/v2"
 	"github.com/alivinco/fimpgo"
+	"strconv"
 )
 
 // DefaultTransform - transforms IotMsg into InfluxDb datapoint
@@ -12,6 +13,12 @@ func DefaultTransform(context *MsgContext, topic string, iotMsg *fimpgo.FimpMess
 		"domain": domain,
 		"mtype":    iotMsg.Type,
 		"serv": iotMsg.Service,
+	}
+	if context.service != nil {
+		tags["location_id"] = strconv.Itoa(int(context.service.LocationId))
+		tags["location_alias"] = context.service.LocationAlias
+		tags["service_id"] = strconv.Itoa(int(context.service.ID))
+		tags["service_alias"] = context.service.Alias
 	}
 	var fields map[string]interface{}
 	var vInt int64

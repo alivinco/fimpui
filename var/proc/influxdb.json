@@ -1,1 +1,44 @@
-[{"ID":1,"Name":"default","MqttBrokerAddr":"tcp://localhost:1883","MqttClientID":"","MqttBrokerUsername":"","MqttBrokerPassword":"","InfluxAddr":"http://localhost:8086","InfluxUsername":"","InfluxPassword":"","InfluxDB":"fimptest","BatchMaxSize":1000,"SaveInterval":1000,"Filters":[{"ID":1,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.sensor.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"sensor","InMemory":false},{"ID":2,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.binary.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"binary","InMemory":false},{"ID":3,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.meter.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"meter","InMemory":false},{"ID":4,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.open.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"open","InMemory":false},{"ID":5,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.presence.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"presence","InMemory":false},{"ID":6,"Name":"","Topic":"","Domain":"","Service":"","MsgType":"evt.lvl.report","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"binary","InMemory":false},{"ID":7,"Name":"","Topic":"","Domain":"","Service":"zwave-ad","MsgType":"","Negation":false,"LinkedFilterBooleanOperation":"","LinkedFilterID":0,"IsAtomic":true,"Tags":null,"MeasurementID":"default","InMemory":false}],"Selectors":[{"ID":1,"Topic":"pt:j1/mt:evt/rt:dev/#","InMemory":false},{"ID":8,"Topic":"pt:j1/mt:cmd/rt:ad/#","InMemory":false}],"Measurements":[{"ID":"sensor","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"sensor_8w","RetentionPolicyDuration":"8w"},{"ID":"binary","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"binary_8w","RetentionPolicyDuration":"8w"},{"ID":"presence","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"presence_8w","RetentionPolicyDuration":"8w"},{"ID":"contact","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"contact_8w","RetentionPolicyDuration":"8w"},{"ID":"meter","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"meter_8w","RetentionPolicyDuration":"8w"},{"ID":"default","Name":"","UseServiceAsMeasurementName":true,"RetentionPolicyName":"default_8w","RetentionPolicyDuration":"8w"}],"Autostart":false}]
+[
+  {
+    "ID": 1,
+    "Name": "default",
+    "MqttBrokerAddr": "tcp://localhost:1883",
+    "MqttClientID": "",
+    "MqttBrokerUsername": "",
+    "MqttBrokerPassword": "",
+    "InfluxAddr": "http://lego.st:8086",
+    "InfluxUsername": "",
+    "InfluxPassword": "",
+    "InfluxDB": "fimptest",
+    "BatchMaxSize": 1000,
+    "SaveInterval": 1000,
+    "Filters": [],
+    "Selectors": [
+      {
+        "ID": 1,
+        "Topic": "pt:j1/mt:evt/rt:dev/#",
+        "InMemory": false
+      },
+      {
+        "ID": 8,
+        "Topic": "pt:j1/mt:cmd/rt:ad/#",
+        "InMemory": false
+      },
+      {
+        "ID": 1,
+        "Topic": "pt:j1/mt:cmd/rt:dev/#",
+        "InMemory": false
+      }
+    ],
+    "Measurements": [
+      {
+        "ID": "default",
+        "Name": "",
+        "UseServiceAsMeasurementName": true,
+        "RetentionPolicyName": "default_8w",
+        "RetentionPolicyDuration": "8w"
+      }
+    ],
+    "Autostart": true
+  }
+]

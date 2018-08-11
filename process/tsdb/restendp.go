@@ -67,7 +67,10 @@ func (endp *IntegrationAPIRestEndp) ctlProcessEndpoint(c echo.Context) error {
 	}
 	switch req.Action {
 	case "start":
-		err = proc.Start()
+		err = proc.Init()
+		if err == nil {
+			err = proc.Start()
+		}
 		break
 	case "stop":
 		err = proc.Stop()

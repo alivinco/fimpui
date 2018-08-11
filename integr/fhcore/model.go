@@ -3,7 +3,6 @@ package fhcore
 import (
 	"time"
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 )
 
 type VinculumMsg struct {
@@ -33,7 +32,7 @@ type MsgRequest struct {
 type msg Msg
 func (m *Msg) UnmarshalJSON(b []byte) (err error) {
 	jmsg := msg{}
-	log.Debug("Unmarshaling JSON ")
+	//log.Debug("Unmarshaling JSON ")
 	if err := json.Unmarshal(b, &jmsg); err == nil {
 		*m = Msg(jmsg)
 		return m.UnmarshalDataParam()
@@ -43,8 +42,8 @@ func (m *Msg) UnmarshalJSON(b []byte) (err error) {
 }
 
 func (m *Msg) UnmarshalDataParam() error {
-	log.Debug("Unmarshaling DataParam ")
-	log.Debug("Type = ",m.Type)
+	//log.Debug("Unmarshaling DataParam ")
+	//log.Debug("Type = ",m.Type)
 	if m.Type == "notify" {
 		switch m.Data.Component {
 		case "device":
@@ -52,7 +51,7 @@ func (m *Msg) UnmarshalDataParam() error {
 			if err := json.Unmarshal(m.Data.ParamRaw, &devices[0]); err != nil {
 				return err
 			}
-			log.Debug("Notify from device ")
+			//log.Debug("Notify from device ")
 			m.Data.Param.Device = devices
 		case "room":
 			rooms := []Room{{}}
@@ -77,7 +76,7 @@ func (m *Msg) UnmarshalDataParam() error {
 	}else {
 		var param Param
 		if err := json.Unmarshal([]byte(m.Data.ParamRaw), &param); err != nil {
-			log.Debug("Unmarshaling Error ",err)
+			//log.Debug("Unmarshaling Error ",err)
 			return err
 		}
 

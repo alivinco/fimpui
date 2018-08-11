@@ -11,6 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/labstack/echo"
 	"github.com/alivinco/fimpui/model"
+	"github.com/alivinco/fimpui/registry"
 )
 
 // Integration is root level container
@@ -22,6 +23,7 @@ type Integration struct {
 	storeFullPath   string
 	Name            string
 	configSaveMutex *sync.Mutex
+	registry *registry.ThingRegistryStore
 }
 
 // GetProcessByID returns process by it's ID
@@ -223,7 +225,7 @@ func (it *Integration) InitProcesses() error {
 // InitNewProcess initialize and start single process
 func (it *Integration) InitNewProcess(procConfig *ProcessConfig) error {
 
-	proc := NewProcess(procConfig)
+	proc := NewProcess(procConfig,it.registry)
 	it.processes = append(it.processes, proc)
 	if procConfig.Autostart {
 		err := proc.Init()
@@ -286,13 +288,13 @@ func (it *Integration) RemoveProcess(ID IDt) error {
 }
 
 // Boot initializes integration
-func Boot(mainConfig *model.FimpUiConfigs , restHandler *echo.Echo) *Integration {
+func Boot(mainConfig *model.FimpUiConfigs , restHandler *echo.Echo,registry *registry.ThingRegistryStore) *Integration {
 	log.Info("<tsdb>Booting InfluxDB integration ")
 	if mainConfig.ProcConfigStorePath == "" {
 		log.Info("<tsdb> Config path path is not defined  ")
 		return nil
 	}
-	integr := Integration{Name: "influxdb", StoreLocation: mainConfig.ProcConfigStorePath}
+	integr := Integration{Name: "influxdb", StoreLocation: mainConfig.ProcConfigStorePath,registry:registry}
 	integr.Init()
 	integr.LoadConfig()
 	integr.InitProcesses()
