@@ -101,6 +101,7 @@ func (mg *Manager) LoadAllFlowsFromStorage () error {
 	for _, file := range files {
 		if strings.Contains(file.Name(),".json"){
 			mg.LoadFlowFromFile(filepath.Join(mg.config.FlowStorageDir,file.Name()))
+			mg.StartFlow(strings.Replace(file.Name(),".json","",1))
 		}
 	}
 	return nil
@@ -126,22 +127,22 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 	}
 
 	flow := NewFlow(flowMeta, mg.globalContext, mg.msgTransport)
-	flow.SetMessageStream(mg.GetNewStream(flow.Id))
 	flow.SetStoragePath(mg.config.FlowStorageDir)
-
-	flow.InitAllNodes()
 	mg.flowRegistry = append(mg.flowRegistry,flow)
-	flow.Start()
 	return nil
 }
+
+
+
 func (mg *Manager) UpdateFlowFromJson(id string, flowJsonDef []byte) error {
-	mg.UnloadFlow(id)
+	mg.StopFlow(id)
+	mg.DeleteFlowFromRegistry(id)
 	err := mg.LoadFlowFromJson(flowJsonDef)
 	return err
 }
 
 func (mg *Manager) ReloadFlowFromStorage(id string ) error {
-	mg.UnloadFlow(id)
+	mg.StopFlow(id)
 	return mg.LoadFlowFromFile(mg.GetFlowFileNameById(id))
 }
 
@@ -156,6 +157,9 @@ func (mg *Manager) UpdateFlowFromJsonAndSaveToStorage(id string, flowJsonDef []b
 		return err
 	}
 	err = mg.UpdateFlowFromJson(id,flowJsonDef)
+	if err == nil {
+		mg.StartFlow(id)
+	}
 	return err
 
 }
@@ -190,40 +194,50 @@ func (mg *Manager) GetFlowList() []FlowListItem{
 func (mg *Manager) ControlFlow(cmd string , flowId string) error {
 	switch cmd {
 	case "START":
-		return mg.GetFlowById(flowId).Start()
+	    mg.StartFlow(flowId)
 	case "STOP":
-		return mg.GetFlowById(flowId).Stop()
-
+		mg.StopFlow(flowId)
 	}
 	return nil
 }
 
-func (mg *Manager) UnloadFlow(id string) {
+func (mg *Manager) StartFlow(flowId string) {
+	flow := mg.GetFlowById(flowId)
+	flow.SetMessageStream(mg.GetNewStream(flow.Id))
+	flow.Start()
+}
+
+func (mg *Manager) StopFlow(id string) {
 	log.Infof("Unloading flow , id = ",id)
 	if mg.GetFlowById(id) == nil {
 		log.Infof("Can find flow by id = ",id)
 		return
 	}
 	mg.GetFlowById(id).Stop()
-	for i :=range mg.flowRegistry {
-		if mg.flowRegistry[i].Id == id {
-			mg.flowRegistry = append(mg.flowRegistry[:i], mg.flowRegistry[i+1:]...)
-			break
-		}
-	}
 	close(mg.msgStreams[id])
 	delete(mg.msgStreams,id)
 	log.Infof("Flow with Id = %s is unloaded",id)
 }
 
-func (mg *Manager) DeleteFlow(id string) {
+func (mg *Manager) DeleteFlowFromRegistry(id string) {
+
+	for i :=range mg.flowRegistry {
+		if mg.flowRegistry[i].Id == id {
+			mg.flowRegistry[i].CleanupBeforeDelete()
+			mg.flowRegistry = append(mg.flowRegistry[:i], mg.flowRegistry[i+1:]...)
+			break
+		}
+	}
+}
+
+func (mg *Manager) DeleteFlowFromStorage(id string) {
 	flow := mg.GetFlowById(id)
 	if flow == nil {
 		return
 	}
 	flow.CleanupBeforeDelete()
-	mg.UnloadFlow(id)
-
+	mg.StopFlow(id)
+	mg.DeleteFlowFromRegistry(id)
 	os.Remove(mg.GetFlowFileNameById(id))
 }
 

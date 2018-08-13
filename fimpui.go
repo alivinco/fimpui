@@ -10,7 +10,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/alivinco/fimpui/flow"
-	flowmodel "github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/integr/fhcore"
 	"github.com/alivinco/fimpui/integr/logexport"
 	"github.com/alivinco/fimpui/integr/mqtt"
@@ -176,6 +175,7 @@ func main() {
 	e.Use(middleware.Recover())
 
 	api.NewContextApi(flowManager.GetGlobalContext(),e)
+	api.NewFlowApi(flowManager,e)
 	regapi.NewRegistryApi(thingRegistryStore,e)
 	// Uncomment the line below to enable Time Series exporter.
 	tsdb.Boot(configs,e,thingRegistryStore)
@@ -484,52 +484,7 @@ func main() {
 		return c.NoContent(http.StatusOK)
 	})
 
-	e.GET("/fimp/flow/list", func(c echo.Context) error {
-		resp := flowManager.GetFlowList()
-		return c.JSON(http.StatusOK, resp)
-	})
-	e.GET("/fimp/flow/definition/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		var resp *flowmodel.FlowMeta
-		if id == "-" {
-			flow := flowManager.GenerateNewFlow()
-			resp = &flow
-		} else {
-			resp = flowManager.GetFlowById(id).FlowMeta
-		}
 
-		return c.JSON(http.StatusOK, resp)
-	})
-
-	e.POST("/fimp/flow/definition/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		body, err := ioutil.ReadAll(c.Request().Body)
-		if err != nil {
-			return err
-		}
-		flowManager.UpdateFlowFromJsonAndSaveToStorage(id, body)
-		return c.NoContent(http.StatusOK)
-	})
-
-	e.POST("/fimp/flow/ctrl/:id/:op", func(c echo.Context) error {
-		id := c.Param("id")
-		op := c.Param("op")
-
-		switch op {
-		case "send-inclusion-report" :
-			flowManager.GetFlowById(id).SendInclusionReport()
-		case "send-exclusion-report" :
-			flowManager.GetFlowById(id).SendExclusionReport()
-		}
-
-		return c.NoContent(http.StatusOK)
-	})
-
-	e.DELETE("/fimp/flow/definition/:id", func(c echo.Context) error {
-		id := c.Param("id")
-		flowManager.DeleteFlow(id)
-		return c.NoContent(http.StatusOK)
-	})
 
 	index := "static/fimpui/dist/index.html"
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

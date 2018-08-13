@@ -12,6 +12,7 @@ import {MatDialog} from "@angular/material";
 })
 export class FlowOverviewComponent implements OnInit {
   flows : any[];
+  groups : string[];
   constructor(private http : Http,public dialog: MatDialog) {  }
 
   ngOnInit() {
@@ -26,6 +27,29 @@ export class FlowOverviewComponent implements OnInit {
         return body;
       }).subscribe ((result) => {
          this.flows = result;
+         var groupsSet = new Set();
+         for (let gr of this.flows) {
+           groupsSet.add(gr.Group);
+
+         }
+
+         this.flows.forEach((value, index,ar) => {
+           groupsSet.add(value.Group);
+           if(ar[index].Stats.LastExecutionTime>10000000) {
+              ar[index].Stats.LastExecutionTime = 0;
+           }
+         })
+
+         this.groups = [];
+         groupsSet.forEach(value => {
+           this.groups.push(value);
+         })
+       console.dir(this.groups);
+         // var it =  groupsSet.entries();
+         // for (let gr3 of it) {
+         //   this.groups.push(gr3[0]);
+         //   }
+
       });
   }
   deleteFlow(id:string) {
@@ -33,6 +57,15 @@ export class FlowOverviewComponent implements OnInit {
       .delete(BACKEND_ROOT+'/fimp/flow/definition/'+id)
       .subscribe ((result) => {
          this.loadListOfFlows()
+      });
+  }
+
+  sendFlowControlCommand(flowId:string,command:string) {
+    this.http
+      .post(BACKEND_ROOT+'/fimp/flow/ctrl/'+flowId+'/'+command,null,  {} )
+      .subscribe ((result) => {
+        console.log("Cmd was sent");
+        this.loadListOfFlows();
       });
   }
   showLog() {

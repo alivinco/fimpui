@@ -55,27 +55,27 @@ func (fl *Flow) SendInclusionReport() {
 		return &service,true
 	}
 
-	for i := range fl.Nodes {
-		if fl.Nodes[i].IsStartNode() {
+	for i := range fl.nodes {
+		if fl.nodes[i].IsStartNode() {
 			var config node.TriggerConfig
-			err := mapstructure.Decode(fl.Nodes[i].GetMetaNode().Config,&config)
+			err := mapstructure.Decode(fl.nodes[i].GetMetaNode().Config,&config)
 			if err==nil {
 				if config.RegisterAsVirtualService{
 					fl.getLog().Debug("New trigger to add ")
 					group := config.VirtualServiceGroup
 					if group == "" {
-						group = string(fl.Nodes[i].GetMetaNode().Id)
+						group = string(fl.nodes[i].GetMetaNode().Id)
 					}
-					service,new := getService(fl.Nodes[i].GetMetaNode().Service,group)
+					service,new := getService(fl.nodes[i].GetMetaNode().Service,group)
 					intf := fimptype.Interface{}
 					intf.Type = "in"
-					intf.MsgType = fl.Nodes[i].GetMetaNode().ServiceInterface
+					intf.MsgType = fl.nodes[i].GetMetaNode().ServiceInterface
 					intf.ValueType = config.InputVariableType
 					intf.Version = "1"
 					if new {
 						fl.getLog().Debug("Adding new trigger ")
-						service.Alias = fl.Nodes[i].GetMetaNode().Label
-						address := strings.Replace(fl.Nodes[i].GetMetaNode().Address, "pt:j1/mt:cmd", "", -1)
+						service.Alias = fl.nodes[i].GetMetaNode().Label
+						address := strings.Replace(fl.nodes[i].GetMetaNode().Address, "pt:j1/mt:cmd", "", -1)
 						address = strings.Replace(address, "pt:j1/mt:evt", "", -1)
 						service.Address = address
 						service.Interfaces = []fimptype.Interface{intf}
@@ -97,27 +97,27 @@ func (fl *Flow) SendInclusionReport() {
 				fl.getLog().Error("Fail to register trigger.Error ",err)
 			}
 		}
-		if fl.Nodes[i].GetMetaNode().Type == "action" {
-			//config,ok := fl.Nodes[i].GetMetaNode().Config.(node.ActionNodeConfig)
+		if fl.nodes[i].GetMetaNode().Type == "action" {
+			//config,ok := fl.nodes[i].GetMetaNode().Config.(node.ActionNodeConfig)
 			config := node.ActionNodeConfig{}
-			err := mapstructure.Decode(fl.Nodes[i].GetMetaNode().Config,&config)
+			err := mapstructure.Decode(fl.nodes[i].GetMetaNode().Config,&config)
 			if err==nil {
 				if config.RegisterAsVirtualService {
 					group := config.VirtualServiceGroup
 					if group == "" {
-						group = string(fl.Nodes[i].GetMetaNode().Id)
+						group = string(fl.nodes[i].GetMetaNode().Id)
 					}
-					service,new := getService(fl.Nodes[i].GetMetaNode().Service,group)
+					service,new := getService(fl.nodes[i].GetMetaNode().Service,group)
 
 					intf := fimptype.Interface{}
 					intf.Type = "out"
-					intf.MsgType = fl.Nodes[i].GetMetaNode().ServiceInterface
+					intf.MsgType = fl.nodes[i].GetMetaNode().ServiceInterface
 					intf.ValueType = config.VariableType
 					intf.Version = "1"
 
 					if new {
-						service.Alias = fl.Nodes[i].GetMetaNode().Label
-						address := strings.Replace( fl.Nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
+						service.Alias = fl.nodes[i].GetMetaNode().Label
+						address := strings.Replace( fl.nodes[i].GetMetaNode().Address,"pt:j1/mt:cmd","",-1)
 						address = strings.Replace( address,"pt:j1/mt:evt","",-1)
 						service.Address = address
 						service.Interfaces = []fimptype.Interface{intf}

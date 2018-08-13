@@ -58,7 +58,7 @@ func TestWaitFlow(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	sendMsg(mqtt)
@@ -116,7 +116,7 @@ func TestIfFlow(t *testing.T) {
 
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	// send msg
@@ -173,7 +173,7 @@ func TestNewFlow3(t *testing.T) {
 
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	// send msg
@@ -216,7 +216,7 @@ func TestSetVariableFlow(t *testing.T) {
 	//}
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	// send msg
@@ -264,7 +264,7 @@ func TestTransformFlipFlow(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", false, nil, nil, nil)
@@ -312,7 +312,7 @@ func TestRestActionFlow(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	msg := fimpgo.NewBoolMessage("evt.binary.report", "out_bin_switch", false, nil, nil, nil)
@@ -354,7 +354,7 @@ func TestTransformAddFlow(t *testing.T) {
 	flowMeta.Nodes = append(flowMeta.Nodes, node)
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	msg := fimpgo.NewFloatMessage("evt.sensor.report", "sensor_temp", 12.5, nil, nil, nil)
@@ -414,7 +414,7 @@ func TestReceiveFlow(t *testing.T) {
 	//}
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	// send msg
@@ -483,7 +483,7 @@ func TestLoopFlow(t *testing.T) {
 	//}
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 1)
 	// send msg
@@ -550,7 +550,7 @@ func TestTimeTriggerFlow(t *testing.T) {
 	//}
 	flow := NewFlow(flowMeta, ctx, mqtt)
 	flow.SetMessageStream(msgChan)
-	flow.InitAllNodes()
+	flow.LoadAndConfigureAllNodes()
 	flow.Start()
 	time.Sleep(time.Second * 3)
 	// send msg

@@ -2,7 +2,8 @@
   padding: 20px;
 }
 .example-card {
-  width: 1200px;
+  /*width: 1200px;*/
+  min-width: 500px;
 }
 
 .example-header-image {
