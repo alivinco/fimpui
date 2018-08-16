@@ -20,7 +20,10 @@ type Manager struct {
 	msgTransport  *fimpgo.MqttTransport
 	globalContext *model.Context
 	config        *fimpuimodel.FimpUiConfigs
+	sharedResources model.GlobalSharedResources
 }
+
+
 
 type FlowListItem struct {
 	Id string
@@ -74,7 +77,7 @@ func (mg *Manager) onMqttMessage(topic string, addr *fimpgo.Address, iotMsg *fim
 func (mg *Manager) GenerateNewFlow() model.FlowMeta {
 	fl := model.FlowMeta{}
 	fl.Nodes = []model.MetaNode{{Id:"1",Type:"trigger",Label:"no label",Config:node.TriggerConfig{Timeout:0,ValueFilter:model.Variable{},IsValueFilterEnabled:false}}}
-	fl.Id = utils.GenerateId(10)
+	fl.Id = utils.GenerateId(15)
 	return fl
 }
 
@@ -128,6 +131,7 @@ func (mg *Manager) LoadFlowFromJson(flowJsonDef []byte) error{
 
 	flow := NewFlow(flowMeta, mg.globalContext, mg.msgTransport)
 	flow.SetStoragePath(mg.config.FlowStorageDir)
+	flow.SetSharedResources(&mg.sharedResources)
 	mg.flowRegistry = append(mg.flowRegistry,flow)
 	return nil
 }
@@ -144,6 +148,27 @@ func (mg *Manager) UpdateFlowFromJson(id string, flowJsonDef []byte) error {
 func (mg *Manager) ReloadFlowFromStorage(id string ) error {
 	mg.StopFlow(id)
 	return mg.LoadFlowFromFile(mg.GetFlowFileNameById(id))
+}
+
+func (mg *Manager) ImportFlow(flowJsonDef []byte) (error) {
+	newId := utils.GenerateId(15)
+	flowMeta := model.FlowMeta{}
+	err := json.Unmarshal(flowJsonDef, &flowMeta)
+	if err != nil {
+		log.Error("<FlMan> Can't unmarshel imported flow.")
+		return err
+	}
+	oldId := flowMeta.Id
+	flowAsString := string(flowJsonDef)
+	flowAsStringUpdated := strings.Replace(flowAsString,oldId,newId,-1)
+	fileName := mg.GetFlowFileNameById(newId)
+	err = ioutil.WriteFile(fileName, []byte(flowAsStringUpdated), 0644)
+	if err != nil {
+		log.Error("Can't save flow to file . Error : ",err)
+		return err
+	}
+	log.Debugf("<FlMan> Flow is imported")
+	return mg.LoadFlowFromFile(fileName)
 }
 
 //
@@ -203,14 +228,21 @@ func (mg *Manager) ControlFlow(cmd string , flowId string) error {
 
 func (mg *Manager) StartFlow(flowId string) {
 	flow := mg.GetFlowById(flowId)
-	flow.SetMessageStream(mg.GetNewStream(flow.Id))
-	flow.Start()
+	if flow.GetFlowState() != "RUNNING" {
+		flow.SetMessageStream(mg.GetNewStream(flow.Id))
+		flow.Start()
+	}
+
 }
 
 func (mg *Manager) StopFlow(id string) {
 	log.Infof("Unloading flow , id = ",id)
 	if mg.GetFlowById(id) == nil {
 		log.Infof("Can find flow by id = ",id)
+		return
+	}
+	if mg.GetFlowById(id).GetFlowState() != "RUNNING" {
+		log.Info("Flow is not running , nothing to stop.")
 		return
 	}
 	mg.GetFlowById(id).Stop()
@@ -235,10 +267,12 @@ func (mg *Manager) DeleteFlowFromStorage(id string) {
 	if flow == nil {
 		return
 	}
-	flow.CleanupBeforeDelete()
 	mg.StopFlow(id)
 	mg.DeleteFlowFromRegistry(id)
 	os.Remove(mg.GetFlowFileNameById(id))
 }
 
 
+func (mg *Manager) SetSharedResources(resources model.GlobalSharedResources) {
+	mg.sharedResources = resources
+}

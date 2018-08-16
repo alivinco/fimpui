@@ -23,6 +23,7 @@ type TriggerConfig struct {
 	InputVariableType string
 	IsValueFilterEnabled bool
 	RegisterAsVirtualService bool // if true - the node will be exposed as service in inclusion report
+	LookupServiceNameAndLocation bool
 	VirtualServiceGroup string   // is used as service group in inclusion report
 	VirtualServiceProps map[string]interface{} // mostly used to announce supported features of the service , for instance supported modes , states , setpoints , etc...
 }
@@ -76,6 +77,13 @@ func (node *TriggerNode) LoadNodeConfig() error {
 	return err
 }
 
+func (node *TriggerNode) LookupAddressToAlias(address string) {
+	service,err := node.flowOpCtx.SharedResources.Registry.GetServiceByFullAddress(address)
+	if err == nil {
+		node.ctx.SetVariable("flow_service_alias","string",service.Alias,"",node.flowOpCtx.FlowId,true)
+		node.ctx.SetVariable("flow_location_alias","string",service.LocationAlias,"",node.flowOpCtx.FlowId,true)
+	}
+}
 
 func (node *TriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 	node.isReactorRunning = true
@@ -100,18 +108,13 @@ func (node *TriggerNode) WaitForEvent(nodeEventStream chan model.ReactorEvent) {
 				(newMsg.Payload.Service == node.meta.Service || node.meta.Service == "*") &&
 				(newMsg.Payload.Type == node.meta.ServiceInterface || node.meta.ServiceInterface == "*") {
 
-				if !node.config.IsValueFilterEnabled {
+				if !node.config.IsValueFilterEnabled || ( (newMsg.Payload.Value == node.config.ValueFilter.Value) && node.config.IsValueFilterEnabled)  {
 					newEvent := model.ReactorEvent{Msg:newMsg,TransitionNodeId:node.meta.SuccessTransition}
 					select {
 					case nodeEventStream <- newEvent:
-						return
-					default:
-						node.getLog().Debug("Message is dropped (no listeners) ")
-					}
-				}else if newMsg.Payload.Value == node.config.ValueFilter.Value {
-					newEvent := model.ReactorEvent{Msg:newMsg,TransitionNodeId:node.meta.SuccessTransition}
-					select {
-					case nodeEventStream <- newEvent:
+						if node.config.LookupServiceNameAndLocation {
+							node.LookupAddressToAlias(newEvent.Msg.AddressStr)
+						}
 						return
 					default:
 						node.getLog().Debug("Message is dropped (no listeners) ")

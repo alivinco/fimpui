@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Http, Response,URLSearchParams }  from '@angular/http';
+import {Headers, Http, RequestOptions, Response, URLSearchParams} from '@angular/http';
 import { BACKEND_ROOT } from "app/globals";
 import { DatePipe } from '@angular/common';
-import {FlowLogDialog} from "../flow-editor/flow-editor.component";
+import {FlowLogDialog, FlowSourceDialog} from "../flow-editor/flow-editor.component";
 import {MatDialog} from "@angular/material";
 
 @Component({
@@ -68,6 +68,33 @@ export class FlowOverviewComponent implements OnInit {
         this.loadListOfFlows();
       });
   }
+
+  openFlowImportWindow() {
+    let dialogRef = this.dialog.open(FlowSourceDialog,{
+      // height: '95%',
+      width: '95%',
+      data:{}
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if(result)
+         this.importFlow(result)
+         setTimeout(result => {
+           this.loadListOfFlows()
+         },1000)
+
+    });
+  }
+
+  importFlow(flow){
+    let headers = new Headers({ 'Content-Type': 'application/json' });
+    let options = new RequestOptions({headers:headers});
+    this.http
+      .post(BACKEND_ROOT+'/fimp/flow/definition/import',JSON.stringify(flow),  options )
+      .subscribe ((result) => {
+        console.log("Flow was saved");
+      });
+  }
+
   showLog() {
     let dialogRef = this.dialog.open(FlowLogDialog,{
       // height: '95%',

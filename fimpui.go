@@ -30,6 +30,7 @@ import (
 	//_ "net/http/pprof"
 	"os/exec"
 	"github.com/alivinco/fimpui/flow/api"
+	fmodel "github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/process/tsdb"
 	"github.com/alivinco/fimpui/flow/utils"
 )
@@ -98,12 +99,20 @@ func main() {
 
 	SetupLog(configs.LogFile, configs.LogLevel)
 	log.Info("--------------Starting FIMPUI----------------")
+
+	//---------THINGS REGISTRY-------------
+	log.Info("<main>-------------- Starting Things registry ")
+	thingRegistryStore := registry.NewThingRegistryStore(configs.RegistryDbFile)
+	log.Info("<main> Started ")
+	//-------------------------------------
 	//---------FLOW------------------------
 	log.Info("<main> Starting Flow manager")
 	flowManager, err := flow.NewManager(configs)
 	if err != nil {
 		log.Error("Can't Init Flow manager . Error :", err)
 	}
+	flowSharedResources := fmodel.GlobalSharedResources{Registry:thingRegistryStore}
+	flowManager.SetSharedResources(flowSharedResources)
 	flowManager.InitMessagingTransport()
 	err = flowManager.LoadAllFlowsFromStorage()
 	if err != nil {
@@ -111,11 +120,7 @@ func main() {
 	}
 	log.Info("<main> Started")
 	//-------------------------------------
-	//---------THINGS REGISTRY-------------
-	log.Info("<main>-------------- Starting Things registry ")
-	thingRegistryStore := registry.NewThingRegistryStore(configs.RegistryDbFile)
-	log.Info("<main> Started ")
-	//-------------------------------------
+
 	//---------REGISTRY INTEGRATION--------
 	log.Info("<main>-------------- Starting MqttIntegration ")
 	mqttRegInt := registry.NewMqttIntegration(configs, thingRegistryStore)

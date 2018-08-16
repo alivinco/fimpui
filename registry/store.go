@@ -7,7 +7,7 @@ import (
 	"github.com/asdine/storm"
 	gobcodec "github.com/asdine/storm/codec/gob"
 	"github.com/imdario/mergo"
-	"github.com/alivinco/fimpui/flow/utils"
+	"github.com/alivinco/fimpui/utils"
 	"github.com/pkg/errors"
 )
 

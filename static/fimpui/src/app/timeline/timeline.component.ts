@@ -13,6 +13,7 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import 'rxjs/add/observable/fromEvent';
 import { BACKEND_ROOT } from "app/globals";
 import {MatDialog, MatDialogRef,MAT_DIALOG_DATA,MatSnackBar, MatTableDataSource} from '@angular/material';
+import {HttpClient, HttpParams} from "@angular/common/http";
 
 @Component({
   selector: 'timeline',
@@ -66,7 +67,7 @@ export class TimelineComponent implements OnInit {
 
   openDialog(fimpMsg:FimpMessage): void {
     let dialogRef = this.dialog.open(MsgDetailsDialog, {
-      width: '500px',
+      width: '600px',
       data: {"fimp":fimpMsg,"parent":this}
     });
 
@@ -112,16 +113,26 @@ export class TimelineDataSource extends DataSource<any> {
 export class MsgDetailsDialog {
   fimpMsg : FimpMessage;
   parentComp : TimelineComponent;
+  service :any;
   constructor(
-    public dialogRef: MatDialogRef<MsgDetailsDialog>,
+    public dialogRef: MatDialogRef<MsgDetailsDialog>,private http: HttpClient,
     @Inject(MAT_DIALOG_DATA) public data: any) {
       this.fimpMsg = data.fimp;
+      this.fimpMsg.raw = JSON.stringify(JSON.parse(this.fimpMsg.raw),null,2)
       this.parentComp = data.parent;
+      this.getServiceByAddress(this.fimpMsg.topic)
     }
 
   close(): void {
     this.dialogRef.close();
   }
+
+  getServiceByAddress(address:string) {
+    this.http.get(BACKEND_ROOT+'/fimp/api/registry/service', { params: new HttpParams().set('address', address) } )
+      .subscribe(result=>{this.service = result; });
+
+  }
+
 
 }
 

@@ -133,7 +133,7 @@ type Client struct {
 }
 
 type Device struct {
-	Fimp          Fimp                   `json:"_fimp"`
+	Fimp          Fimp                   `json:"fimp"`
 	Client        Client                 `json:"client"`
 	Functionality string                 `json:"functionality"`
 	ID            int                    `json:"id"`

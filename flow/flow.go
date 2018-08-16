@@ -7,7 +7,7 @@ import (
 	"github.com/alivinco/fimpui/flow/model"
 	"github.com/alivinco/fimpui/flow/node"
 	"time"
-	"github.com/alivinco/fimpui/flow/utils"
+	"github.com/alivinco/fimpui/utils"
 )
 
 type Flow struct {
@@ -31,6 +31,7 @@ type Flow struct {
 	WaitingSince        time.Time
 	LastExecutionTime   time.Duration
 	logFields           log.Fields
+ 	sharedResources     * model.GlobalSharedResources
 }
 
 func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport *fimpgo.MqttTransport) *Flow {
@@ -41,7 +42,7 @@ func NewFlow(metaFlow model.FlowMeta, globalContext *model.Context, msgTransport
 	flow.nodeInboundStreams = make(map[model.NodeID]model.MsgPipeline)
 	flow.msgTransport = msgTransport
 	flow.globalContext = globalContext
-	flow.opContext = model.FlowOperationalContext{NodeIsReady:make(chan bool),NodeControlSignalChannel:make(chan int)}
+	flow.opContext = model.FlowOperationalContext{NodeIsReady:make(chan bool),NodeControlSignalChannel:make(chan int),State:"LOADED"}
 	flow.initFromMetaFlow(&metaFlow)
 
 	return &flow
@@ -326,7 +327,10 @@ func (fl *Flow) CloseAllInboundStreams() {
 
 // Starts Flow loop in its own goroutine and sets isFlowRunning flag to true
 func (fl *Flow) Start() error {
-
+	if fl.GetFlowState() == "RUNNING" {
+		log.Info("Flow is already running")
+		return nil
+	}
 	fl.getLog().Info(" Starting flow : ", fl.Name)
 	fl.opContext.State = "STARTING"
 	fl.opContext.IsFlowRunning = true
@@ -386,6 +390,10 @@ func (fl *Flow) Stop() error {
 }
 
 func (fl *Flow) CleanupBeforeDelete() {
+	if fl.GetFlowState() == "LOADED" {
+		fl.getLog().Info(" Nothing to cleanup ")
+		return
+	}
 	fl.CloseAllInboundStreams()
 	close(fl.nodeOutboundStream)
 	fl.getLog().Info(" All streams and running goroutins were closed  ")
@@ -435,4 +443,8 @@ func (fl *Flow) StartMsgStreamRouter() {
 
 func (fl *Flow) SetMessageStream(msgInStream model.MsgPipeline) {
 	fl.msgInStream = msgInStream
+}
+
+func (fl *Flow) SetSharedResources(resources *model.GlobalSharedResources) {
+	fl.opContext.SharedResources = resources
 }
