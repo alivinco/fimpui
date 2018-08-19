@@ -10,7 +10,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"encoding/gob"
 	"github.com/pkg/errors"
-	"sync"
+	"math"
 )
 
 type Variable struct {
@@ -61,6 +61,45 @@ func (vrbl *Variable) IsEqual(var2 *Variable) (bool,error) {
 	return false , nil
 }
 
+
+// Validates actual Variable type against type set in VariableType
+func (vrbl * Variable)isTypeValid()bool {
+	switch vrbl.ValueType {
+	case "int":
+		switch vrbl.Value.(type) {
+		case int,int8,int16,int32,int64,float32,float64:
+			return true
+		}
+		return false
+	case "float":
+		switch v:=vrbl.Value.(type) {
+		case float32:
+			return true
+		case float64:
+			if ! math.IsNaN(v){
+				return true
+			}
+		}
+		return false
+	case "bool":
+		switch vrbl.Value.(type) {
+		case bool:
+			return true
+		}
+		return false
+	case "string":
+		switch vrbl.Value.(type) {
+		case string:
+			return true
+		}
+		return false
+	}
+
+
+
+	return true
+}
+
 func (vrbl * Variable)ToNumber()(float64,error) {
 	switch v := vrbl.Value.(type) {
 	case int :
@@ -89,7 +128,7 @@ type ContextRecord struct {
 type Context struct {
 	storageLocation string
 	db *bolt.DB
-	inMemoryStore sync.Map
+	inMemoryStore ContextInMemoryStore
 }
 
 func NewContextDB(storageLocation string) (*Context , error) {
@@ -103,6 +142,7 @@ func NewContextDB(storageLocation string) (*Context , error) {
 		return nil ,err
 	}
 	ctx.RegisterFlow("global")
+	ctx.DeleteRecord("weather.temp","global",false)
 	return &ctx,nil
 }
 func (ctx *Context) Close() {
@@ -130,6 +170,7 @@ func (ctx *Context) UnregisterFlow(flowId string) error {
 		}
 		return nil
 	})
+	ctx.inMemoryStore.DeleteFlow(flowId)
 	log.Info("<ctx> Flow %s is deleted .",flowId)
 	return nil
 }
@@ -142,9 +183,13 @@ func (ctx *Context) SetVariable(name string,valueType string,value interface{},d
 
 
 func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) error {
+	log.Infof("<ctx> Saving variable ,in flow %s , type = %s , ",flowId,rec.Variable.ValueType,rec.Variable.Value)
+	if !rec.Variable.isTypeValid() {
+		log.Info("<ctx> Incompatible type , varname = ",rec.Name)
+		return errors.New("Incompatible type")
+	}
 	if inMemory {
-		ctx.inMemoryStore.Store(flowId+"."+rec.Name,*rec)
-
+		ctx.inMemoryStore.Store(*rec,flowId)
 	} else {
 		err := ctx.db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
@@ -162,8 +207,9 @@ func (ctx *Context) PutRecord(rec *ContextRecord,flowId string,inMemory bool ) e
 
 func (ctx *Context) DeleteRecord(name string,flowId string,inMemory bool ) error {
 	if inMemory {
-		ctx.inMemoryStore.Delete(flowId+"."+name)
+
 	} else {
+		log.Infof("<ctx> 2Deleting variable %s from flow %s",name,flowId)
 		err := ctx.db.Update(func(tx *bolt.Tx) error {
 			b := tx.Bucket([]byte(flowId))
 			return b.Delete([]byte(name))
@@ -195,12 +241,9 @@ func (ctx *Context) GetVariableType(name string ,flowId string) (string,error) {
 
 func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) {
 	// check memmory first
-	recI , ok := ctx.inMemoryStore.Load(flowId+"."+name)
-	if ok {
-		rec,ok := recI.(ContextRecord)
-		if ok {
-			return &rec,nil
-		}
+	rec := ctx.inMemoryStore.Get(flowId,name)
+	if rec != nil {
+		return rec,nil
 	}
 
 	var ctxRec *ContextRecord
@@ -229,11 +272,12 @@ func (ctx *Context) GetRecord(name string,flowId string) (*ContextRecord,error) 
 
 func (ctx *Context) GetRecords(flowId string) []ContextRecord  {
 	result := []ContextRecord{}
-
+	log.Info("<ctx> GEtting records")
 	ctx.db.View(func(tx *bolt.Tx) error {
 		// Assume bucket exists and has keys
 		b := tx.Bucket([]byte(flowId))
 		if b == nil {
+
 			return nil
 		}
 		c := b.Cursor()
@@ -250,15 +294,15 @@ func (ctx *Context) GetRecords(flowId string) []ContextRecord  {
 
 		return nil
 	})
-
-	ctx.inMemoryStore.Range(func(key, value interface{}) bool {
-		rec , ok := value.(ContextRecord)
-		if ok {
-			result = append(result,rec)
-		}
-		return true
-	})
-
+	//log.Info("<ctx> DONE ,",len(result))
+	//log.Info("<ctx> DONE ,",result)
+	//
+	memResult, err := ctx.inMemoryStore.GetRecordsForFlow(flowId)
+	if err == nil {
+		result = append(result,memResult...)
+	}else {
+		log.Error("Can't get records from memory store , err :",err)
+	}
 	return result
 }
 
@@ -278,6 +322,12 @@ func (ctx *Context) decodeRecord(data []byte) (*ContextRecord, error) {
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
 	err := dec.Decode(&ctxRec)
+	//log.Infof("Decoding variable %s",ctxRec.Name)
+	//if ctxRec.Name == "weather.temp"{
+	//	return nil,errors.New("WrongType")
+	//
+	//}
+
 	return &ctxRec,err
 }
 

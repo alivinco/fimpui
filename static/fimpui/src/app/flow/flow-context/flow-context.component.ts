@@ -1,4 +1,4 @@
-import {Component, ElementRef, ViewChild,OnInit} from '@angular/core';
+import {Component, ElementRef, ViewChild, OnInit, Input} from '@angular/core';
 import {DataSource} from '@angular/cdk/collections';
 import {BehaviorSubject} from 'rxjs/BehaviorSubject';
 import {Observable} from 'rxjs/Observable';
@@ -23,12 +23,24 @@ import {TableContextRec} from "./model"
   styleUrls: ['./flow-context.component.css']
 })
 export class FlowContextComponent implements OnInit {
+  @Input() isEmbedded : boolean;
+  @Input() flowId : string;
+  loadMode : string
   displayedColumns = ['flowId','name','description','valueType','value','updatedAt','action'];
   dataSource: FlowContextDataSource | null;
   constructor(private http : Http,public dialog: MatDialog) {
   }
   ngOnInit() {
-    this.dataSource = new FlowContextDataSource(this.http);
+    if (!this.flowId) {
+      this.flowId = "global";
+    }
+    this.dataSource = new FlowContextDataSource(this.http,this.flowId);
+    // console.log("Is embedded = "+this.isEmbedded);
+    if (this.isEmbedded) {
+      this.loadMode = "local"
+    }else {
+      this.loadMode = "global"
+    }
   }
 
   showRecordEditorDialog(ctxRec:TableContextRec) {
@@ -40,7 +52,7 @@ export class FlowContextComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result)
       {
-        this.dataSource.getData()
+        this.dataSource.getData("global")
       }
     });
   }
@@ -55,13 +67,21 @@ export class FlowContextComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result)
       {
-        this.dataSource.getData();
+        this.dataSource.getData("global");
       }
     });
   }
 
+  onModeChange(event:any) {
+    if(this.loadMode == "global") {
+      this.dataSource.getData("global");
+    }else {
+      this.dataSource.getData(this.flowId);
+    }
+  }
+
   reload() {
-    this.dataSource.getData();
+    this.dataSource.getData(this.flowId);
   }
 
 
@@ -71,21 +91,32 @@ export class FlowContextComponent implements OnInit {
 export class FlowContextDataSource extends DataSource<any> {
   ctxRecordsObs = new BehaviorSubject<TableContextRec[]>([]);
 
-  constructor(private http : Http) {
+  constructor(private http : Http,private flowId:string) {
     super();
     console.log("Getting context data")
-    this.getData();
+    this.getData(flowId);
   }
 
-  getData() {
+  getData(flowId:string) {
     this.http
-        .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
+        .get(BACKEND_ROOT+'/fimp/api/flow/context/'+flowId)
         .map((res: Response)=>{
           let result = res.json();
-          return this.mapContext(result);
+          return this.mapContext(result,flowId);
         }).subscribe(result=>{
           this.ctxRecordsObs.next(result);
+          console.log("Mappping global variable")
         });
+    // if(this.flowId)
+    //   this.http
+    //     .get(BACKEND_ROOT+'/fimp/api/flow/context/'+this.flowId)
+    //     .map((res: Response)=>{
+    //       let result = res.json();
+    //       return this.mapContext(result,this.flowId);
+    //     }).subscribe(result=>{
+    //
+    //       this.ctxRecordsObs.next(this.ctxRecordsObs.getValue().concat(result));
+    //   });
 
   }
 
@@ -94,11 +125,11 @@ export class FlowContextDataSource extends DataSource<any> {
   }
   disconnect() {}
 
-  mapContext(result:any):TableContextRec[] {
+  mapContext(result:any,flowId:string):TableContextRec[] {
     let contexts : TableContextRec[] = [];
     for (var key in result){
             let loc = new TableContextRec();
-            loc.FlowId = "global";
+            loc.FlowId = flowId;
             loc.Name = result[key].Name;
             loc.Description = result[key].Description;
             loc.UpdatedAt = result[key].UpdatedAt;

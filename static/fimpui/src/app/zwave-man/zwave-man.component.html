@@ -76,6 +76,12 @@
       <br/>
       <div #topology hidden >
         <p>
+          <button mat-raised-button color="accent" (click)="requestRSSI()">Get background RSSI</button>
+          <ng-container *ngIf="rssiReport">
+            Channel 1 : {{ rssiReport.ch1 }} Channel 2 : {{ rssiReport.ch2 }}
+          </ng-container>
+        </p>
+        <p>
         <button mat-raised-button color="accent" (click)="requestImaStats()">Reload</button>
         <button mat-raised-button color="accent" (click)="resetImaStats()">Reset</button></p>
         <button mat-raised-button color="accent" (click)="pingNetwork()">Ping all nodes in the network </button>
@@ -158,6 +164,8 @@
           <button mat-raised-button (click)="pingNode(pingFromInput.value,pingToInput.value,txLevelInput.value)">Ping</button>
           <p>Result : {{ pingResult }} </p>
         </div>
+
+
 
         <button mat-raised-button color="accent" (click)="restartAdapter()">Restart adapter </button>
         <button mat-raised-button color="accent" (click)="updateNetwork()">Start network update </button>

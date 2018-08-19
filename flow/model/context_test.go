@@ -8,6 +8,12 @@ func TestContext_SetVariable(t *testing.T) {
 		t.Error("Fail to create context ",err)
 	}
 	ctx.SetVariable("mode","string","away","home mode","global",false)
+	err = ctx.SetVariable("temp","float",nil,"","global",false)
+	if err == nil {
+		t.Error("Type validation doesn't work")
+	}else {
+		t.Log("Type validation works")
+	}
 	ctx.Close()
 
 	ctx ,err = NewContextDB("context_test_1.db")

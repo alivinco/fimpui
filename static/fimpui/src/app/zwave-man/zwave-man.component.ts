@@ -38,6 +38,7 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
   localTemplatesCache : string[];
   pingResult :string;
   isReloadNodesEnabled:boolean;
+  rssiReport : any;
   constructor(public dialog: MatDialog,private fimp:FimpService,private router: Router,private http : Http) {
   }
 
@@ -82,6 +83,8 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
 
           }
 
+        }else if (fimpMsg.mtype == "evt.zwnetstats.rssi_report"){
+          this.rssiReport = {"ch1":fimpMsg.val["0"],"ch2":fimpMsg.val["1"]} ;
         }else if (fimpMsg.mtype == "evt.zwnetstats.full_report"){
           this.networkStats = fimpMsg.val;
           localStorage.setItem("zwNetworkStats", JSON.stringify(this.networkStats));
@@ -309,6 +312,12 @@ export class ZwaveManComponent implements OnInit ,OnDestroy {
     props["tx_level"] = level;
     let msg  = new FimpMessage("dev_sys","cmd.ping.send","string",toNode,props,null)
     this.fimp.publish("pt:j1/mt:cmd/rt:dev/rn:zw/ad:1/sv:dev_sys/ad:"+fromNode+"_0",msg.toString());
+  }
+
+  requestRSSI(){
+    this.rssiReport = {"ch1":"?","ch2":"?"};
+    let msg  = new FimpMessage("zwave-ad","cmd.zwnetstats.get_rssi","null",null,null,null)
+    this.fimp.publish("pt:j1/mt:cmd/rt:ad/rn:zw/ad:1",msg.toString());
   }
 
   pingNodeFromGw(toNode:string){

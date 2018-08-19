@@ -25,11 +25,11 @@ func (ctx * ContextApi) RegisterRestApi() {
 	ctx.echo.GET("/fimp/api/flow/context/:flowid", func(c echo.Context) error {
 		id := c.Param("flowid")
 		if id != "-"{
-			ctx := ctx.ctx.GetRecords(id)
-			return c.JSON(http.StatusOK, ctx)
+			result := ctx.ctx.GetRecords(id)
+			return c.JSON(http.StatusOK, result)
 		}
-		var ctx []model.ContextRecord
-		return c.JSON(http.StatusOK, ctx)
+		var result []model.ContextRecord
+		return c.JSON(http.StatusOK, result)
 	})
 
 	ctx.echo.POST("/fimp/api/flow/context/record/:flowid", func(c echo.Context) error {
@@ -47,11 +47,13 @@ func (ctx * ContextApi) RegisterRestApi() {
 		}
 		ctx.ctx.PutRecord(&rec,flowId,false)
 
-		return c.JSON(http.StatusOK, ctx)
+		return c.JSON(http.StatusOK, rec)
 	})
 
-	ctx.echo.DELETE("/fimp/api/flow/context/record/:name", func(c echo.Context) error {
-		name := c.Param("name")
+	ctx.echo.DELETE("/fimp/api/flow/context/record/:flowid", func(c echo.Context) error {
+		// flowId is variable name here
+		name := c.Param("flowid")
+		log.Info("<ctx> Request to delete record with name ",name)
 		if name != ""{
 			err := ctx.ctx.DeleteRecord(name,"global",false)
 			return c.JSON(http.StatusOK, err)

@@ -24,6 +24,7 @@ export class VariableSelectorComponent implements OnInit {
     @Input() label : string;
     @Input() flowId:string;
     @Output() onSelect = new EventEmitter<ContextVariable>();
+    variableType : string;
     vars:ContextVariable[];
 
   ngOnInit() {
@@ -85,7 +86,10 @@ export class VariableSelectorComponent implements OnInit {
       if (result)
       {
         this.variableName = result.Name
+        this.variableType = result.ValueType
+        this.onSelected();
         this.loadContext();
+
       }
     });
   }
@@ -102,14 +106,20 @@ export class VariableSelectorComponent implements OnInit {
 
   onSelected() {
       var event = new ContextVariable();
-     // event.Name = this.variableName;
-     // event.isGlobal = this.isGlobal;
+      console.log("OnSelected variable name = "+this.variableName );
+      event.Name = this.variableName;
+      event.Type = this.variableType
+      event.isGlobal = this.isGlobal;
+
      if(this.variableName=="") {
        var event = new ContextVariable();
        event.Name = "";
        this.onSelect.emit(event);
      }
-     event = this.getVariableByName(this.variableName,this.isGlobal)
+     if (this.variableType == undefined){
+       event = this.getVariableByName(this.variableName,this.isGlobal)
+
+     }
      if (event) {
        this.onSelect.emit(event);
      }

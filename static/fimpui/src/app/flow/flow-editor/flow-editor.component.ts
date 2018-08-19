@@ -745,23 +745,23 @@ export class ContextDialog {
   localContext :string ;
   globalContext : string;
   constructor(public dialogRef: MatDialogRef<ContextDialog>,@Inject(MAT_DIALOG_DATA) public data: Flow,private http : Http) {
-     this.http
-      .get(BACKEND_ROOT+'/fimp/api/flow/context/'+data.Id)
-      .map(function(res: Response){
-        let body = res.json();
-        return body;
-      }).subscribe ((result) => {
-         this.localContext = JSON.stringify(result, null, 2);
-      });
-
-    this.http
-      .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
-      .map(function(res: Response){
-        let body = res.json();
-        return body;
-      }).subscribe ((result) => {
-         this.globalContext = JSON.stringify(result, null, 2);
-      });
+    //  this.http
+    //   .get(BACKEND_ROOT+'/fimp/api/flow/context/'+data.Id)
+    //   .map(function(res: Response){
+    //     let body = res.json();
+    //     return body;
+    //   }).subscribe ((result) => {
+    //      this.localContext = JSON.stringify(result, null, 2);
+    //   });
+    //
+    // this.http
+    //   .get(BACKEND_ROOT+'/fimp/api/flow/context/global')
+    //   .map(function(res: Response){
+    //     let body = res.json();
+    //     return body;
+    //   }).subscribe ((result) => {
+    //      this.globalContext = JSON.stringify(result, null, 2);
+    //   });
 
 
     // this.localContext = JSON.stringify(data, null, 2)
