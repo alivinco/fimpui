@@ -9,7 +9,7 @@
       <section *ngIf="isEmbedded">
       <label >Show :</label>
       <mat-radio-group [(ngModel)]="loadMode" (change)="onModeChange($event)">
-        <mat-radio-button class="example-margin" value="local">local variables</mat-radio-button>
+        <mat-radio-button class="example-margin" value="local">flow variables</mat-radio-button>
         <mat-radio-button class="example-margin" value="global">global variables</mat-radio-button>
       </mat-radio-group>
       </section>

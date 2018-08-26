@@ -118,6 +118,7 @@ type Param struct {
 	Components []string `json:"components"`
 	Device     []Device `json:"device,omitempty"`
 	Room       []Room   `json:"room,omitempty"`
+	Area       []Area   `json:"area,omitempty"`
 	House      House    `json:"house,omitempty"`
 	Shortcut   []Shortcut `json:"shortcut,omitempty"`
 }
@@ -157,6 +158,14 @@ type Room struct {
 	Client Client      `json:"client"`
 	Type   string      `json:"type"`
 }
+
+type Area struct {
+	ID     int         `json:"id"`
+	Props  interface{} `json:"props"`
+	Name   string      `json:"name"`
+	Type   string      `json:"type"`
+}
+
 
 type Shortcut struct {
 	ID     int    `json:"id"`

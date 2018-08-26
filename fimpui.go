@@ -478,6 +478,10 @@ func main() {
 		resp, _ := vinculumClient.GetMessage([]string{"device"})
 		return c.JSON(http.StatusOK, resp.Msg.Data.Param.Device)
 	})
+	e.GET("/fimp/api/vinculum/areas", func(c echo.Context) error {
+		resp, _ := vinculumClient.GetMessage([]string{"area"})
+		return c.JSON(http.StatusOK, resp.Msg.Data.Param.Area)
+	})
 
 	e.GET("/fimp/api/vinculum/shortcuts", func(c echo.Context) error {
 		resp, _ := vinculumClient.GetShortcuts()

@@ -4,6 +4,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { HttpModule } from '@angular/http';
 import { EventLogComponent,EventsPerDeviceChart } from './event-log/event-log.component';
 import { SystemMetricsComponent } from './system-metrics/system-metrics.component';
+import { SystemAlarmsComponent } from './system-alarms/system-alarms.component';
 import { TsdbConfigComponent } from './tsdb/tsdb-config.component';
 
 import { StatsRoutingModule } from "./stats-routing.module";
@@ -50,6 +51,6 @@ import { MatTableModule,
     StatsRoutingModule
   ],
   exports:[EventsPerDeviceChart],
-  declarations: [EventLogComponent,SystemMetricsComponent,EventsPerDeviceChart,TsdbConfigComponent]
+  declarations: [EventLogComponent,SystemMetricsComponent,SystemAlarmsComponent,EventsPerDeviceChart,TsdbConfigComponent]
 })
 export class StatsModule { }
